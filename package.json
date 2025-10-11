@@ -1,0 +1,16 @@
+{
+  "name": "current-appscript-files",
+  "version": "1.0.0",
+  "description": "Walker Awning Google Apps Script automation with auto-syncing trigger documentation",
+  "main": "parser.js",
+  "scripts": {
+    "parse": "node parser.js",
+    "test": "node parser.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PhilosophySama/Current-Appscript-files.git"
+  },
+  "author": "PhilosophySama",
+  "license": "MIT"
+}
