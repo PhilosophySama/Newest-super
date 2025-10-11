@@ -1,0 +1,2665 @@
+{
+  "metadata": {
+    "lastUpdated": "2025-10-11T19:59:47.185Z",
+    "repoUrl": "https://github.com/PhilosophySama/Newest-super",
+    "version": "2.0-complete",
+    "scanType": "comprehensive",
+    "totalTriggers": 20
+  },
+  "stats": {
+    "totalFiles": 9,
+    "totalFunctions": 121,
+    "totalTriggers": 20,
+    "totalLines": 5219,
+    "publicFunctions": 39,
+    "helperFunctions": 109,
+    "avgFunctionsPerFile": 13,
+    "avgLinesPerFile": 580
+  },
+  "files": [
+    {
+      "path": "Draft Creator.gs",
+      "filename": "Draft Creator.gs",
+      "purpose": "Create customer info request draft when \"Customer Info\" is selected",
+      "version": "01/05-09:30PM EST by Claude Opus 4.1",
+      "functions": [
+        {
+          "name": "v2_createCustomerInfoDraft_",
+          "line": 4,
+          "description": "Create customer info request draft when \"Customer Info\" is selected",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_createCOIDraft_",
+          "line": 148,
+          "description": "Create COI request draft when \"COI Req\" is selected",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_createRoughQuote_",
+          "line": 295,
+          "description": "Create rough quote draft/message when \"Rough quote\" is selected",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installTriggerDrafts_V2",
+          "line": 584,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "handleEditDraft_V2",
+          "line": 598,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "v2_searchAndLinkEmail_",
+          "line": 680,
+          "description": "Search for existing email and link it in column B when \"Liz\" is selected",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_createCustomerDraft_",
+          "line": 759,
+          "description": "Create customer follow-up draft when \"Email customer\" is selected",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_createHandoffDraft_",
+          "line": 855,
+          "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "createDraftsForAllRows_V2",
+          "line": 929,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "v2_createDraftForRow_",
+          "line": 976,
+          "description": "Row → Draft creation ========================= */",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_exportRecoverRangeAsPng_",
+          "line": 1099,
+          "description": "PNG snapshot via Sheets export endpoint for Re-cover!A1:K14 at EXACT pixel size.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_captureRecoverSnapshotHTML_",
+          "line": 1153,
+          "description": "HTML fallback (requires Sheets API).",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_buildHtmlBody_",
+          "line": 1308,
+          "description": "Email body builders ================ */",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_buildPlainBody_",
+          "line": 1337,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_extractUrlFromCell_",
+          "line": 1349,
+          "description": "Helpers ===================== */",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_looksLikeUrl_",
+          "line": 1399,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_safeString_",
+          "line": 1400,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_htmlEscape_",
+          "line": 1401,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_colLetterToIndex_",
+          "line": 1403,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_getSpreadsheet_",
+          "line": 1409,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_writeB_",
+          "line": 1416,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_withRetry_",
+          "line": 1427,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_specificErrorMessage_",
+          "line": 1443,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_shortErr_",
+          "line": 1450,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_validateConfig_",
+          "line": 1452,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_isValidEmail_",
+          "line": 1459,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_firstLinkInRichText_",
+          "line": 1461,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_isGmailDraftUrl_",
+          "line": 1473,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_templateSafe_",
+          "line": 1477,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_timestamp_",
+          "line": 1489,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_safeLogErrorToSheet_",
+          "line": 1495,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [
+        {
+          "type": "draft_stage",
+          "key": "TARGET_STAGE",
+          "words": [
+            "qDraft"
+          ],
+          "primary": "qDraft"
+        },
+        {
+          "type": "draft_stage",
+          "key": "LIZ_STAGE",
+          "words": [
+            "Liz"
+          ],
+          "primary": "Liz"
+        },
+        {
+          "type": "draft_stage",
+          "key": "CUSTOMER_STAGE",
+          "words": [
+            "Email customer"
+          ],
+          "primary": "Email customer"
+        },
+        {
+          "type": "draft_stage",
+          "key": "HANDOFF_STAGE",
+          "words": [
+            "Cust Handoff"
+          ],
+          "primary": "Cust Handoff"
+        },
+        {
+          "type": "draft_stage",
+          "key": "ROUGH_QUOTE_STAGE",
+          "words": [
+            "Rough quote"
+          ],
+          "primary": "Rough quote"
+        },
+        {
+          "type": "draft_stage",
+          "key": "COI_STAGE",
+          "words": [
+            "COI Req"
+          ],
+          "primary": "COI Req"
+        }
+      ],
+      "dependencies": [
+        "v2_createCustomerInfoDraft_",
+        "d_colLetterToIndex_",
+        "d_safeString_",
+        "d_htmlEscape_",
+        "d_isValidEmail_",
+        "d_withRetry_",
+        "d_specificErrorMessage_",
+        "d_shortErr_",
+        "v2_createCOIDraft_",
+        "v2_createRoughQuote_",
+        "d_templateSafe_",
+        "v2_validateConfig_",
+        "v2_getSpreadsheet_",
+        "v2_searchAndLinkEmail_",
+        "v2_createCustomerDraft_",
+        "v2_createHandoffDraft_",
+        "v2_createDraftForRow_",
+        "d_safeLogErrorToSheet_",
+        "d_extractUrlFromCell_",
+        "d_firstLinkInRichText_",
+        "d_isGmailDraftUrl_",
+        "v2_exportRecoverRangeAsPng_",
+        "v2_captureRecoverSnapshotHTML_",
+        "v2_buildHtmlBody_",
+        "v2_buildPlainBody_",
+        "d_writeB_",
+        "d_timestamp_",
+        "d_looksLikeUrl_",
+        "DRAFTS_V2"
+      ],
+      "lines": 1508,
+      "size": 60544
+    },
+    {
+      "path": "F/U and Send proposal.gs",
+      "filename": "U and Send proposal.gs",
+      "purpose": "Lead_Followup_Draft_V2.gs version# 09/23-05:05PM EST by Chatgpt5 PURPOSE",
+      "version": "09/23-05:05PM EST by Chatgpt5",
+      "functions": [
+        {
+          "name": "installTriggerDrafts_FU",
+          "line": 35,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "handleEditDraft_FU",
+          "line": 48,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "createDraftsForAllRows_FU",
+          "line": 80,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "fu_createDraftForRow_",
+          "line": 127,
+          "description": "Row → Draft creation ========================= */",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_safeString_",
+          "line": 173,
+          "description": "Helpers ===================== */",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_colLetterToIndex_",
+          "line": 174,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_getSpreadsheet_",
+          "line": 179,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_writeB_",
+          "line": 185,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_firstLinkInRichText_",
+          "line": 195,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_isGmailDraftUrl_",
+          "line": 206,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_shortErr_",
+          "line": 210,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "fu_getSpreadsheet_",
+        "fu_colLetterToIndex_",
+        "fu_firstLinkInRichText_",
+        "fu_isGmailDraftUrl_",
+        "fu_createDraftForRow_",
+        "fu_shortErr_",
+        "fu_safeString_",
+        "fu_writeB_"
+      ],
+      "lines": 212,
+      "size": 7745
+    },
+    {
+      "path": "Lean-to generator.gs",
+      "filename": "Lean-to generator.gs",
+      "purpose": "LEAN-TO RUBY (Exact) — Drive File Export Version# [09/14-01:58PM EST] by Chatgpt5 Triggers on edits to Leads!T:AD (cols 20–30) when AA contains \"Lean-to\" or \"Sloped L\".",
+      "version": "[09/14-01:58PM EST] by Chatgpt5",
+      "functions": [
+        {
+          "name": "handleEditLeanToRuby_",
+          "line": 26,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "r_buildRubyFromExactTemplate_",
+          "line": 117,
+          "description": "Replace ONLY the parameter literals in the exact Ruby template. Every other character (including spacing and comments) is preserved verbatim.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "r_getRubyExactTemplate",
+          "line": 169,
+          "description": "EXACT Ruby template as provided — DO NOT CHANGE ANYTHING HERE. We substitute only the parameter values via r_buildRubyFromExactTemplate_().",
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "r_getRubyExactTemplate_",
+          "line": 170,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "r_writeRubyToDrive_",
+          "line": 362,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "r_getRubyExportFolder_",
+          "line": 380,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installTriggerLeanToRuby_",
+          "line": 395,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "handleEditLeanToRuby_",
+        "r_buildRubyFromExactTemplate_",
+        "r_writeRubyToDrive_",
+        "r_getRubyExactTemplate_",
+        "r_getRubyExportFolder_",
+        "installTriggerLeanToRuby_",
+        "LEANTO_RUBY_EXPORT"
+      ],
+      "lines": 403,
+      "size": 13440
+    },
+    {
+      "path": "Menus.gs",
+      "filename": "Menus.gs",
+      "purpose": "Single shared menu for the project. Version# [01/06-10:30AM EST] - Fixed QuickBooks menu references by Claude Opus 4.1",
+      "version": "[01/06-10:30AM EST] - Fixed QuickBooks menu references",
+      "functions": [
+        {
+          "name": "onOpen",
+          "line": 15,
+          "description": "- System utilities  IMPORTANT: Do not define any other onOpen() anywhere else.",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "showQuickBooksSetup_",
+          "line": 93,
+          "description": "Show QuickBooks setup instructions",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "debugMenuError_",
+          "line": 161,
+          "description": "Debug function to help identify menu issues",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "listAllTriggers_",
+          "line": 199,
+          "description": "System utility: List all triggers",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "removeAllTriggers_",
+          "line": 218,
+          "description": "System utility: Remove all triggers",
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "showQuickBooksSetup_",
+        "debugMenuError_",
+        "listAllTriggers_",
+        "removeAllTriggers_"
+      ],
+      "lines": 229,
+      "size": 7232
+    },
+    {
+      "path": "Miles Log.gs",
+      "filename": "Miles Log.gs",
+      "purpose": "Mileage Log Automation Script Version 8.1 [09/10-11:00AM EST] by Claude Opus 4.1 Features:",
+      "version": "8.1 [09/10-11:00AM EST] by Claude Opus 4.1",
+      "functions": [
+        {
+          "name": "installTriggerMileage_",
+          "line": 50,
+          "description": "======================== MAIN ========================",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "runMileageSync_",
+          "line": 66,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "ml_processEvents",
+          "line": 113,
+          "description": "======================== PROCESSING ========================",
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_groupEventsByDate",
+          "line": 130,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_processDayEvents",
+          "line": 140,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_getOrdinal",
+          "line": 192,
+          "description": "======================== UTILITIES ========================",
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_getMileageSheet",
+          "line": 198,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_validateSheet",
+          "line": 205,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_getDateBoundaries",
+          "line": 215,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_getExistingDates",
+          "line": 231,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_getCalendarEventsChunked",
+          "line": 247,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_getCalendarEvents",
+          "line": 260,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_getEventAddress",
+          "line": 266,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_extractAddress",
+          "line": 270,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_isOfficeAddress",
+          "line": 280,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_calculateDistance",
+          "line": 287,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_flagDistance",
+          "line": 298,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_formatDate",
+          "line": 302,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_createCalendarLink",
+          "line": 309,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_createMapsLink",
+          "line": 314,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_getTimestamp",
+          "line": 318,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "ml_addEntriesToSheet",
+          "line": 326,
+          "description": "======================== BATCH WRITER (optimized) ========================",
+          "isPublic": true,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "installTriggerMileage_",
+        "runMileageSync_",
+        "MILEAGE_CONFIG",
+        "Defines: MILEAGE_CONFIG"
+      ],
+      "lines": 376,
+      "size": 12765
+    },
+    {
+      "path": "QBO Estimates.gs",
+      "filename": "QBO Estimates.gs",
+      "purpose": "QBO ESTIMATES - QuickBooks Online Integration Version# [01/06-10:30AM EST] - Complete estimate and invoice management by Claude Opus 4.1",
+      "version": "[01/06-10:30AM EST] - Complete estimate and invoice management",
+      "functions": [
+        {
+          "name": "convertEstimateToInvoice",
+          "line": 17,
+          "description": "Convert estimate to invoice for awarded jobs Run this from Awarded sheet with active cell on the row to convert",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "processAllAwardedEstimates",
+          "line": 180,
+          "description": "Process all rows in Awarded sheet that have estimates but no invoices",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "sendEstimateCurrentRow_",
+          "line": 230,
+          "description": "Send estimate for current row in Leads sheet to QuickBooks",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "findOrCreateCustomer_",
+          "line": 353,
+          "description": "Helper: Find existing customer or create new one in QuickBooks",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "parseAddress_",
+          "line": 402,
+          "description": "Helper: Parse address string into QuickBooks address object",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "configureEnvironment",
+          "line": 420,
+          "description": "Configure QuickBooks environment (production vs sandbox)",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "listQuickBooksItems",
+          "line": 442,
+          "description": "Debug: List all QuickBooks items (for line item configuration)",
+          "isPublic": true,
+          "isHelper": false
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "sendEstimateCurrentRow_",
+        "findOrCreateCustomer_",
+        "parseAddress_"
+      ],
+      "lines": 486,
+      "size": 15590
+    },
+    {
+      "path": "QuickBooksAuth.gs",
+      "filename": "QuickBooksAuth.gs",
+      "purpose": "QUICKBOOKS AUTH (OAuth2 setup) Version# [01/06-10:30AM EST] - Fixed OAuth flow with proper redirect URI handling by Claude Opus 4.1",
+      "version": "[01/06-10:30AM EST] - Fixed OAuth flow with proper redirect URI handling",
+      "functions": [
+        {
+          "name": "getScriptUrl",
+          "line": 22,
+          "description": "Get the current web app URL - MUST run this after deploying as web app",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "getOAuthService",
+          "line": 36,
+          "description": "Initialize OAuth2 service for QuickBooks",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "resetAuth",
+          "line": 66,
+          "description": "Clear stored authentication credentials",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "authorize",
+          "line": 84,
+          "description": "Triggered from menu → \"Authorize QuickBooks\" Opens authorization in a modal with a clickable link",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "authCallback",
+          "line": 195,
+          "description": "OAuth2 callback handler",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "doGet",
+          "line": 315,
+          "description": "Web app entry point - MUST be deployed as web app",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "testQuickBooksConnection_",
+          "line": 399,
+          "description": "Test QuickBooks connection",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "showRedirectUri_",
+          "line": 477,
+          "description": "Helper function to show current redirect URI and setup instructions",
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "testQuickBooksConnection_",
+        "showRedirectUri_"
+      ],
+      "lines": 501,
+      "size": 16715
+    },
+    {
+      "path": "Stage Automation.gs",
+      "filename": "Stage Automation.gs",
+      "purpose": "STAGE AUTOMATION (standalone) Version: 01/10-09:15PM EST by Claude Opus 4.1 Moves rows between sheets, creates Drive folders, writes Google Earth links,",
+      "version": "01/10-09:15PM EST by Claude Opus 4.1",
+      "functions": [
+        {
+          "name": "handleEditMove_",
+          "line": 104,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_autoSortByStage_",
+          "line": 185,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "updateJobDescription_",
+          "line": 228,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "handleDisplayNameChange_",
+          "line": 303,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "handleEmailChange_",
+          "line": 342,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "handleAddressChange_",
+          "line": 376,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "createEarthLink_",
+          "line": 406,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "handleQbUrlChange_",
+          "line": 439,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "handleStageChange_",
+          "line": 456,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "moveRow_",
+          "line": 587,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_searchAndLinkSentEmail_",
+          "line": 648,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_linkQuoteSentEmail_",
+          "line": 730,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_createPrintPacket_",
+          "line": 837,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "createNextDayGinoEvent_",
+          "line": 1044,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "testCalendarAccess_",
+          "line": 1115,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_stageMatches_",
+          "line": 1126,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_looksLikeUrl_",
+          "line": 1130,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_getUrlFromCell_",
+          "line": 1134,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_cleanAddressForGoogleEarth_",
+          "line": 1164,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_geocodeAddress_",
+          "line": 1181,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_extractCoordinates_",
+          "line": 1204,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_logOperation_",
+          "line": 1214,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "testDriveAccess_",
+          "line": 1221,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "validateSheetStructure_",
+          "line": 1232,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installTriggerMove_",
+          "line": 1277,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "checkEmptyFoldersDaily_",
+          "line": 1292,
+          "description": "Check empty folders daily at 7am (time-driven trigger)",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "checkEmptyFoldersNow_",
+          "line": 1327,
+          "description": "Check empty folders immediately (manual trigger from menu)",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_checkEmptyFoldersInSheet_",
+          "line": 1356,
+          "description": "Check all folders in a single sheet and highlight empty ones",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installDailyFolderCheckTrigger_",
+          "line": 1441,
+          "description": "Install daily folder check trigger (7am)",
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [
+        {
+          "type": "stage_mapping",
+          "key": "quote_sent",
+          "words": [
+            "quote sent",
+            "quoted",
+            "estimate sent",
+            "sent"
+          ],
+          "primary": "quote sent"
+        },
+        {
+          "type": "stage_mapping",
+          "key": "awarded",
+          "words": [
+            "awarded",
+            "won",
+            "accepted",
+            "approved",
+            "waiting on deposit",
+            "deposit"
+          ],
+          "primary": "awarded"
+        },
+        {
+          "type": "stage_mapping",
+          "key": "archive",
+          "words": [
+            "archive",
+            "archived",
+            "closed"
+          ],
+          "primary": "archive"
+        },
+        {
+          "type": "stage_mapping",
+          "key": "lost",
+          "words": [
+            "lost",
+            "declined",
+            "rejected",
+            "cancelled"
+          ],
+          "primary": "lost"
+        },
+        {
+          "type": "stage_mapping",
+          "key": "heaven",
+          "words": [
+            "heaven",
+            "installed",
+            "complete",
+            "completed",
+            "done",
+            "pending review"
+          ],
+          "primary": "heaven"
+        },
+        {
+          "type": "stage_mapping",
+          "key": "revise",
+          "words": [
+            "revise",
+            "revision",
+            "needs revision"
+          ],
+          "primary": "revise"
+        },
+        {
+          "type": "stage_mapping",
+          "key": "schedule",
+          "words": [
+            "2. sched",
+            "schedule",
+            "sched"
+          ],
+          "primary": "2. sched"
+        },
+        {
+          "type": "stage_mapping",
+          "key": "print_folder",
+          "words": [
+            "print folder",
+            "print packet",
+            "print"
+          ],
+          "primary": "print folder"
+        },
+        {
+          "type": "column_trigger",
+          "column": "F",
+          "name": "Display Name",
+          "automated": true
+        },
+        {
+          "type": "column_trigger",
+          "column": "I",
+          "name": "Email",
+          "automated": true
+        },
+        {
+          "type": "column_trigger",
+          "column": "J",
+          "name": "Address",
+          "automated": true
+        },
+        {
+          "type": "column_trigger",
+          "column": "M",
+          "name": "Job Description",
+          "automated": true
+        },
+        {
+          "type": "column_trigger",
+          "column": "P",
+          "name": "QB URL",
+          "automated": true
+        },
+        {
+          "type": "column_trigger",
+          "column": "Q",
+          "name": "Earth Link",
+          "automated": true
+        }
+      ],
+      "dependencies": [
+        "handleEditMove_",
+        "m_logOperation_",
+        "handleDisplayNameChange_",
+        "handleEmailChange_",
+        "handleAddressChange_",
+        "updateJobDescription_",
+        "handleQbUrlChange_",
+        "handleStageChange_",
+        "m_autoSortByStage_",
+        "createEarthLink_",
+        "m_geocodeAddress_",
+        "m_cleanAddressForGoogleEarth_",
+        "m_getUrlFromCell_",
+        "m_stageMatches_",
+        "createNextDayGinoEvent_",
+        "m_createPrintPacket_",
+        "m_linkQuoteSentEmail_",
+        "moveRow_",
+        "m_searchAndLinkSentEmail_",
+        "testCalendarAccess_",
+        "m_looksLikeUrl_",
+        "m_extractCoordinates_",
+        "testDriveAccess_",
+        "validateSheetStructure_",
+        "installTriggerMove_",
+        "checkEmptyFoldersDaily_",
+        "m_checkEmptyFoldersInSheet_",
+        "checkEmptyFoldersNow_",
+        "installDailyFolderCheckTrigger_",
+        "MOVE_CONFIG",
+        "Defines: MOVE_CONFIG"
+      ],
+      "lines": 1465,
+      "size": 53216
+    },
+    {
+      "path": "testrubygeneration.gs",
+      "filename": "testrubygeneration.gs",
+      "purpose": "No description available",
+      "version": null,
+      "functions": [
+        {
+          "name": "debugRubyGeneration",
+          "line": 1,
+          "description": null,
+          "isPublic": true,
+          "isHelper": false
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "handleEditLeanToRuby_"
+      ],
+      "lines": 39,
+      "size": 1457
+    }
+  ],
+  "categories": {
+    "core": [
+      {
+        "path": "Draft Creator.gs",
+        "filename": "Draft Creator.gs",
+        "purpose": "Create customer info request draft when \"Customer Info\" is selected",
+        "version": "01/05-09:30PM EST by Claude Opus 4.1",
+        "functions": [
+          {
+            "name": "v2_createCustomerInfoDraft_",
+            "line": 4,
+            "description": "Create customer info request draft when \"Customer Info\" is selected",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_createCOIDraft_",
+            "line": 148,
+            "description": "Create COI request draft when \"COI Req\" is selected",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_createRoughQuote_",
+            "line": 295,
+            "description": "Create rough quote draft/message when \"Rough quote\" is selected",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installTriggerDrafts_V2",
+            "line": 584,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "handleEditDraft_V2",
+            "line": 598,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "v2_searchAndLinkEmail_",
+            "line": 680,
+            "description": "Search for existing email and link it in column B when \"Liz\" is selected",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_createCustomerDraft_",
+            "line": 759,
+            "description": "Create customer follow-up draft when \"Email customer\" is selected",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_createHandoffDraft_",
+            "line": 855,
+            "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "createDraftsForAllRows_V2",
+            "line": 929,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "v2_createDraftForRow_",
+            "line": 976,
+            "description": "Row → Draft creation ========================= */",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_exportRecoverRangeAsPng_",
+            "line": 1099,
+            "description": "PNG snapshot via Sheets export endpoint for Re-cover!A1:K14 at EXACT pixel size.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_captureRecoverSnapshotHTML_",
+            "line": 1153,
+            "description": "HTML fallback (requires Sheets API).",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_buildHtmlBody_",
+            "line": 1308,
+            "description": "Email body builders ================ */",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_buildPlainBody_",
+            "line": 1337,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_extractUrlFromCell_",
+            "line": 1349,
+            "description": "Helpers ===================== */",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_looksLikeUrl_",
+            "line": 1399,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_safeString_",
+            "line": 1400,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_htmlEscape_",
+            "line": 1401,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_colLetterToIndex_",
+            "line": 1403,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_getSpreadsheet_",
+            "line": 1409,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_writeB_",
+            "line": 1416,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_withRetry_",
+            "line": 1427,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_specificErrorMessage_",
+            "line": 1443,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_shortErr_",
+            "line": 1450,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_validateConfig_",
+            "line": 1452,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_isValidEmail_",
+            "line": 1459,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_firstLinkInRichText_",
+            "line": 1461,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_isGmailDraftUrl_",
+            "line": 1473,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_templateSafe_",
+            "line": 1477,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_timestamp_",
+            "line": 1489,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_safeLogErrorToSheet_",
+            "line": 1495,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [
+          {
+            "type": "draft_stage",
+            "key": "TARGET_STAGE",
+            "words": [
+              "qDraft"
+            ],
+            "primary": "qDraft"
+          },
+          {
+            "type": "draft_stage",
+            "key": "LIZ_STAGE",
+            "words": [
+              "Liz"
+            ],
+            "primary": "Liz"
+          },
+          {
+            "type": "draft_stage",
+            "key": "CUSTOMER_STAGE",
+            "words": [
+              "Email customer"
+            ],
+            "primary": "Email customer"
+          },
+          {
+            "type": "draft_stage",
+            "key": "HANDOFF_STAGE",
+            "words": [
+              "Cust Handoff"
+            ],
+            "primary": "Cust Handoff"
+          },
+          {
+            "type": "draft_stage",
+            "key": "ROUGH_QUOTE_STAGE",
+            "words": [
+              "Rough quote"
+            ],
+            "primary": "Rough quote"
+          },
+          {
+            "type": "draft_stage",
+            "key": "COI_STAGE",
+            "words": [
+              "COI Req"
+            ],
+            "primary": "COI Req"
+          }
+        ],
+        "dependencies": [
+          "v2_createCustomerInfoDraft_",
+          "d_colLetterToIndex_",
+          "d_safeString_",
+          "d_htmlEscape_",
+          "d_isValidEmail_",
+          "d_withRetry_",
+          "d_specificErrorMessage_",
+          "d_shortErr_",
+          "v2_createCOIDraft_",
+          "v2_createRoughQuote_",
+          "d_templateSafe_",
+          "v2_validateConfig_",
+          "v2_getSpreadsheet_",
+          "v2_searchAndLinkEmail_",
+          "v2_createCustomerDraft_",
+          "v2_createHandoffDraft_",
+          "v2_createDraftForRow_",
+          "d_safeLogErrorToSheet_",
+          "d_extractUrlFromCell_",
+          "d_firstLinkInRichText_",
+          "d_isGmailDraftUrl_",
+          "v2_exportRecoverRangeAsPng_",
+          "v2_captureRecoverSnapshotHTML_",
+          "v2_buildHtmlBody_",
+          "v2_buildPlainBody_",
+          "d_writeB_",
+          "d_timestamp_",
+          "d_looksLikeUrl_",
+          "DRAFTS_V2"
+        ],
+        "lines": 1508,
+        "size": 60544
+      },
+      {
+        "path": "Stage Automation.gs",
+        "filename": "Stage Automation.gs",
+        "purpose": "STAGE AUTOMATION (standalone) Version: 01/10-09:15PM EST by Claude Opus 4.1 Moves rows between sheets, creates Drive folders, writes Google Earth links,",
+        "version": "01/10-09:15PM EST by Claude Opus 4.1",
+        "functions": [
+          {
+            "name": "handleEditMove_",
+            "line": 104,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_autoSortByStage_",
+            "line": 185,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "updateJobDescription_",
+            "line": 228,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "handleDisplayNameChange_",
+            "line": 303,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "handleEmailChange_",
+            "line": 342,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "handleAddressChange_",
+            "line": 376,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "createEarthLink_",
+            "line": 406,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "handleQbUrlChange_",
+            "line": 439,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "handleStageChange_",
+            "line": 456,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "moveRow_",
+            "line": 587,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_searchAndLinkSentEmail_",
+            "line": 648,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_linkQuoteSentEmail_",
+            "line": 730,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_createPrintPacket_",
+            "line": 837,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "createNextDayGinoEvent_",
+            "line": 1044,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "testCalendarAccess_",
+            "line": 1115,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_stageMatches_",
+            "line": 1126,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_looksLikeUrl_",
+            "line": 1130,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_getUrlFromCell_",
+            "line": 1134,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_cleanAddressForGoogleEarth_",
+            "line": 1164,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_geocodeAddress_",
+            "line": 1181,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_extractCoordinates_",
+            "line": 1204,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_logOperation_",
+            "line": 1214,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "testDriveAccess_",
+            "line": 1221,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "validateSheetStructure_",
+            "line": 1232,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installTriggerMove_",
+            "line": 1277,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "checkEmptyFoldersDaily_",
+            "line": 1292,
+            "description": "Check empty folders daily at 7am (time-driven trigger)",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "checkEmptyFoldersNow_",
+            "line": 1327,
+            "description": "Check empty folders immediately (manual trigger from menu)",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_checkEmptyFoldersInSheet_",
+            "line": 1356,
+            "description": "Check all folders in a single sheet and highlight empty ones",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installDailyFolderCheckTrigger_",
+            "line": 1441,
+            "description": "Install daily folder check trigger (7am)",
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [
+          {
+            "type": "stage_mapping",
+            "key": "quote_sent",
+            "words": [
+              "quote sent",
+              "quoted",
+              "estimate sent",
+              "sent"
+            ],
+            "primary": "quote sent"
+          },
+          {
+            "type": "stage_mapping",
+            "key": "awarded",
+            "words": [
+              "awarded",
+              "won",
+              "accepted",
+              "approved",
+              "waiting on deposit",
+              "deposit"
+            ],
+            "primary": "awarded"
+          },
+          {
+            "type": "stage_mapping",
+            "key": "archive",
+            "words": [
+              "archive",
+              "archived",
+              "closed"
+            ],
+            "primary": "archive"
+          },
+          {
+            "type": "stage_mapping",
+            "key": "lost",
+            "words": [
+              "lost",
+              "declined",
+              "rejected",
+              "cancelled"
+            ],
+            "primary": "lost"
+          },
+          {
+            "type": "stage_mapping",
+            "key": "heaven",
+            "words": [
+              "heaven",
+              "installed",
+              "complete",
+              "completed",
+              "done",
+              "pending review"
+            ],
+            "primary": "heaven"
+          },
+          {
+            "type": "stage_mapping",
+            "key": "revise",
+            "words": [
+              "revise",
+              "revision",
+              "needs revision"
+            ],
+            "primary": "revise"
+          },
+          {
+            "type": "stage_mapping",
+            "key": "schedule",
+            "words": [
+              "2. sched",
+              "schedule",
+              "sched"
+            ],
+            "primary": "2. sched"
+          },
+          {
+            "type": "stage_mapping",
+            "key": "print_folder",
+            "words": [
+              "print folder",
+              "print packet",
+              "print"
+            ],
+            "primary": "print folder"
+          },
+          {
+            "type": "column_trigger",
+            "column": "F",
+            "name": "Display Name",
+            "automated": true
+          },
+          {
+            "type": "column_trigger",
+            "column": "I",
+            "name": "Email",
+            "automated": true
+          },
+          {
+            "type": "column_trigger",
+            "column": "J",
+            "name": "Address",
+            "automated": true
+          },
+          {
+            "type": "column_trigger",
+            "column": "M",
+            "name": "Job Description",
+            "automated": true
+          },
+          {
+            "type": "column_trigger",
+            "column": "P",
+            "name": "QB URL",
+            "automated": true
+          },
+          {
+            "type": "column_trigger",
+            "column": "Q",
+            "name": "Earth Link",
+            "automated": true
+          }
+        ],
+        "dependencies": [
+          "handleEditMove_",
+          "m_logOperation_",
+          "handleDisplayNameChange_",
+          "handleEmailChange_",
+          "handleAddressChange_",
+          "updateJobDescription_",
+          "handleQbUrlChange_",
+          "handleStageChange_",
+          "m_autoSortByStage_",
+          "createEarthLink_",
+          "m_geocodeAddress_",
+          "m_cleanAddressForGoogleEarth_",
+          "m_getUrlFromCell_",
+          "m_stageMatches_",
+          "createNextDayGinoEvent_",
+          "m_createPrintPacket_",
+          "m_linkQuoteSentEmail_",
+          "moveRow_",
+          "m_searchAndLinkSentEmail_",
+          "testCalendarAccess_",
+          "m_looksLikeUrl_",
+          "m_extractCoordinates_",
+          "testDriveAccess_",
+          "validateSheetStructure_",
+          "installTriggerMove_",
+          "checkEmptyFoldersDaily_",
+          "m_checkEmptyFoldersInSheet_",
+          "checkEmptyFoldersNow_",
+          "installDailyFolderCheckTrigger_",
+          "MOVE_CONFIG",
+          "Defines: MOVE_CONFIG"
+        ],
+        "lines": 1465,
+        "size": 53216
+      }
+    ],
+    "automation": [
+      {
+        "path": "Lean-to generator.gs",
+        "filename": "Lean-to generator.gs",
+        "purpose": "LEAN-TO RUBY (Exact) — Drive File Export Version# [09/14-01:58PM EST] by Chatgpt5 Triggers on edits to Leads!T:AD (cols 20–30) when AA contains \"Lean-to\" or \"Sloped L\".",
+        "version": "[09/14-01:58PM EST] by Chatgpt5",
+        "functions": [
+          {
+            "name": "handleEditLeanToRuby_",
+            "line": 26,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "r_buildRubyFromExactTemplate_",
+            "line": 117,
+            "description": "Replace ONLY the parameter literals in the exact Ruby template. Every other character (including spacing and comments) is preserved verbatim.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "r_getRubyExactTemplate",
+            "line": 169,
+            "description": "EXACT Ruby template as provided — DO NOT CHANGE ANYTHING HERE. We substitute only the parameter values via r_buildRubyFromExactTemplate_().",
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "r_getRubyExactTemplate_",
+            "line": 170,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "r_writeRubyToDrive_",
+            "line": 362,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "r_getRubyExportFolder_",
+            "line": 380,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installTriggerLeanToRuby_",
+            "line": 395,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "handleEditLeanToRuby_",
+          "r_buildRubyFromExactTemplate_",
+          "r_writeRubyToDrive_",
+          "r_getRubyExactTemplate_",
+          "r_getRubyExportFolder_",
+          "installTriggerLeanToRuby_",
+          "LEANTO_RUBY_EXPORT"
+        ],
+        "lines": 403,
+        "size": 13440
+      },
+      {
+        "path": "testrubygeneration.gs",
+        "filename": "testrubygeneration.gs",
+        "purpose": "No description available",
+        "version": null,
+        "functions": [
+          {
+            "name": "debugRubyGeneration",
+            "line": 1,
+            "description": null,
+            "isPublic": true,
+            "isHelper": false
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "handleEditLeanToRuby_"
+        ],
+        "lines": 39,
+        "size": 1457
+      }
+    ],
+    "integration": [
+      {
+        "path": "QBO Estimates.gs",
+        "filename": "QBO Estimates.gs",
+        "purpose": "QBO ESTIMATES - QuickBooks Online Integration Version# [01/06-10:30AM EST] - Complete estimate and invoice management by Claude Opus 4.1",
+        "version": "[01/06-10:30AM EST] - Complete estimate and invoice management",
+        "functions": [
+          {
+            "name": "convertEstimateToInvoice",
+            "line": 17,
+            "description": "Convert estimate to invoice for awarded jobs Run this from Awarded sheet with active cell on the row to convert",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "processAllAwardedEstimates",
+            "line": 180,
+            "description": "Process all rows in Awarded sheet that have estimates but no invoices",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "sendEstimateCurrentRow_",
+            "line": 230,
+            "description": "Send estimate for current row in Leads sheet to QuickBooks",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "findOrCreateCustomer_",
+            "line": 353,
+            "description": "Helper: Find existing customer or create new one in QuickBooks",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "parseAddress_",
+            "line": 402,
+            "description": "Helper: Parse address string into QuickBooks address object",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "configureEnvironment",
+            "line": 420,
+            "description": "Configure QuickBooks environment (production vs sandbox)",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "listQuickBooksItems",
+            "line": 442,
+            "description": "Debug: List all QuickBooks items (for line item configuration)",
+            "isPublic": true,
+            "isHelper": false
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "sendEstimateCurrentRow_",
+          "findOrCreateCustomer_",
+          "parseAddress_"
+        ],
+        "lines": 486,
+        "size": 15590
+      },
+      {
+        "path": "QuickBooksAuth.gs",
+        "filename": "QuickBooksAuth.gs",
+        "purpose": "QUICKBOOKS AUTH (OAuth2 setup) Version# [01/06-10:30AM EST] - Fixed OAuth flow with proper redirect URI handling by Claude Opus 4.1",
+        "version": "[01/06-10:30AM EST] - Fixed OAuth flow with proper redirect URI handling",
+        "functions": [
+          {
+            "name": "getScriptUrl",
+            "line": 22,
+            "description": "Get the current web app URL - MUST run this after deploying as web app",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "getOAuthService",
+            "line": 36,
+            "description": "Initialize OAuth2 service for QuickBooks",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "resetAuth",
+            "line": 66,
+            "description": "Clear stored authentication credentials",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "authorize",
+            "line": 84,
+            "description": "Triggered from menu → \"Authorize QuickBooks\" Opens authorization in a modal with a clickable link",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "authCallback",
+            "line": 195,
+            "description": "OAuth2 callback handler",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "doGet",
+            "line": 315,
+            "description": "Web app entry point - MUST be deployed as web app",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "testQuickBooksConnection_",
+            "line": 399,
+            "description": "Test QuickBooks connection",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "showRedirectUri_",
+            "line": 477,
+            "description": "Helper function to show current redirect URI and setup instructions",
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "testQuickBooksConnection_",
+          "showRedirectUri_"
+        ],
+        "lines": 501,
+        "size": 16715
+      }
+    ],
+    "utilities": [
+      {
+        "path": "Menus.gs",
+        "filename": "Menus.gs",
+        "purpose": "Single shared menu for the project. Version# [01/06-10:30AM EST] - Fixed QuickBooks menu references by Claude Opus 4.1",
+        "version": "[01/06-10:30AM EST] - Fixed QuickBooks menu references",
+        "functions": [
+          {
+            "name": "onOpen",
+            "line": 15,
+            "description": "- System utilities  IMPORTANT: Do not define any other onOpen() anywhere else.",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "showQuickBooksSetup_",
+            "line": 93,
+            "description": "Show QuickBooks setup instructions",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "debugMenuError_",
+            "line": 161,
+            "description": "Debug function to help identify menu issues",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "listAllTriggers_",
+            "line": 199,
+            "description": "System utility: List all triggers",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "removeAllTriggers_",
+            "line": 218,
+            "description": "System utility: Remove all triggers",
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "showQuickBooksSetup_",
+          "debugMenuError_",
+          "listAllTriggers_",
+          "removeAllTriggers_"
+        ],
+        "lines": 229,
+        "size": 7232
+      }
+    ],
+    "other": [
+      {
+        "path": "F/U and Send proposal.gs",
+        "filename": "U and Send proposal.gs",
+        "purpose": "Lead_Followup_Draft_V2.gs version# 09/23-05:05PM EST by Chatgpt5 PURPOSE",
+        "version": "09/23-05:05PM EST by Chatgpt5",
+        "functions": [
+          {
+            "name": "installTriggerDrafts_FU",
+            "line": 35,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "handleEditDraft_FU",
+            "line": 48,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "createDraftsForAllRows_FU",
+            "line": 80,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "fu_createDraftForRow_",
+            "line": 127,
+            "description": "Row → Draft creation ========================= */",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_safeString_",
+            "line": 173,
+            "description": "Helpers ===================== */",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_colLetterToIndex_",
+            "line": 174,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_getSpreadsheet_",
+            "line": 179,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_writeB_",
+            "line": 185,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_firstLinkInRichText_",
+            "line": 195,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_isGmailDraftUrl_",
+            "line": 206,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_shortErr_",
+            "line": 210,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "fu_getSpreadsheet_",
+          "fu_colLetterToIndex_",
+          "fu_firstLinkInRichText_",
+          "fu_isGmailDraftUrl_",
+          "fu_createDraftForRow_",
+          "fu_shortErr_",
+          "fu_safeString_",
+          "fu_writeB_"
+        ],
+        "lines": 212,
+        "size": 7745
+      },
+      {
+        "path": "Miles Log.gs",
+        "filename": "Miles Log.gs",
+        "purpose": "Mileage Log Automation Script Version 8.1 [09/10-11:00AM EST] by Claude Opus 4.1 Features:",
+        "version": "8.1 [09/10-11:00AM EST] by Claude Opus 4.1",
+        "functions": [
+          {
+            "name": "installTriggerMileage_",
+            "line": 50,
+            "description": "======================== MAIN ========================",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "runMileageSync_",
+            "line": 66,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "ml_processEvents",
+            "line": 113,
+            "description": "======================== PROCESSING ========================",
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_groupEventsByDate",
+            "line": 130,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_processDayEvents",
+            "line": 140,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_getOrdinal",
+            "line": 192,
+            "description": "======================== UTILITIES ========================",
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_getMileageSheet",
+            "line": 198,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_validateSheet",
+            "line": 205,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_getDateBoundaries",
+            "line": 215,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_getExistingDates",
+            "line": 231,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_getCalendarEventsChunked",
+            "line": 247,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_getCalendarEvents",
+            "line": 260,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_getEventAddress",
+            "line": 266,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_extractAddress",
+            "line": 270,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_isOfficeAddress",
+            "line": 280,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_calculateDistance",
+            "line": 287,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_flagDistance",
+            "line": 298,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_formatDate",
+            "line": 302,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_createCalendarLink",
+            "line": 309,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_createMapsLink",
+            "line": 314,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_getTimestamp",
+            "line": 318,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "ml_addEntriesToSheet",
+            "line": 326,
+            "description": "======================== BATCH WRITER (optimized) ========================",
+            "isPublic": true,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "installTriggerMileage_",
+          "runMileageSync_",
+          "MILEAGE_CONFIG",
+          "Defines: MILEAGE_CONFIG"
+        ],
+        "lines": 376,
+        "size": 12765
+      }
+    ]
+  },
+  "stageMoves": [
+    {
+      "type": "stage_mapping",
+      "key": "quote_sent",
+      "words": [
+        "quote sent",
+        "quoted",
+        "estimate sent",
+        "sent"
+      ],
+      "primary": "quote sent"
+    },
+    {
+      "type": "stage_mapping",
+      "key": "awarded",
+      "words": [
+        "awarded",
+        "won",
+        "accepted",
+        "approved",
+        "waiting on deposit",
+        "deposit"
+      ],
+      "primary": "awarded"
+    },
+    {
+      "type": "stage_mapping",
+      "key": "archive",
+      "words": [
+        "archive",
+        "archived",
+        "closed"
+      ],
+      "primary": "archive"
+    },
+    {
+      "type": "stage_mapping",
+      "key": "lost",
+      "words": [
+        "lost",
+        "declined",
+        "rejected",
+        "cancelled"
+      ],
+      "primary": "lost"
+    },
+    {
+      "type": "stage_mapping",
+      "key": "heaven",
+      "words": [
+        "heaven",
+        "installed",
+        "complete",
+        "completed",
+        "done",
+        "pending review"
+      ],
+      "primary": "heaven"
+    },
+    {
+      "type": "stage_mapping",
+      "key": "revise",
+      "words": [
+        "revise",
+        "revision",
+        "needs revision"
+      ],
+      "primary": "revise"
+    },
+    {
+      "type": "stage_mapping",
+      "key": "schedule",
+      "words": [
+        "2. sched",
+        "schedule",
+        "sched"
+      ],
+      "primary": "2. sched"
+    },
+    {
+      "type": "stage_mapping",
+      "key": "print_folder",
+      "words": [
+        "print folder",
+        "print packet",
+        "print"
+      ],
+      "primary": "print folder"
+    }
+  ],
+  "draftCreator": [
+    {
+      "type": "draft_stage",
+      "key": "TARGET_STAGE",
+      "words": [
+        "qDraft"
+      ],
+      "primary": "qDraft"
+    },
+    {
+      "type": "draft_stage",
+      "key": "LIZ_STAGE",
+      "words": [
+        "Liz"
+      ],
+      "primary": "Liz"
+    },
+    {
+      "type": "draft_stage",
+      "key": "CUSTOMER_STAGE",
+      "words": [
+        "Email customer"
+      ],
+      "primary": "Email customer"
+    },
+    {
+      "type": "draft_stage",
+      "key": "HANDOFF_STAGE",
+      "words": [
+        "Cust Handoff"
+      ],
+      "primary": "Cust Handoff"
+    },
+    {
+      "type": "draft_stage",
+      "key": "ROUGH_QUOTE_STAGE",
+      "words": [
+        "Rough quote"
+      ],
+      "primary": "Rough quote"
+    },
+    {
+      "type": "draft_stage",
+      "key": "COI_STAGE",
+      "words": [
+        "COI Req"
+      ],
+      "primary": "COI Req"
+    }
+  ],
+  "autoColumns": [
+    {
+      "type": "column_trigger",
+      "column": "F",
+      "name": "Display Name",
+      "automated": true
+    },
+    {
+      "type": "column_trigger",
+      "column": "I",
+      "name": "Email",
+      "automated": true
+    },
+    {
+      "type": "column_trigger",
+      "column": "J",
+      "name": "Address",
+      "automated": true
+    },
+    {
+      "type": "column_trigger",
+      "column": "M",
+      "name": "Job Description",
+      "automated": true
+    },
+    {
+      "type": "column_trigger",
+      "column": "P",
+      "name": "QB URL",
+      "automated": true
+    },
+    {
+      "type": "column_trigger",
+      "column": "Q",
+      "name": "Earth Link",
+      "automated": true
+    }
+  ]
+}
