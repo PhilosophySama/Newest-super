@@ -1,37 +1,37 @@
 name: Update Trigger Map
 
-   on:
-     push:
-       branches: [ main ]
-       paths:
-         - '*.gs'
-         - 'parser.js'
-     workflow_dispatch:
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '*.gs'
+      - 'parser.js'
+  workflow_dispatch:
 
-   jobs:
-     update:
-       runs-on: ubuntu-latest
-       permissions:
-         contents: write
-       
-       steps:
-         - name: Checkout repository
-           uses: actions/checkout@v3
-         
-         - name: Setup Node.js
-           uses: actions/setup-node@v3
-           with:
-             node-version: '18'
-         
-         - name: Parse trigger files
-           run: node parser.js
-         
-         - name: Commit updated triggers.json
-           run: |
-             git config --local user.email "github-actions[bot]@users.noreply.github.com"
-             git config --local user.name "github-actions[bot]"
-             git add docs/triggers.json
-             git diff --staged --quiet || git commit -m "🤖 Auto-update trigger map [skip ci]"
-         
-         - name: Push changes
-           run: git push
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Parse trigger files
+        run: node parser.js
+      
+      - name: Commit updated triggers.json
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/triggers.json
+          git diff --staged --quiet || git commit -m "🤖 Auto-update trigger map [skip ci]"
+      
+      - name: Push changes
+        run: git push
