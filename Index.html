@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Walker Awning Apps Script</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 { color: #667eea; }
+        .stats { background: #f4f4f4; padding: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🏢 Walker Awning - Apps Script Suite</h1>
+    <p>Google Apps Script automation for lead management and customer communications.</p>
+    
+    <div class="stats">
+        <h2>📊 Project Stats</h2>
+        <ul>
+            <li><strong>10 Files</strong></li>
+            <li><strong>134 Functions</strong></li>
+            <li><strong>5,839 Lines of Code</strong></li>
+            <li><strong>20 Active Triggers</strong></li>
+        </ul>
+    </div>
+    
+    <p><a href="https://github.com/PhilosophySama/Newest-super">View Repository on GitHub →</a></p>
+    
+    <script>
+        // Load triggers.json data
+        fetch('triggers.json')
+            .then(r => r.json())
+            .then(data => {
+                console.log('Loaded project data:', data);
+                document.body.innerHTML += `<p>Loaded data for ${data.stats.totalFiles} files!</p>`;
+            });
+    </script>
+</body>
+</html>
