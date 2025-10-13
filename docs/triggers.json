@@ -1,20 +1,20 @@
 {
   "metadata": {
-    "lastUpdated": "2025-10-11T19:59:47.185Z",
+    "lastUpdated": "2025-10-13T04:45:59.591Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
     "totalTriggers": 20
   },
   "stats": {
-    "totalFiles": 9,
-    "totalFunctions": 121,
+    "totalFiles": 10,
+    "totalFunctions": 134,
     "totalTriggers": 20,
-    "totalLines": 5219,
+    "totalLines": 5839,
     "publicFunctions": 39,
-    "helperFunctions": 109,
+    "helperFunctions": 122,
     "avgFunctionsPerFile": 13,
-    "avgLinesPerFile": 580
+    "avgLinesPerFile": 584
   },
   "files": [
     {
@@ -324,6 +324,124 @@
       ],
       "lines": 1508,
       "size": 60544
+    },
+    {
+      "path": "Email Reader.gs",
+      "filename": "Email Reader.gs",
+      "purpose": "EMAIL READER AUTOMATION Version: 01/13-11:45PM EST by Claude Opus 4.1 Scans emails for specific senders/subjects and processes them automatically.",
+      "version": "01/13-11:45PM EST by Claude Opus 4.1",
+      "functions": [
+        {
+          "name": "processEmailsReader_",
+          "line": 115,
+          "description": "Main email processing function - runs on time trigger",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "er_processSearchConfig_",
+          "line": 170,
+          "description": "Process emails for a specific search configuration",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "er_processEmail_",
+          "line": 242,
+          "description": "Process a single email message",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "er_autoSplitRow_",
+          "line": 343,
+          "description": "Auto-split column A by commas across columns A-U",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "er_getOrCreateLabel_",
+          "line": 399,
+          "description": "Get or create Gmail label",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "er_log_",
+          "line": 426,
+          "description": "Logging helper",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installTriggerEmailReader_",
+          "line": 440,
+          "description": "Install time-based trigger for email reader",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "runEmailReaderNow_",
+          "line": 473,
+          "description": "Manual run for testing - processes emails immediately",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "testEmailReaderSearch_",
+          "line": 491,
+          "description": "Test function - check for Ruby Mail emails without processing",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "clearProcessedLabels_",
+          "line": 522,
+          "description": "Clear processed label from all emails (for testing)",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "showEmailReaderConfig_",
+          "line": 560,
+          "description": "Show current configuration",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "er_getTriggerStatus_",
+          "line": 589,
+          "description": "Get trigger status",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "addEmailSearch_",
+          "line": 606,
+          "description": "Add new email search configuration Example usage: addEmailSearch_('Contact Form', 'subject:Contact Form', true, {...})",
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "processEmailsReader_",
+        "er_log_",
+        "er_getOrCreateLabel_",
+        "er_processSearchConfig_",
+        "er_processEmail_",
+        "er_autoSplitRow_",
+        "installTriggerEmailReader_",
+        "runEmailReaderNow_",
+        "testEmailReaderSearch_",
+        "clearProcessedLabels_",
+        "showEmailReaderConfig_",
+        "er_getTriggerStatus_",
+        "addEmailSearch_",
+        "Defines: EMAIL_READER_CONFIG"
+      ],
+      "lines": 620,
+      "size": 16662
     },
     {
       "path": "F/U and Send proposal.gs",
@@ -2213,6 +2331,124 @@
       }
     ],
     "other": [
+      {
+        "path": "Email Reader.gs",
+        "filename": "Email Reader.gs",
+        "purpose": "EMAIL READER AUTOMATION Version: 01/13-11:45PM EST by Claude Opus 4.1 Scans emails for specific senders/subjects and processes them automatically.",
+        "version": "01/13-11:45PM EST by Claude Opus 4.1",
+        "functions": [
+          {
+            "name": "processEmailsReader_",
+            "line": 115,
+            "description": "Main email processing function - runs on time trigger",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "er_processSearchConfig_",
+            "line": 170,
+            "description": "Process emails for a specific search configuration",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "er_processEmail_",
+            "line": 242,
+            "description": "Process a single email message",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "er_autoSplitRow_",
+            "line": 343,
+            "description": "Auto-split column A by commas across columns A-U",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "er_getOrCreateLabel_",
+            "line": 399,
+            "description": "Get or create Gmail label",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "er_log_",
+            "line": 426,
+            "description": "Logging helper",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installTriggerEmailReader_",
+            "line": 440,
+            "description": "Install time-based trigger for email reader",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "runEmailReaderNow_",
+            "line": 473,
+            "description": "Manual run for testing - processes emails immediately",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "testEmailReaderSearch_",
+            "line": 491,
+            "description": "Test function - check for Ruby Mail emails without processing",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "clearProcessedLabels_",
+            "line": 522,
+            "description": "Clear processed label from all emails (for testing)",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "showEmailReaderConfig_",
+            "line": 560,
+            "description": "Show current configuration",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "er_getTriggerStatus_",
+            "line": 589,
+            "description": "Get trigger status",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "addEmailSearch_",
+            "line": 606,
+            "description": "Add new email search configuration Example usage: addEmailSearch_('Contact Form', 'subject:Contact Form', true, {...})",
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "processEmailsReader_",
+          "er_log_",
+          "er_getOrCreateLabel_",
+          "er_processSearchConfig_",
+          "er_processEmail_",
+          "er_autoSplitRow_",
+          "installTriggerEmailReader_",
+          "runEmailReaderNow_",
+          "testEmailReaderSearch_",
+          "clearProcessedLabels_",
+          "showEmailReaderConfig_",
+          "er_getTriggerStatus_",
+          "addEmailSearch_",
+          "Defines: EMAIL_READER_CONFIG"
+        ],
+        "lines": 620,
+        "size": 16662
+      },
       {
         "path": "F/U and Send proposal.gs",
         "filename": "U and Send proposal.gs",
