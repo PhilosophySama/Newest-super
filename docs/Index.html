@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walker Awning Complete Documentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle { color: #666; font-size: 1.1em; }
+        
+        .sync-badge {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            color: #2e7d32;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+        
+        .search-bar {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .stats-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.85em;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            background: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .tab:hover {
+            background: #f8f9ff;
+            border-color: #667eea;
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .file-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .file-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .file-card.hidden { display: none; }
+        
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .file-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            word-break: break-word;
+        }
+        
+        .file-icon { font-size: 2em; }
+        
+        .file-purpose {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+        
+        .file-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .file-stat {
+            background: #f8f9ff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .file-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .file-card.expanded .file-details {
+            max-height: 2000px;
+        }
+        
+        .functions-list {
+            margin-top: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .function-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .function-item:last-child { border-bottom: none; }
+        
+        .function-name { color: #d32f2f; font-weight: 600; }
+        .function-desc { color: #666; font-size: 0.85em; margin-top: 3px; }
+        
+        .triggers-list {
+            margin-top: 15px;
+            background: #fff9e6;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .trigger-item {
+            padding: 6px 0;
+            color: #f57f17;
+            font-weight: 600;
+        }
+        
+        .deps-list {
+            margin-top: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .dep-item {
+            padding: 4px 0;
+            color: #1976d2;
+            font-size: 0.9em;
+        }
+        
+        .expand-icon {
+            transition: transform 0.3s;
+            font-size: 0.8em;
+            color: #999;
+        }
+        
+        .file-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        .category-section {
+            margin-bottom: 30px;
+        }
+        
+        .category-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 1.2em;
+            display: none;
+        }
+        
+        .version-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .file-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Walker Awning Complete Documentation</h1>
+            <p class="subtitle">Comprehensive auto-generated documentation for all automation scripts</p>
+            <div class="sync-badge" id="syncBadge" style="display:none;">
+                <strong>🔄 Auto-synced from GitHub</strong> • <span id="lastUpdated"></span>
+            </div>
+            <input type="text" class="search-bar" id="searchInput" placeholder="🔍 Search files, functions, triggers...">
+        </header>
+
+        <div class="stats-panel">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalFiles">0</div>
+                    <div class="stat-label">Files</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalFunctions">0</div>
+                    <div class="stat-label">Functions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalTriggers">0</div>
+                    <div class="stat-label">Triggers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalLines">0</div>
+                    <div class="stat-label">Lines of Code</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="publicFunctions">0</div>
+                    <div class="stat-label">Public Functions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="helperFunctions">0</div>
+                    <div class="stat-label">Helper Functions</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="all-files">📂 All Files</div>
+            <div class="tab" data-tab="core">⚡ Core Automation</div>
+            <div class="tab" data-tab="integration">🔗 Integrations</div>
+            <div class="tab" data-tab="utilities">🛠️ Utilities</div>
+        </div>
+
+        <!-- All Files Tab -->
+        <div class="tab-content active" id="all-files">
+            <div class="file-grid" id="allFilesGrid"></div>
+        </div>
+
+        <!-- Core Tab -->
+        <div class="tab-content" id="core">
+            <div class="file-grid" id="coreGrid"></div>
+        </div>
+
+        <!-- Integration Tab -->
+        <div class="tab-content" id="integration">
+            <div class="file-grid" id="integrationGrid"></div>
+        </div>
+
+        <!-- Utilities Tab -->
+        <div class="tab-content" id="utilities">
+            <div class="file-grid" id="utilitiesGrid"></div>
+        </div>
+
+        <div class="no-results" id="noResults">
+            <div style="font-size: 3em; margin-bottom: 20px;">🔍</div>
+            <div>No files found matching your search.</div>
+        </div>
+    </div>
+
+    <script>
+        let docsData = null;
+
+        // Load data from GitHub
+        async function loadDocs() {
+            try {
+                const response = await fetch('triggers.json');
+                if (response.ok) {
+                    docsData = await response.json();
+                    renderDocs();
+                }
+            } catch (error) {
+                console.error('Failed to load documentation:', error);
+            }
+        }
+
+        function renderDocs() {
+            if (!docsData) return;
+
+            // Update stats
+            if (docsData.stats) {
+                document.getElementById('totalFiles').textContent = docsData.stats.totalFiles;
+                document.getElementById('totalFunctions').textContent = docsData.stats.totalFunctions;
+                document.getElementById('totalTriggers').textContent = docsData.stats.totalTriggers;
+                document.getElementById('totalLines').textContent = docsData.stats.totalLines.toLocaleString();
+                document.getElementById('publicFunctions').textContent = docsData.stats.publicFunctions;
+                document.getElementById('helperFunctions').textContent = docsData.stats.helperFunctions;
+            }
+
+            // Update sync badge
+            if (docsData.metadata?.lastUpdated) {
+                const badge = document.getElementById('syncBadge');
+                badge.style.display = 'inline-block';
+                document.getElementById('lastUpdated').textContent = 
+                    'Last updated: ' + getTimeAgo(new Date(docsData.metadata.lastUpdated));
+            }
+
+            // Render files
+            renderFileGrid('allFilesGrid', docsData.files || []);
+            
+            if (docsData.categories) {
+                renderFileGrid('coreGrid', docsData.categories.core || []);
+                renderFileGrid('integrationGrid', docsData.categories.integration || []);
+                renderFileGrid('utilitiesGrid', [...(docsData.categories.utilities || []), ...(docsData.categories.automation || []), ...(docsData.categories.other || [])]);
+            }
+        }
+
+        function renderFileGrid(gridId, files) {
+            const grid = document.getElementById(gridId);
+            if (!grid) return;
+
+            grid.innerHTML = files.map(file => createFileCard(file)).join('');
+        }
+
+        function createFileCard(file) {
+            const icon = getFileIcon(file.filename);
+            const functionsHtml = file.functions.length > 0 ? `
+                <div class="functions-list">
+                    <strong>📋 Functions (${file.functions.length}):</strong>
+                    ${file.functions.slice(0, 10).map(f => `
+                        <div class="function-item">
+                            <div class="function-name">${f.name}()</div>
+                            ${f.description ? `<div class="function-desc">${f.description}</div>` : ''}
+                        </div>
+                    `).join('')}
+                    ${file.functions.length > 10 ? `<div style="text-align:center;margin-top:10px;color:#666;">+ ${file.functions.length - 10} more...</div>` : ''}
+                </div>
+            ` : '';
+
+            const triggersHtml = file.triggers.length > 0 ? `
+                <div class="triggers-list">
+                    <strong>⚡ Triggers (${file.triggers.length}):</strong>
+                    ${file.triggers.map(t => {
+                        const triggerName = t.primary || t.name || t.key;
+                        const triggerWords = t.words ? t.words.map(w => `[${w}]`).join(' ') : (t.column ? `Column ${t.column}` : '');
+                        return `
+                            <div class="trigger-item">
+                                <strong>${triggerName}:</strong> ${triggerWords}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            ` : '';
+
+            const depsHtml = file.dependencies.length > 0 ? `
+                <div class="deps-list">
+                    <strong>🔗 Dependencies:</strong>
+                    ${file.dependencies.slice(0, 5).map(d => `<div class="dep-item">• ${d}</div>`).join('')}
+                    ${file.dependencies.length > 5 ? `<div style="text-align:center;margin-top:5px;color:#666;">+ ${file.dependencies.length - 5} more...</div>` : ''}
+                </div>
+            ` : '';
+
+            return `
+                <div class="file-card" data-keywords="${file.filename} ${file.purpose} ${file.functions.map(f => f.name).join(' ')}">
+                    <div class="file-header">
+                        <div class="file-name">${file.filename}</div>
+                        <div>
+                            <span class="file-icon">${icon}</span>
+                            <span class="expand-icon">▼</span>
+                        </div>
+                    </div>
+                    ${file.version ? `<div class="version-badge">${file.version}</div>` : ''}
+                    <div class="file-purpose">${file.purpose}</div>
+                    <div class="file-stats">
+                        <span class="file-stat">📊 ${file.lines} lines</span>
+                        <span class="file-stat">⚙️ ${file.functions.length} functions</span>
+                        ${file.triggers.length > 0 ? `<span class="file-stat">⚡ ${file.triggers.length} triggers</span>` : ''}
+                    </div>
+                    <div class="file-details">
+                        ${functionsHtml}
+                        ${triggersHtml}
+                        ${depsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getFileIcon(filename) {
+            const name = filename.toLowerCase();
+            if (name.includes('stage')) return '🔄';
+            if (name.includes('draft')) return '📧';
+            if (name.includes('quickbooks') || name.includes('qbo')) return '💼';
+            if (name.includes('menu')) return '📋';
+            if (name.includes('mileage') || name.includes('miles')) return '🚗';
+            if (name.includes('lean') || name.includes('ruby')) return '📐';
+            if (name.includes('test')) return '🧪';
+            return '📄';
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+            
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return `${interval} ${unit}${interval !== 1 ? 's' : ''} ago`;
+                }
+            }
+            return 'just now';
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                const tabName = tab.getAttribute('data-tab');
+                document.getElementById(tabName).classList.add('active');
+                
+                document.getElementById('searchInput').value = '';
+                filterFiles('');
+            });
+        });
+
+        // Card expansion
+        document.addEventListener('click', (e) => {
+            const card = e.target.closest('.file-card');
+            if (card) {
+                card.classList.toggle('expanded');
+            }
+        });
+
+        // Search
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            filterFiles(e.target.value.toLowerCase());
+        });
+
+        function filterFiles(searchTerm) {
+            const cards = document.querySelectorAll('.file-card');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const keywords = card.getAttribute('data-keywords') || '';
+                const matches = !searchTerm || keywords.toLowerCase().includes(searchTerm);
+                
+                if (matches) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            
+            document.getElementById('noResults').style.display = 
+                visibleCount === 0 && searchTerm ? 'block' : 'none';
+        }
+
+        // Initialize
+        loadDocs();
+    </script>
+</body>
+</html>
