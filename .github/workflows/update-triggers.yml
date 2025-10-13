@@ -6,6 +6,7 @@ on:
     paths:
       - '*.gs'
       - 'parser.js'
+      - '!docs/triggers.json'
   workflow_dispatch:
 
 jobs:
@@ -31,7 +32,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add docs/triggers.json
-          git diff --staged --quiet || git commit -m "🤖 Auto-update trigger map [skip ci]"
+          git diff --staged --quiet || git commit -m "🤖 Auto-update trigger map"
       
       - name: Push changes
         run: git push
