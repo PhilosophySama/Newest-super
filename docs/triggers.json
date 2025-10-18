@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2025-10-13T15:49:21.529Z",
+    "lastUpdated": "2025-10-18T18:24:33.510Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,13 +8,13 @@
   },
   "stats": {
     "totalFiles": 10,
-    "totalFunctions": 134,
+    "totalFunctions": 133,
     "totalTriggers": 20,
-    "totalLines": 5839,
-    "publicFunctions": 39,
-    "helperFunctions": 122,
+    "totalLines": 6093,
+    "publicFunctions": 43,
+    "helperFunctions": 121,
     "avgFunctionsPerFile": 13,
-    "avgLinesPerFile": 584
+    "avgLinesPerFile": 609
   },
   "files": [
     {
@@ -328,120 +328,92 @@
     {
       "path": "Email Reader.gs",
       "filename": "Email Reader.gs",
-      "purpose": "EMAIL READER AUTOMATION Version: 01/13-11:45PM EST by Claude Opus 4.1 Scans emails for specific senders/subjects and processes them automatically.",
-      "version": "01/13-11:45PM EST by Claude Opus 4.1",
+      "purpose": "EMAIL READER AUTOMATION - RUBY PARSER Version: 01/13-03:00PM EST by Claude Opus 4.1 Enhanced Ruby email parsing with field-specific extraction",
+      "version": "01/13-03:00PM EST by Claude Opus 4.1",
       "functions": [
         {
-          "name": "processEmailsReader_",
-          "line": 115,
-          "description": "Main email processing function - runs on time trigger",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "er_processSearchConfig_",
-          "line": 170,
-          "description": "Process emails for a specific search configuration",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
           "name": "er_processEmail_",
-          "line": 242,
-          "description": "Process a single email message",
+          "line": 87,
+          "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "er_autoSplitRow_",
-          "line": 343,
-          "description": "Auto-split column A by commas across columns A-U",
+          "name": "er_tryEnhancedAIParsing_",
+          "line": 162,
+          "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "er_getOrCreateLabel_",
-          "line": 399,
-          "description": "Get or create Gmail label",
+          "name": "er_tryRubyPatternParsing_",
+          "line": 227,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "er_tryStructuredExtraction_",
+          "line": 328,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "er_saveForManualReview_",
+          "line": 389,
+          "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_log_",
-          "line": 426,
-          "description": "Logging helper",
+          "line": 421,
+          "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "installTriggerEmailReader_",
-          "line": 440,
-          "description": "Install time-based trigger for email reader",
-          "isPublic": false,
+          "name": "er_installTrigger",
+          "line": 430,
+          "description": null,
+          "isPublic": true,
           "isHelper": true
         },
         {
-          "name": "runEmailReaderNow_",
-          "line": 473,
-          "description": "Manual run for testing - processes emails immediately",
-          "isPublic": false,
+          "name": "er_removeTrigger",
+          "line": 441,
+          "description": null,
+          "isPublic": true,
           "isHelper": true
         },
         {
-          "name": "testEmailReaderSearch_",
-          "line": 491,
-          "description": "Test function - check for Ruby Mail emails without processing",
-          "isPublic": false,
+          "name": "er_processNewEmails",
+          "line": 450,
+          "description": null,
+          "isPublic": true,
           "isHelper": true
         },
         {
-          "name": "clearProcessedLabels_",
-          "line": 522,
-          "description": "Clear processed label from all emails (for testing)",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "showEmailReaderConfig_",
-          "line": 560,
-          "description": "Show current configuration",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "er_getTriggerStatus_",
-          "line": 589,
-          "description": "Get trigger status",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "addEmailSearch_",
-          "line": 606,
-          "description": "Add new email search configuration Example usage: addEmailSearch_('Contact Form', 'subject:Contact Form', true, {...})",
-          "isPublic": false,
+          "name": "er_testProcessing",
+          "line": 485,
+          "description": null,
+          "isPublic": true,
           "isHelper": true
         }
       ],
       "triggers": [],
       "dependencies": [
-        "processEmailsReader_",
-        "er_log_",
-        "er_getOrCreateLabel_",
-        "er_processSearchConfig_",
         "er_processEmail_",
-        "er_autoSplitRow_",
-        "installTriggerEmailReader_",
-        "runEmailReaderNow_",
-        "testEmailReaderSearch_",
-        "clearProcessedLabels_",
-        "showEmailReaderConfig_",
-        "er_getTriggerStatus_",
-        "addEmailSearch_",
+        "er_log_",
+        "er_tryEnhancedAIParsing_",
+        "er_tryRubyPatternParsing_",
+        "er_tryStructuredExtraction_",
+        "er_saveForManualReview_",
         "Defines: EMAIL_READER_CONFIG"
       ],
-      "lines": 620,
-      "size": 16662
+      "lines": 508,
+      "size": 14603
     },
     {
       "path": "F/U and Send proposal.gs",
@@ -544,54 +516,68 @@
     {
       "path": "Lean-to generator.gs",
       "filename": "Lean-to generator.gs",
-      "purpose": "LEAN-TO RUBY (Exact) — Drive File Export Version# [09/14-01:58PM EST] by Chatgpt5 Triggers on edits to Leads!T:AD (cols 20–30) when AA contains \"Lean-to\" or \"Sloped L\".",
-      "version": "[09/14-01:58PM EST] by Chatgpt5",
+      "purpose": "AWNING RUBY GENERATOR (Lean-to & A-Frame) — Drive File Export Version# [01/13-11:45PM EST] by Claude Opus 4.1 Triggers on edits to Leads!T:AD (cols 20–30).",
+      "version": "[01/13-11:45PM EST] by Claude Opus 4.1",
       "functions": [
         {
-          "name": "handleEditLeanToRuby_",
-          "line": 26,
+          "name": "handleEditAwningRuby_",
+          "line": 30,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "r_buildRubyFromExactTemplate_",
-          "line": 117,
-          "description": "Replace ONLY the parameter literals in the exact Ruby template. Every other character (including spacing and comments) is preserved verbatim.",
+          "name": "r_buildLeanToRuby_",
+          "line": 144,
+          "description": "Build Lean-to Ruby script with parameters",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "r_buildAFrameRuby_",
+          "line": 201,
+          "description": "Build A-Frame Ruby script with parameters",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "r_getLeanToTemplate_",
+          "line": 259,
+          "description": "Lean-to Ruby template (exact copy from original)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "r_getRubyExactTemplate",
-          "line": 169,
-          "description": "EXACT Ruby template as provided — DO NOT CHANGE ANYTHING HERE. We substitute only the parameter values via r_buildRubyFromExactTemplate_().",
+          "line": 454,
+          "description": "Public wrapper for Lean-to template (for backward compatibility)",
           "isPublic": true,
           "isHelper": true
         },
         {
-          "name": "r_getRubyExactTemplate_",
-          "line": 170,
-          "description": null,
+          "name": "r_getAFrameTemplate_",
+          "line": 461,
+          "description": "A-Frame Ruby template",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "r_writeRubyToDrive_",
-          "line": 362,
+          "line": 716,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "r_getRubyExportFolder_",
-          "line": 380,
+          "line": 735,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerLeanToRuby_",
-          "line": 395,
+          "line": 750,
           "description": null,
           "isPublic": false,
           "isHelper": true
@@ -599,54 +585,56 @@
       ],
       "triggers": [],
       "dependencies": [
-        "handleEditLeanToRuby_",
-        "r_buildRubyFromExactTemplate_",
+        "handleEditAwningRuby_",
+        "r_buildLeanToRuby_",
+        "r_buildAFrameRuby_",
         "r_writeRubyToDrive_",
-        "r_getRubyExactTemplate_",
+        "r_getLeanToTemplate_",
+        "r_getAFrameTemplate_",
         "r_getRubyExportFolder_",
         "installTriggerLeanToRuby_",
         "LEANTO_RUBY_EXPORT"
       ],
-      "lines": 403,
-      "size": 13440
+      "lines": 757,
+      "size": 24812
     },
     {
       "path": "Menus.gs",
       "filename": "Menus.gs",
-      "purpose": "Single shared menu for the project. Version# [01/06-10:30AM EST] - Fixed QuickBooks menu references by Claude Opus 4.1",
-      "version": "[01/06-10:30AM EST] - Fixed QuickBooks menu references",
+      "purpose": "Single shared menu for the project. Version# [01/13-11:45PM EST] - Added Email Reader menu by Claude Opus 4.1",
+      "version": "[01/13-11:45PM EST] - Added Email Reader menu",
       "functions": [
         {
           "name": "onOpen",
-          "line": 15,
+          "line": 16,
           "description": "- System utilities  IMPORTANT: Do not define any other onOpen() anywhere else.",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 93,
+          "line": 103,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "debugMenuError_",
-          "line": 161,
+          "line": 171,
           "description": "Debug function to help identify menu issues",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "listAllTriggers_",
-          "line": 199,
+          "line": 211,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 218,
+          "line": 230,
           "description": "System utility: Remove all triggers",
           "isPublic": false,
           "isHelper": true
@@ -659,8 +647,8 @@
         "listAllTriggers_",
         "removeAllTriggers_"
       ],
-      "lines": 229,
-      "size": 7232
+      "lines": 241,
+      "size": 7652
     },
     {
       "path": "Miles Log.gs",
@@ -1339,7 +1327,7 @@
         "Defines: MOVE_CONFIG"
       ],
       "lines": 1465,
-      "size": 53216
+      "size": 53212
     },
     {
       "path": "testrubygeneration.gs",
@@ -2043,61 +2031,75 @@
           "Defines: MOVE_CONFIG"
         ],
         "lines": 1465,
-        "size": 53216
+        "size": 53212
       }
     ],
     "automation": [
       {
         "path": "Lean-to generator.gs",
         "filename": "Lean-to generator.gs",
-        "purpose": "LEAN-TO RUBY (Exact) — Drive File Export Version# [09/14-01:58PM EST] by Chatgpt5 Triggers on edits to Leads!T:AD (cols 20–30) when AA contains \"Lean-to\" or \"Sloped L\".",
-        "version": "[09/14-01:58PM EST] by Chatgpt5",
+        "purpose": "AWNING RUBY GENERATOR (Lean-to & A-Frame) — Drive File Export Version# [01/13-11:45PM EST] by Claude Opus 4.1 Triggers on edits to Leads!T:AD (cols 20–30).",
+        "version": "[01/13-11:45PM EST] by Claude Opus 4.1",
         "functions": [
           {
-            "name": "handleEditLeanToRuby_",
-            "line": 26,
+            "name": "handleEditAwningRuby_",
+            "line": 30,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "r_buildRubyFromExactTemplate_",
-            "line": 117,
-            "description": "Replace ONLY the parameter literals in the exact Ruby template. Every other character (including spacing and comments) is preserved verbatim.",
+            "name": "r_buildLeanToRuby_",
+            "line": 144,
+            "description": "Build Lean-to Ruby script with parameters",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "r_buildAFrameRuby_",
+            "line": 201,
+            "description": "Build A-Frame Ruby script with parameters",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "r_getLeanToTemplate_",
+            "line": 259,
+            "description": "Lean-to Ruby template (exact copy from original)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "r_getRubyExactTemplate",
-            "line": 169,
-            "description": "EXACT Ruby template as provided — DO NOT CHANGE ANYTHING HERE. We substitute only the parameter values via r_buildRubyFromExactTemplate_().",
+            "line": 454,
+            "description": "Public wrapper for Lean-to template (for backward compatibility)",
             "isPublic": true,
             "isHelper": true
           },
           {
-            "name": "r_getRubyExactTemplate_",
-            "line": 170,
-            "description": null,
+            "name": "r_getAFrameTemplate_",
+            "line": 461,
+            "description": "A-Frame Ruby template",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "r_writeRubyToDrive_",
-            "line": 362,
+            "line": 716,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "r_getRubyExportFolder_",
-            "line": 380,
+            "line": 735,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerLeanToRuby_",
-            "line": 395,
+            "line": 750,
             "description": null,
             "isPublic": false,
             "isHelper": true
@@ -2105,16 +2107,18 @@
         ],
         "triggers": [],
         "dependencies": [
-          "handleEditLeanToRuby_",
-          "r_buildRubyFromExactTemplate_",
+          "handleEditAwningRuby_",
+          "r_buildLeanToRuby_",
+          "r_buildAFrameRuby_",
           "r_writeRubyToDrive_",
-          "r_getRubyExactTemplate_",
+          "r_getLeanToTemplate_",
+          "r_getAFrameTemplate_",
           "r_getRubyExportFolder_",
           "installTriggerLeanToRuby_",
           "LEANTO_RUBY_EXPORT"
         ],
-        "lines": 403,
-        "size": 13440
+        "lines": 757,
+        "size": 24812
       },
       {
         "path": "testrubygeneration.gs",
@@ -2280,40 +2284,40 @@
       {
         "path": "Menus.gs",
         "filename": "Menus.gs",
-        "purpose": "Single shared menu for the project. Version# [01/06-10:30AM EST] - Fixed QuickBooks menu references by Claude Opus 4.1",
-        "version": "[01/06-10:30AM EST] - Fixed QuickBooks menu references",
+        "purpose": "Single shared menu for the project. Version# [01/13-11:45PM EST] - Added Email Reader menu by Claude Opus 4.1",
+        "version": "[01/13-11:45PM EST] - Added Email Reader menu",
         "functions": [
           {
             "name": "onOpen",
-            "line": 15,
+            "line": 16,
             "description": "- System utilities  IMPORTANT: Do not define any other onOpen() anywhere else.",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 93,
+            "line": 103,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "debugMenuError_",
-            "line": 161,
+            "line": 171,
             "description": "Debug function to help identify menu issues",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "listAllTriggers_",
-            "line": 199,
+            "line": 211,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 218,
+            "line": 230,
             "description": "System utility: Remove all triggers",
             "isPublic": false,
             "isHelper": true
@@ -2326,128 +2330,100 @@
           "listAllTriggers_",
           "removeAllTriggers_"
         ],
-        "lines": 229,
-        "size": 7232
+        "lines": 241,
+        "size": 7652
       }
     ],
     "other": [
       {
         "path": "Email Reader.gs",
         "filename": "Email Reader.gs",
-        "purpose": "EMAIL READER AUTOMATION Version: 01/13-11:45PM EST by Claude Opus 4.1 Scans emails for specific senders/subjects and processes them automatically.",
-        "version": "01/13-11:45PM EST by Claude Opus 4.1",
+        "purpose": "EMAIL READER AUTOMATION - RUBY PARSER Version: 01/13-03:00PM EST by Claude Opus 4.1 Enhanced Ruby email parsing with field-specific extraction",
+        "version": "01/13-03:00PM EST by Claude Opus 4.1",
         "functions": [
           {
-            "name": "processEmailsReader_",
-            "line": 115,
-            "description": "Main email processing function - runs on time trigger",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "er_processSearchConfig_",
-            "line": 170,
-            "description": "Process emails for a specific search configuration",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
             "name": "er_processEmail_",
-            "line": 242,
-            "description": "Process a single email message",
+            "line": 87,
+            "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "er_autoSplitRow_",
-            "line": 343,
-            "description": "Auto-split column A by commas across columns A-U",
+            "name": "er_tryEnhancedAIParsing_",
+            "line": 162,
+            "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "er_getOrCreateLabel_",
-            "line": 399,
-            "description": "Get or create Gmail label",
+            "name": "er_tryRubyPatternParsing_",
+            "line": 227,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "er_tryStructuredExtraction_",
+            "line": 328,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "er_saveForManualReview_",
+            "line": 389,
+            "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_log_",
-            "line": 426,
-            "description": "Logging helper",
+            "line": 421,
+            "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "installTriggerEmailReader_",
-            "line": 440,
-            "description": "Install time-based trigger for email reader",
-            "isPublic": false,
+            "name": "er_installTrigger",
+            "line": 430,
+            "description": null,
+            "isPublic": true,
             "isHelper": true
           },
           {
-            "name": "runEmailReaderNow_",
-            "line": 473,
-            "description": "Manual run for testing - processes emails immediately",
-            "isPublic": false,
+            "name": "er_removeTrigger",
+            "line": 441,
+            "description": null,
+            "isPublic": true,
             "isHelper": true
           },
           {
-            "name": "testEmailReaderSearch_",
-            "line": 491,
-            "description": "Test function - check for Ruby Mail emails without processing",
-            "isPublic": false,
+            "name": "er_processNewEmails",
+            "line": 450,
+            "description": null,
+            "isPublic": true,
             "isHelper": true
           },
           {
-            "name": "clearProcessedLabels_",
-            "line": 522,
-            "description": "Clear processed label from all emails (for testing)",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "showEmailReaderConfig_",
-            "line": 560,
-            "description": "Show current configuration",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "er_getTriggerStatus_",
-            "line": 589,
-            "description": "Get trigger status",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "addEmailSearch_",
-            "line": 606,
-            "description": "Add new email search configuration Example usage: addEmailSearch_('Contact Form', 'subject:Contact Form', true, {...})",
-            "isPublic": false,
+            "name": "er_testProcessing",
+            "line": 485,
+            "description": null,
+            "isPublic": true,
             "isHelper": true
           }
         ],
         "triggers": [],
         "dependencies": [
-          "processEmailsReader_",
-          "er_log_",
-          "er_getOrCreateLabel_",
-          "er_processSearchConfig_",
           "er_processEmail_",
-          "er_autoSplitRow_",
-          "installTriggerEmailReader_",
-          "runEmailReaderNow_",
-          "testEmailReaderSearch_",
-          "clearProcessedLabels_",
-          "showEmailReaderConfig_",
-          "er_getTriggerStatus_",
-          "addEmailSearch_",
+          "er_log_",
+          "er_tryEnhancedAIParsing_",
+          "er_tryRubyPatternParsing_",
+          "er_tryStructuredExtraction_",
+          "er_saveForManualReview_",
           "Defines: EMAIL_READER_CONFIG"
         ],
-        "lines": 620,
-        "size": 16662
+        "lines": 508,
+        "size": 14603
       },
       {
         "path": "F/U and Send proposal.gs",
