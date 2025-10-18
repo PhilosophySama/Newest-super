@@ -204,7 +204,7 @@ function m_autoSortByStage_(sheet) {
       .setFontFamily('Roboto')
       .setFontSize(10)
       .setVerticalAlignment('middle')
-      .setBackground('#ffffff'); // Reset fill color to white
+      .setBackground(null); // Clear background (no fill)
     
     if (S.ENABLE_LOGGING) {
       m_logOperation_('Auto-sorted and formatted', {
@@ -1376,7 +1376,7 @@ function m_checkEmptyFoldersInSheet_(sheet) {
     
     // Skip empty cells
     if (!richText || !richText.getText()) {
-      backgrounds.push(['#ffffff']); // White background for empty
+      backgrounds.push(['#ffffff']); // reset background for empty
       continue;
     }
     
@@ -1384,14 +1384,14 @@ function m_checkEmptyFoldersInSheet_(sheet) {
     const folderUrl = richText.getLinkUrl();
     
     if (!folderUrl) {
-      backgrounds.push(['#ffffff']); // No link = white background
+      backgrounds.push(['#ffffff']); // No link = reset background
       continue;
     }
     
     // Extract folder ID from URL
     const match = folderUrl.match(/[-\w]{25,}/);
     if (!match) {
-      backgrounds.push(['#ffffff']); // Invalid URL = white background
+      backgrounds.push(['#ffffff']); // Invalid URL = reset background
       continue;
     }
     
@@ -1405,7 +1405,7 @@ function m_checkEmptyFoldersInSheet_(sheet) {
       checked++;
       
       if (files.hasNext()) {
-        // Folder has files - white background (or clear any existing color)
+        // Folder has files - reset background (or clear any existing color)
         backgrounds.push(['#ffffff']);
       } else {
         // Folder is empty - red background
