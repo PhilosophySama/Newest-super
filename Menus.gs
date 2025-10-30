@@ -1,6 +1,6 @@
 /**
  * Single shared menu for the project.
- * Version# [01/13-11:45PM EST] - Added Email Reader menu
+ * Version# [01/20-Added Email Reader Diagnostics]
  * by Claude Opus 4.1
  *
  * - Stage menu (Move automation)
@@ -8,7 +8,7 @@
  * - Mileage menu (Mileage log automation)
  * - Ruby menu (Lean-to generator)
  * - QuickBooks menu (Auth + API tests)
- * - Email Reader menu (Automated email processing)
+ * - Email Reader menu (Automated email processing) - NOW WITH DIAGNOSTICS
  * - System utilities
  *
  * IMPORTANT: Do not define any other onOpen() anywhere else.
@@ -68,13 +68,15 @@ function onOpen() {
       .addItem('🔄 Reset Authorization', 'resetAuth')
       .addToUi();
 
-    // Email Reader Menu
+    // Email Reader Menu - ENHANCED
     ui.createMenu('Email Reader')
-      .addItem('Run Email Reader Now', 'er_processNewEmails')
-      .addItem('Setup Auto-Check (Every 15 min)', 'er_installTrigger')
-      .addItem('Remove Auto-Check', 'er_removeTrigger')
+      .addItem('🔍 Run Diagnostic Check', 'er_diagnosticCheck')
       .addSeparator()
-      .addItem('Test Email Processing', 'er_testProcessing')
+      .addItem('▶️ Run Email Reader Now', 'er_processNewEmails')
+      .addItem('🧪 Test Email Processing', 'er_testProcessing')
+      .addSeparator()
+      .addItem('⚙️ Setup Auto-Check (Every 15 min)', 'er_installTrigger')
+      .addItem('🛑 Remove Auto-Check', 'er_removeTrigger')
       .addToUi();
 
     // System utilities menu
@@ -176,13 +178,13 @@ function debugMenuError_() {
   const functionsToCheck = [
     'installTriggerMove_',
     'installTriggerDrafts_V2',
-    'installTriggerEmailReader_',
+    'er_diagnosticCheck',
     'authorize',
     'testQuickBooksConnection_',
     'getScriptUrl',
     'convertEstimateToInvoice',
     'sendEstimateCurrentRow_',
-    'runEmailReaderNow_'
+    'er_processNewEmails'
   ];
   
   functionsToCheck.forEach(funcName => {

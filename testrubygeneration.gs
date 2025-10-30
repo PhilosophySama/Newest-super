@@ -28,7 +28,7 @@ function debugRubyGeneration() {
     range: sheet.getRange(row, 27)
   };
 
-  handleEditLeanToRuby_(e);
+handleEditAwningRuby_(e); 
 
   const result = sheet.getRange(row, 19).getValue();
   console.log("Column S after handler:", result ? "Has content" : "Empty");

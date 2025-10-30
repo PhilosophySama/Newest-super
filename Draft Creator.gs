@@ -1,412 +1,6 @@
 /**
- * Create customer info request draft when "Customer Info" is selected
- */
-function v2_createCustomerInfoDraft_(sh, row) {
-  try {
-    // Customer Info only works on Leads, F/U, and Awarded sheets
-    const sheetName = sh.getName();
-    if (sheetName !== 'Leads' && sheetName !== 'F/U' && sheetName !== 'Awarded') {
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue('Customer Info Request only available on Leads, F/U, and Awarded sheets');
-      return { toast: 'Customer Info Request only available on Leads, F/U, and Awarded sheets' };
-    }
-    
-    const lastCol = sh.getLastColumn();
-    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
-    const idx = (L) => d_colLetterToIndex_(L) - 1;
-    
-    // Get customer data
-    const customerEmail = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]);
-    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
-    const firstName = customerName ? customerName.split(' ')[0] : 'there';
-    
-    // Check what's missing (columns C, E, F, H, I, J, R, T, U)
-    const fabricColor = d_safeString_(vals[2]); // Column C
-    const name = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]); // E
-    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]); // F
-    const phone = d_safeString_(vals[idx(DRAFTS_V2.COLS.PHONE)]); // H
-    const email = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]); // I
-    const address = d_safeString_(vals[idx(DRAFTS_V2.COLS.ADDRESS)]); // J
-    const jobType = d_safeString_(vals[idx(DRAFTS_V2.COLS.JOB_TYPE)]); // R
-    const length = d_safeString_(vals[idx(DRAFTS_V2.COLS.LEN)]); // T
-    const width = d_safeString_(vals[idx(DRAFTS_V2.COLS.WIDTH)]); // U
-    
-    // Build list of missing items
-    const missingItems = [];
-    if (!fabricColor) missingItems.push('Fabric Color');
-    if (!name) missingItems.push('Your Name');
-    if (!displayName) missingItems.push('Display Name');
-    if (!phone) missingItems.push('Best Phone Number');
-    if (!email) missingItems.push('Email Address');
-    if (!address) missingItems.push('Project Address');
-    if (!jobType) missingItems.push('What kind of awning you are looking to get');
-    if (!length || !width) missingItems.push('Rough dimensions of the awning (Length x Width)');
-    
-    // If nothing is missing, don't send
-    if (missingItems.length === 0) {
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue('All customer info already complete - no email needed');
-      return { toast: 'All customer info already complete' };
-    }
-    
-    // Create subject
-    const subject = 'Info request for awning';
-    
-    // Build bullet list
-    let bulletList = '';
-    let htmlBulletList = '';
-    
-    missingItems.forEach(item => {
-      bulletList += `• ${item}\n`;
-      htmlBulletList += `  <li>${d_htmlEscape_(item)}</li>\n`;
-    });
-    
-    // Create plain text body
-    const plainBody = `Hello ${firstName},
-
-May I just get a bit more info from you?
-
-Please provide:
-${bulletList}
-Also please send me some pics of the frame of the awning and I will get an estimate to you right away.
-
-Thank you so much and call me if you have any questions.
-
-Best Regards,
-Gino Carneiro
-Walker Awning`;
-    
-    // Create HTML body
-    const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
-<p>Hello ${d_htmlEscape_(firstName)},</p>
-
-<p>May I just get a bit more info from you?</p>
-
-<p><strong>Please provide:</strong></p>
-<ul style="line-height: 1.8;">
-${htmlBulletList}</ul>
-
-<p>Also please send me some pics of the frame of the awning and I will get an estimate to you right away.</p>
-
-<p>Thank you so much and call me if you have any questions.</p>
-
-<p>Best Regards,<br>
-Gino Carneiro<br>
-Walker Awning</p>
-</div>`;
-    
-    // Check if email exists
-    if (customerEmail && d_isValidEmail_(customerEmail)) {
-      // Create Gmail draft
-      const options = {
-        htmlBody: htmlBody
-      };
-      
-      try {
-        const draft = d_withRetry_(() => GmailApp.createDraft(customerEmail, subject, plainBody, options));
-        const draftMessageId = draft.getMessage().getId();
-        const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
-        
-        // Create rich text link for column B
-        const linkText = '📋 Info';
-        const richText = SpreadsheetApp.newRichTextValue()
-          .setText(linkText)
-          .setLinkUrl(0, linkText.length, draftUrl)
-          .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
-          .build();
-        
-        // Update column B
-        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-        logCell.setRichTextValue(richText);
-        
-        return { toast: 'Info request draft created & linked in column B' };
-        
-      } catch (err) {
-        const msg = d_specificErrorMessage_(err);
-        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-        logCell.setValue(msg);
-        return { toast: msg };
-      }
-      
-    } else {
-      // No email - just put the text message in column B
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue('📱 TEXT MESSAGE (copy below):\n\n' + plainBody);
-      return { toast: 'Text message script placed in column B for copying' };
-    }
-    
-  } catch (err) {
-    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-    logCell.setValue('Error creating info request: ' + d_shortErr_(err));
-    return { toast: 'Error creating info request: ' + d_shortErr_(err) };
-  }
-}
-
-/**
- * Create COI request draft when "COI Req" is selected
- */
-function v2_createCOIDraft_(sh, row) {
-  try {
-    // COI Request only works on F/U, Awarded, and Heaven sheets
-    const sheetName = sh.getName();
-    if (sheetName !== 'F/U' && sheetName !== 'Awarded' && sheetName !== 'Heaven') {
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue('COI Request only available on F/U, Awarded, and Heaven sheets');
-      return { toast: 'COI Request only available on F/U, Awarded, and Heaven sheets' };
-    }
-    
-    const lastCol = sh.getLastColumn();
-    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
-    const idx = (L) => d_colLetterToIndex_(L) - 1;
-    
-    // Get customer data
-    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
-    const customerEmail = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]);
-    const address = d_safeString_(vals[idx(DRAFTS_V2.COLS.ADDRESS)]);
-    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]) || 'Unnamed Lead';
-    
-    // Validate required fields
-    if (!customerName) {
-      const msg = 'No customer name found in column E';
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue(msg);
-      return { toast: msg };
-    }
-    
-    if (!customerEmail || !d_isValidEmail_(customerEmail)) {
-      const msg = 'No valid customer email found in column I';
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue(msg);
-      return { toast: msg };
-    }
-    
-    if (!address) {
-      const msg = 'No address found in column J';
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue(msg);
-      return { toast: msg };
-    }
-    
-    if (!displayName || displayName === 'Unnamed Lead') {
-      const msg = 'No display name found in column F';
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue(msg);
-      return { toast: msg };
-    }
-    
-    // Create subject
-    const subject = `COI Request: ${displayName}`;
-    
-    // Create plain text body
-    const plainBody = `Hello wonderful Keyes team,
-
-     May I please have the COI for:
-${displayName}
-${address}
-
-Please forward (with attached W9) to ${customerName} at ${customerEmail} and CC Gino@WalkerAwning.com.
-
-So they get all the docs in one thread.
-
-Thank you all in advance for your timely replies and great work!
-
-Best regards,
-Gino Carneiro`;
-    
-    // Create HTML body with bold inserted data
-    const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
-<p>Hello wonderful Keyes team,</p>
-
-<p style="margin-left: 20px;">May I please have the COI for:<br>
-<strong>${d_htmlEscape_(displayName)}</strong><br>
-<strong>${d_htmlEscape_(address)}</strong></p>
-
-<p>Please forward (with attached W9) to <strong>${d_htmlEscape_(customerName)}</strong> at <strong>${d_htmlEscape_(customerEmail)}</strong> and CC Gino@WalkerAwning.com.</p>
-
-<p>So they get all the docs in one thread.</p>
-
-<p>Thank you all in advance for your timely replies and great work!</p>
-
-<p>Best regards,<br>
-Gino Carneiro</p>
-</div>`;
-    
-    // Create draft options
-    const options = {
-      htmlBody: htmlBody
-    };
-    
-    // Attach W9 PDF from Drive
-    if (DRAFTS_V2.COI_REQUEST && DRAFTS_V2.COI_REQUEST.ATTACHMENT_FILE_ID) {
-      try {
-        const file = DriveApp.getFileById(DRAFTS_V2.COI_REQUEST.ATTACHMENT_FILE_ID);
-        options.attachments = [file.getBlob()];
-      } catch (attachErr) {
-        // Log error but continue - draft will be created without attachment
-        console.error('Could not attach W9 file:', attachErr);
-        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-        logCell.setValue('Warning: W9 attachment failed. Check file ID. Draft created without attachment.');
-        // Don't return - still create the draft
-      }
-    }
-    
-    // Create draft
-    try {
-      const draft = d_withRetry_(() => GmailApp.createDraft(
-        DRAFTS_V2.COI_REQUEST.RECIPIENTS.join(','), 
-        subject, 
-        plainBody, 
-        options
-      ));
-      const draftMessageId = draft.getMessage().getId();
-      const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
-      
-      // Create rich text link for column B
-      const linkText = 'COI Request';
-      const richText = SpreadsheetApp.newRichTextValue()
-        .setText(linkText)
-        .setLinkUrl(0, linkText.length, draftUrl)
-        .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
-        .build();
-      
-      // Update column B
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setRichTextValue(richText);
-      
-      return { toast: 'COI request draft created & linked in column B' };
-      
-    } catch (err) {
-      const msg = d_specificErrorMessage_(err);
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue(msg);
-      return { toast: msg };
-    }
-    
-  } catch (err) {
-    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-    logCell.setValue('Error creating COI draft: ' + d_shortErr_(err));
-    return { toast: 'Error creating COI draft: ' + d_shortErr_(err) };
-  }
-}
-
-/**
- * Create rough quote draft/message when "Rough quote" is selected
- */
-function v2_createRoughQuote_(sh, row) {
-  try {
-    const lastCol = sh.getLastColumn();
-    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
-    const idx = (L) => d_colLetterToIndex_(L) - 1;
-    
-    // Get data
-    const customerEmail = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]);
-    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]) || 'Unnamed Lead';
-    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
-    const firstName = customerName ? customerName.split(' ')[0] : 'there';
-    
-    // Get dimensions and job info
-    const length = parseFloat(vals[idx(DRAFTS_V2.COLS.LEN)]) || 0;
-    const width = parseFloat(vals[idx(DRAFTS_V2.COLS.WIDTH)]) || 0;
-    const jobType = d_safeString_(vals[idx(DRAFTS_V2.COLS.JOB_TYPE)]);
-    const fabric = d_safeString_(vals[idx(DRAFTS_V2.COLS.FABRIC)]);
-    
-    // Validate dimensions
-    if (length <= 0 || width <= 0) {
-      const msg = 'Missing or invalid dimensions (Length/Width)';
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue(msg);
-      return { toast: msg };
-    }
-    
-    // Calculate price based on job type
-    let priceText = '';
-    const jobTypeLower = jobType.toLowerCase();
-    
-    if (jobTypeLower === 'complete') {
-      const minPrice = Math.round(length * width * 50);
-      const maxPrice = Math.round(length * width * 60);
-      priceText = `${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}`;
-      
-    } else if (jobTypeLower === 're-cover') {
-      // Use minimum width of 5 for calculations
-      const calcWidth = Math.max(width, DRAFTS_V2.ROUGH_QUOTE_EMAIL.MIN_WIDTH_RECOVER);
-      const totalFeet = Math.ceil(length / 5) * calcWidth;
-      const yards = totalFeet / 3;
-      const minPrice = Math.round(yards * 105);
-      const maxPrice = Math.round(yards * 115);
-      priceText = `${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}`;
-      
-    } else if (jobTypeLower === 'aluminum canopy') {
-      const minPrice = Math.round(length * width * 100);
-      const maxPrice = Math.round(length * width * 150);
-      priceText = `${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}`;
-      
-    } else {
-      priceText = 'price to be determined';
-    }
-    
-    // Build message body
-    const fabricText = fabric ? ` ${fabric}` : '';
-    const dimensionText = `${length}' x ${width}'`;
-    
-    const messageBody = `Hello ${firstName},\n\n` +
-      `For the ${dimensionText}${fabricText} awning ${jobType}, it will be around ${priceText}. Sound good?` +
-      DRAFTS_V2.ROUGH_QUOTE_EMAIL.SIGNATURE;
-    
-    const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
-<p>Hello ${d_htmlEscape_(firstName)},</p>
-<p>For the ${d_htmlEscape_(dimensionText)}${d_htmlEscape_(fabricText)} awning ${d_htmlEscape_(jobType)}, it will be around <strong>${d_htmlEscape_(priceText)}</strong>. Sound good?</p>
-<p style="white-space: pre-line;">${d_htmlEscape_(DRAFTS_V2.ROUGH_QUOTE_EMAIL.SIGNATURE)}</p>
-</div>`;
-    
-    // Check if email exists
-    if (customerEmail && d_isValidEmail_(customerEmail)) {
-      // Create Gmail draft
-      const subject = d_templateSafe_(DRAFTS_V2.ROUGH_QUOTE_EMAIL.SUBJECT_TEMPLATE, { displayName });
-      
-      try {
-        const draft = d_withRetry_(() => GmailApp.createDraft(customerEmail, subject, messageBody, { htmlBody }));
-        const draftMessageId = draft.getMessage().getId();
-        const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
-        
-        // Create rich text link for column B
-        const linkText = '💬 Rough Quote Draft: ' + displayName;
-        const richText = SpreadsheetApp.newRichTextValue()
-          .setText(linkText)
-          .setLinkUrl(0, linkText.length, draftUrl)
-          .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
-          .build();
-        
-        // Update column B
-        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-        logCell.setRichTextValue(richText);
-        
-        return { toast: 'Rough quote draft created & linked in column B' };
-        
-      } catch (err) {
-        const msg = d_specificErrorMessage_(err);
-        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-        logCell.setValue(msg);
-        return { toast: msg };
-      }
-      
-    } else {
-      // No email - just put the text message in column B
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue('📱 TEXT MESSAGE (copy below):\n\n' + messageBody);
-      return { toast: 'Text message script placed in column B for copying' };
-    }
-    
-  } catch (err) {
-    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-    logCell.setValue('Error creating rough quote: ' + d_shortErr_(err));
-    return { toast: 'Error creating rough quote: ' + d_shortErr_(err) };
-  }
-}
-
-/**
  * Lead_Draft_Creator_V2.gs
- * version# 01/05-09:30PM EST by Claude Opus 4.1
+ * version# 10/21-11:50PM EST by Claude Opus 4.1
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
@@ -482,6 +76,14 @@ const DRAFTS_V2 = {
     AWNING_TYPE:   'AC',
   },
 
+  // Google Drive File IDs for Customer Info attachments
+  CUSTOMER_INFO_ATTACHMENTS: {
+    SUNBRELLA_FILE_ID: '1_SUNBRELLA_PLACEHOLDER_',
+    VINYL_FERRARI_FILE_ID: '1_FERRARI_PLACEHOLDER_',
+    VINYL_PATIO500_FILE_ID: '1_PATIO500_PLACEHOLDER_',
+    VINYL_COASTLINE_FILE_ID: '1_COASTLINE_PLACEHOLDER_'
+  },
+
   RECOVER: {
     SELECT_CELL_A1:    'K2',
     SNAPSHOT_RANGE_A1: 'A1:K14',
@@ -512,20 +114,19 @@ const DRAFTS_V2 = {
     SUBJECT_TEMPLATE: 'Your awning quote from Walker Awning - ${displayName}',
     BODY_TEMPLATE: `Hello \${firstName},
 
-Thank you for your interest in Walker Awning. Linked is your custom quote for the awning project we discussed.
+Thank you for considering Walker Awning! Linked is your custom quote for the awning project we discussed.
 
 Project Details:
 - Location: \${address}
 - Description: \${jobDescription}
 
-If you have any questions or would like to proceed with this project, please don't hesitate to reach out.
+If you have any questions or would like to proceed with this project, please reach out via text or call.
 
-Best regards,
-Walker Awning Team`,
+Best regards,`,
     HTML_BODY_TEMPLATE: `<div style="font-family: Arial, sans-serif; color: #333;">
 <p>Hello \${firstName},</p>
 
-<p>Thank you for your interest in Walker Awning. Linked is your custom quote for the awning project we discussed.</p>
+<p>Thank you for considering Walker Awning! Linked is your custom quote for the awning project we discussed.</p>
 
 <p><strong>Project Details:</strong></p>
 <ul style="line-height: 1.8;">
@@ -533,7 +134,7 @@ Walker Awning Team`,
   <li><strong>Description:</strong> \${jobDescription}</li>
 </ul>
 
-<p>If you have any questions or would like to proceed with this project, please don't hesitate to reach out.</p>
+<p>If you have any questions or would like to proceed with this project, please reach out via text or call.</p>
 
 <p>Best regards,<br>
 Walker Awning Team</p>
@@ -579,6 +180,46 @@ Thanks,`,
 
   RETRY: { MAX_ATTEMPTS: 3, DELAYS_MS: [5000, 15000, 30000] }
 };
+
+/**
+ * Helper function to find Google Drive file IDs by exact file names
+ * Run this ONCE to get the file IDs for CUSTOMER_INFO_ATTACHMENTS
+ */
+function findCustomerInfoAttachmentFileIds() {
+  const fileNames = {
+    SUNBRELLA: '2025 Sunbrella Colors.pdf',
+    VINYL_FERRARI: '2025 - Vinyl - Ferrari.jpg',
+    VINYL_PATIO500: '2025 - Vinyl - Patio 500.jpg',
+    VINYL_COASTLINE: '2025 - Vinyl - Coastline Plus.jpg'
+  };
+  
+  const results = {};
+  
+  for (const [key, fileName] of Object.entries(fileNames)) {
+    try {
+      const files = DriveApp.getFilesByName(fileName);
+      if (files.hasNext()) {
+        const file = files.next();
+        results[key] = file.getId();
+        Logger.log(`${key}: ${file.getId()} (${fileName})`);
+      } else {
+        Logger.log(`${key}: FILE NOT FOUND - ${fileName}`);
+        results[key] = 'FILE_NOT_FOUND';
+      }
+    } catch (err) {
+      Logger.log(`${key}: ERROR - ${err.message}`);
+      results[key] = 'ERROR';
+    }
+  }
+  
+  Logger.log('\n\n=== COPY THIS INTO YOUR DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS CONFIG ===');
+  Logger.log(`  SUNBRELLA_FILE_ID: '${results.SUNBRELLA}',`);
+  Logger.log(`  VINYL_FERRARI_FILE_ID: '${results.VINYL_FERRARI}',`);
+  Logger.log(`  VINYL_PATIO500_FILE_ID: '${results.VINYL_PATIO500}',`);
+  Logger.log(`  VINYL_COASTLINE_FILE_ID: '${results.VINYL_COASTLINE}'`);
+  
+  return results;
+}
 
 /** Install onEdit trigger (clean re-install). */
 function installTriggerDrafts_V2() {
@@ -675,59 +316,70 @@ function handleEditDraft_V2(e) {
 }
 
 /**
- * Search for existing email and link it in column B when "Liz" is selected
+ * Search Gmail for existing emails/drafts and link in column B
  */
 function v2_searchAndLinkEmail_(sh, row) {
   try {
-    // Get the display name from column F
-    const displayNameCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.DISPLAY_NAME));
-    const displayName = d_safeString_(displayNameCell.getValue());
+    const lastCol = sh.getLastColumn();
+    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
+    const idx = (L) => d_colLetterToIndex_(L) - 1;
     
-    if (!displayName || displayName === 'Unnamed Lead') {
-      return { message: 'No display name found in column F' };
-    }
-    
-    // Construct the search query
-    const searchSubject = `${DRAFTS_V2.EMAIL.SUBJECT_PREFIX}: ${displayName}`;
-    const searchQuery = `subject:"${searchSubject}"`;
-    
-    // Add date filter for recent emails
-    const daysAgo = new Date();
-    daysAgo.setDate(daysAgo.getDate() - DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS);
-    const dateFilter = ` after:${daysAgo.getFullYear()}/${daysAgo.getMonth() + 1}/${daysAgo.getDate()}`;
-    
-    // Search Gmail
-    const threads = GmailApp.search(searchQuery + dateFilter, 0, DRAFTS_V2.EMAIL_SEARCH.MAX_RESULTS);
-    
-    if (threads.length === 0) {
-      // No email found - update column B with message
+    // Get display name for search
+    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]);
+    if (!displayName) {
       const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue(`No email found for: "${searchSubject}"`);
-      return { message: `No email found with subject: "${searchSubject}"` };
+      logCell.setValue('No display name found in column F for email search');
+      return { message: 'No display name found for search' };
     }
     
-    // Get the most recent thread's first message
+    // Search for emails/drafts with display name
+    const searchQuery = `subject:"${displayName}" newer_than:${DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS}d`;
+    
+    // First check drafts
+    const drafts = GmailApp.search(`in:drafts ${searchQuery}`, 0, DRAFTS_V2.EMAIL_SEARCH.MAX_RESULTS);
+    if (drafts.length > 0) {
+      // Found a draft - use the most recent one
+      const thread = drafts[0];
+      const messages = thread.getMessages();
+      const message = messages[messages.length - 1];
+      const messageId = message.getId();
+      const gmailUrl = `https://mail.google.com/mail/u/0/#drafts?compose=${encodeURIComponent(messageId)}`;
+      
+      // Create link in column B
+      const linkText = '📝 Draft ';
+      const richText = SpreadsheetApp.newRichTextValue()
+        .setText(linkText)
+        .setLinkUrl(0, linkText.length, gmailUrl)
+        .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+        .build();
+      
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setRichTextValue(richText);
+      
+      const messageDate = message.getDate();
+      const formattedDate = Utilities.formatDate(messageDate, Session.getScriptTimeZone(), 'MM/dd/yyyy HH:mm');
+      return { message: `Found and linked draft from ${formattedDate}` };
+    }
+    
+    // No draft found, search sent emails
+    const threads = GmailApp.search(`in:sent ${searchQuery}`, 0, DRAFTS_V2.EMAIL_SEARCH.MAX_RESULTS);
+    if (threads.length === 0) {
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue(`No emails or drafts found for "${displayName}" in last ${DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS} days`);
+      return { message: 'No emails found' };
+    }
+    
+    // Found an email - use the most recent one
     const thread = threads[0];
     const messages = thread.getMessages();
-    if (messages.length === 0) {
-      return { message: 'Email thread found but contains no messages' };
-    }
-    
-    const message = messages[0];
+    const message = messages[messages.length - 1];
     const messageId = message.getId();
+    const gmailUrl = `https://mail.google.com/mail/u/0/#inbox/${thread.getId()}`;
     
     // Determine if it's a draft or sent email
     const isDraft = message.isDraft();
     
-    // Construct Gmail URL
-    let gmailUrl;
-    if (isDraft) {
-      gmailUrl = `https://mail.google.com/mail/u/0/#drafts?compose=${encodeURIComponent(messageId)}`;
-    } else {
-      gmailUrl = `https://mail.google.com/mail/u/0/#all/${messageId}`;
-    }
-    
-    // Create rich text link for column B (overwrites any existing content)
+    // Create link in column B
     const linkText = isDraft ? '📝 Draft ' : '✉️ Liz ';
     const richText = SpreadsheetApp.newRichTextValue()
       .setText(linkText)
@@ -925,6 +577,486 @@ function v2_createHandoffDraft_(sh, row) {
   }
 }
 
+/**
+ * Create customer info request draft when "Customer Info" is selected
+ * Version# [10/21-11:50PM EST] by Claude Opus 4.1
+ */
+function v2_createCustomerInfoDraft_(sh, row) {
+  try {
+    // Customer Info only works on Leads, F/U, and Awarded sheets
+    const sheetName = sh.getName();
+    if (sheetName !== 'Leads' && sheetName !== 'F/U' && sheetName !== 'Awarded') {
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue('Customer Info Request only available on Leads, F/U, and Awarded sheets');
+      return { toast: 'Customer Info Request only available on Leads, F/U, and Awarded sheets' };
+    }
+    
+    const lastCol = sh.getLastColumn();
+    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
+    const idx = (L) => d_colLetterToIndex_(L) - 1;
+    
+    // Get customer data
+    const customerEmail = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]);
+    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
+    const firstName = customerName ? customerName.split(' ')[0] : 'there';
+    
+    // Check what's missing (columns C, E, F, H, I, J, R, T, U)
+    const fabricColor = d_safeString_(vals[2]); // Column C
+    const name = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]); // E
+    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]); // F
+    const phone = d_safeString_(vals[idx(DRAFTS_V2.COLS.PHONE)]); // H
+    const email = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]); // I
+    const address = d_safeString_(vals[idx(DRAFTS_V2.COLS.ADDRESS)]); // J
+    const jobType = d_safeString_(vals[idx(DRAFTS_V2.COLS.JOB_TYPE)]); // R
+    const length = d_safeString_(vals[idx(DRAFTS_V2.COLS.LEN)]); // T
+    const width = d_safeString_(vals[idx(DRAFTS_V2.COLS.WIDTH)]); // U
+    
+    // Get valance style (Z) and fabric (AB) for conditional attachments
+    const valanceStyle = d_safeString_(vals[idx(DRAFTS_V2.COLS.VALANCE_STYLE)]); // Z
+    const fabric = d_safeString_(vals[idx(DRAFTS_V2.COLS.FABRIC)]); // AB
+    
+    // Build list of missing items
+    const missingItems = [];
+    if (!fabricColor) missingItems.push('Fabric Color');
+    if (!name) missingItems.push('Your Name');
+    if (!displayName) missingItems.push('Display Name');
+    if (!phone) missingItems.push('Best Phone Number');
+    if (!email) missingItems.push('Email Address');
+    if (!address) missingItems.push('Project Address');
+    if (!jobType) missingItems.push('What kind of awning you are looking to get');
+    if (!length || !width) missingItems.push('Rough dimensions of the awning (Length x Width)');
+    
+    // If nothing is missing, don't send
+    if (missingItems.length === 0) {
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue('All customer info already complete - no email needed');
+      return { toast: 'All customer info already complete' };
+    }
+    
+    // Create subject
+    const subject = 'Info request for awning';
+    
+    // Build bullet list
+    let bulletList = '';
+    let htmlBulletList = '';
+    
+    missingItems.forEach(item => {
+      bulletList += `• ${item}\n`;
+      htmlBulletList += `  <li>${d_htmlEscape_(item)}</li>\n`;
+    });
+    
+    // Determine if we need Sunbrella link based on conditions
+    const needsSunbrellaLink = 
+      (valanceStyle.toLowerCase() === 'wrapped' && fabric.toLowerCase() === 'vinyl') ||
+      (valanceStyle.toLowerCase() === 'hanging' && fabric.toLowerCase() === 'vinyl');
+    
+    // Create plain text body
+    let plainBody = `Hello ${firstName},
+
+May I just get a bit more info from you?
+
+Please provide:
+${bulletList}`;
+
+    // Add Sunbrella link to plain text if needed
+    if (needsSunbrellaLink) {
+      plainBody += `\nSunbrella colors here: https://www.sunbrella.com/browse-fabrics/fabrics-by-use/shade-awnings-pergolas\n`;
+    }
+
+    plainBody += `\nAlso please send me some pics of the frame of the awning and I will get an estimate to you right away.
+
+Thank you so much and call me if you have any questions.
+
+Best Regards,
+Gino Carneiro
+Walker Awning`;
+    
+    // Create HTML body
+    let htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+<p>Hello ${d_htmlEscape_(firstName)},</p>
+
+<p>May I just get a bit more info from you?</p>
+
+<p><strong>Please provide:</strong></p>
+<ul style="line-height: 1.8;">
+${htmlBulletList}</ul>`;
+
+    // Add Sunbrella link to HTML if needed
+    if (needsSunbrellaLink) {
+      htmlBody += `\n<p><a href="https://www.sunbrella.com/browse-fabrics/fabrics-by-use/shade-awnings-pergolas" target="_blank" style="color: #0066cc; text-decoration: underline;">Sunbrella colors here</a></p>`;
+    }
+
+    htmlBody += `\n<p>Also please send me some pics of the frame of the awning and I will get an estimate to you right away.</p>
+
+<p>Thank you so much and call me if you have any questions.</p>
+
+<p>Best Regards,<br>
+Gino Carneiro<br>
+Walker Awning</p>
+</div>`;
+    
+    // Check if email exists
+    if (customerEmail && d_isValidEmail_(customerEmail)) {
+      // Create Gmail draft options
+      const options = {
+        htmlBody: htmlBody
+      };
+      
+      // Handle attachments based on conditions
+      const attachments = [];
+      
+      try {
+        // Condition 1: If AB = Sunbrella, attach 2025 Sunbrella Colors.pdf
+        if (fabric.toLowerCase() === 'sunbrella') {
+          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.SUNBRELLA_FILE_ID) {
+            const sunbrellaFile = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.SUNBRELLA_FILE_ID);
+            attachments.push(sunbrellaFile.getBlob());
+          }
+        }
+        
+        // Condition 2: If Z = wrapped AND AB = Vinyl, attach 3 vinyl files
+        if (valanceStyle.toLowerCase() === 'wrapped' && fabric.toLowerCase() === 'vinyl') {
+          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_FERRARI_FILE_ID) {
+            const ferrariFile = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_FERRARI_FILE_ID);
+            attachments.push(ferrariFile.getBlob());
+          }
+          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID) {
+            const patio500File = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID);
+            attachments.push(patio500File.getBlob());
+          }
+          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID) {
+            const coastlineFile = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID);
+            attachments.push(coastlineFile.getBlob());
+          }
+        }
+        
+        // Condition 3: If Z = hanging AND AB = Vinyl, attach 2 vinyl files
+        if (valanceStyle.toLowerCase() === 'hanging' && fabric.toLowerCase() === 'vinyl') {
+          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID) {
+            const patio500File = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID);
+            attachments.push(patio500File.getBlob());
+          }
+          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID) {
+            const coastlineFile = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID);
+            attachments.push(coastlineFile.getBlob());
+          }
+        }
+        
+        // Add attachments to options if any exist
+        if (attachments.length > 0) {
+          options.attachments = attachments;
+        }
+        
+      } catch (attachErr) {
+        // Log error but continue - draft will be created without attachments
+        console.error('Could not attach files:', attachErr);
+        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+        logCell.setValue('Warning: Some attachments failed. Check file IDs in DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS config.');
+      }
+      
+      // Create draft
+      try {
+        const draft = d_withRetry_(() => GmailApp.createDraft(customerEmail, subject, plainBody, options));
+        const draftMessageId = draft.getMessage().getId();
+        const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
+        
+        // Create rich text link for column B
+        const linkText = '📋 Info';
+        const richText = SpreadsheetApp.newRichTextValue()
+          .setText(linkText)
+          .setLinkUrl(0, linkText.length, draftUrl)
+          .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+          .build();
+        
+        // Update column B
+        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+        logCell.setRichTextValue(richText);
+        
+        return { toast: 'Info request draft created & linked in column B' };
+        
+      } catch (err) {
+        const msg = d_specificErrorMessage_(err);
+        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+        logCell.setValue(msg);
+        return { toast: msg };
+      }
+      
+    } else {
+      // No email - just put the text message in column B
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue('📱 TEXT MESSAGE (copy below):\n\n' + plainBody);
+      return { toast: 'Text message script placed in column B for copying' };
+    }
+    
+  } catch (err) {
+    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+    logCell.setValue('Error creating info request: ' + d_shortErr_(err));
+    return { toast: 'Error creating info request: ' + d_shortErr_(err) };
+  }
+}
+
+/**
+ * Create COI request draft when "COI Req" is selected
+ */
+function v2_createCOIDraft_(sh, row) {
+  try {
+    // COI Request only works on F/U, Awarded, and Heaven sheets
+    const sheetName = sh.getName();
+    if (sheetName !== 'F/U' && sheetName !== 'Awarded' && sheetName !== 'Heaven') {
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue('COI Request only available on F/U, Awarded, and Heaven sheets');
+      return { toast: 'COI Request only available on F/U, Awarded, and Heaven sheets' };
+    }
+    
+    const lastCol = sh.getLastColumn();
+    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
+    const idx = (L) => d_colLetterToIndex_(L) - 1;
+    
+    // Get customer data
+    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
+    const customerEmail = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]);
+    const address = d_safeString_(vals[idx(DRAFTS_V2.COLS.ADDRESS)]);
+    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]) || 'Unnamed Lead';
+    
+    // Validate required fields
+    if (!customerName) {
+      const msg = 'No customer name found in column E';
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue(msg);
+      return { toast: msg };
+    }
+    
+    if (!customerEmail || !d_isValidEmail_(customerEmail)) {
+      const msg = 'No valid customer email found in column I';
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue(msg);
+      return { toast: msg };
+    }
+    
+    if (!address) {
+      const msg = 'No address found in column J';
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue(msg);
+      return { toast: msg };
+    }
+    
+    if (!displayName || displayName === 'Unnamed Lead') {
+      const msg = 'No display name found in column F';
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue(msg);
+      return { toast: msg };
+    }
+    
+    // Create subject
+    const subject = `COI Request: ${displayName}`;
+    
+    // Create plain text body
+    const plainBody = `Hello wonderful Keyes team,
+
+     May I please have the COI for:
+${displayName}
+${address}
+
+Please forward (with attached W9) to ${customerName} at ${customerEmail} and CC Gino@WalkerAwning.com.
+
+So they get all the docs in one thread.
+
+Thank you all in advance for your timely replies and great work!
+
+Best regards,
+Gino Carneiro`;
+    
+    // Create HTML body with bold inserted data
+    const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+<p>Hello wonderful Keyes team,</p>
+
+<p style="margin-left: 20px;">May I please have the COI for:<br>
+<strong>${d_htmlEscape_(displayName)}</strong><br>
+<strong>${d_htmlEscape_(address)}</strong></p>
+
+<p>Please forward (with attached W9) to <strong>${d_htmlEscape_(customerName)}</strong> at <strong>${d_htmlEscape_(customerEmail)}</strong> and CC Gino@WalkerAwning.com.</p>
+
+<p>So they get all the docs in one thread.</p>
+
+<p>Thank you all in advance for your timely replies and great work!</p>
+
+<p>Best regards,<br>
+Gino Carneiro</p>
+</div>`;
+    
+    // Create draft options
+    const options = {
+      htmlBody: htmlBody
+    };
+    
+    // Attach W9 PDF from Drive
+    if (DRAFTS_V2.COI_REQUEST && DRAFTS_V2.COI_REQUEST.ATTACHMENT_FILE_ID) {
+      try {
+        const file = DriveApp.getFileById(DRAFTS_V2.COI_REQUEST.ATTACHMENT_FILE_ID);
+        options.attachments = [file.getBlob()];
+      } catch (attachErr) {
+        // Log error but continue - draft will be created without attachment
+        console.error('Could not attach W9 file:', attachErr);
+        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+        logCell.setValue('Warning: W9 attachment failed. Check file ID. Draft created without attachment.');
+        // Don't return - still create the draft
+      }
+    }
+    
+    // Create draft
+    try {
+      const draft = d_withRetry_(() => GmailApp.createDraft(
+        DRAFTS_V2.COI_REQUEST.RECIPIENTS.join(','), 
+        subject, 
+        plainBody, 
+        options
+      ));
+      const draftMessageId = draft.getMessage().getId();
+      const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
+      
+      // Create rich text link for column B
+      const linkText = '📋 COI Request';
+      const richText = SpreadsheetApp.newRichTextValue()
+        .setText(linkText)
+        .setLinkUrl(0, linkText.length, draftUrl)
+        .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+        .build();
+      
+      // Update column B
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setRichTextValue(richText);
+      
+      return { toast: 'COI request draft created & linked in column B' };
+      
+    } catch (err) {
+      const msg = d_specificErrorMessage_(err);
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue(msg);
+      return { toast: msg };
+    }
+    
+  } catch (err) {
+    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+    logCell.setValue('Error creating COI draft: ' + d_shortErr_(err));
+    return { toast: 'Error creating COI draft: ' + d_shortErr_(err) };
+  }
+}
+
+/**
+ * Create rough quote draft/message when "Rough quote" is selected
+ */
+function v2_createRoughQuote_(sh, row) {
+  try {
+    const lastCol = sh.getLastColumn();
+    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
+    const idx = (L) => d_colLetterToIndex_(L) - 1;
+    
+    // Get data
+    const customerEmail = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]);
+    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]) || 'Unnamed Lead';
+    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
+    const firstName = customerName ? customerName.split(' ')[0] : 'there';
+    
+    // Get dimensions and job info
+    const length = parseFloat(vals[idx(DRAFTS_V2.COLS.LEN)]) || 0;
+    const width = parseFloat(vals[idx(DRAFTS_V2.COLS.WIDTH)]) || 0;
+    const jobType = d_safeString_(vals[idx(DRAFTS_V2.COLS.JOB_TYPE)]);
+    const fabric = d_safeString_(vals[idx(DRAFTS_V2.COLS.FABRIC)]);
+    
+    // Validate dimensions
+    if (length <= 0 || width <= 0) {
+      const msg = 'Missing or invalid dimensions (Length/Width)';
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue(msg);
+      return { toast: msg };
+    }
+    
+    // Calculate price based on job type
+    let priceText = '';
+    const jobTypeLower = jobType.toLowerCase();
+    
+    if (jobTypeLower === 'complete') {
+      const minPrice = Math.round(length * width * 50);
+      const maxPrice = Math.round(length * width * 60);
+      priceText = `${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}`;
+      
+    } else if (jobTypeLower === 're-cover') {
+      // Use minimum width of 5 for calculations
+      const calcWidth = Math.max(width, DRAFTS_V2.ROUGH_QUOTE_EMAIL.MIN_WIDTH_RECOVER);
+      const totalFeet = Math.ceil(length / 5) * calcWidth;
+      const yards = totalFeet / 3;
+      const minPrice = Math.round(yards * 105);
+      const maxPrice = Math.round(yards * 115);
+      priceText = `${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}`;
+      
+    } else if (jobTypeLower === 'aluminum canopy') {
+      const minPrice = Math.round(length * width * 100);
+      const maxPrice = Math.round(length * width * 150);
+      priceText = `${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}`;
+      
+    } else {
+      priceText = 'price to be determined';
+    }
+    
+    // Build message body
+    const fabricText = fabric ? ` ${fabric}` : '';
+    const dimensionText = `${length}' x ${width}'`;
+    
+    const messageBody = `Hello ${firstName},\n\n` +
+      `For the ${dimensionText}${fabricText} awning ${jobType}, it will be around ${priceText}. Please let me know what you think.` +
+      DRAFTS_V2.ROUGH_QUOTE_EMAIL.SIGNATURE;
+    
+    const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+<p>Hello ${d_htmlEscape_(firstName)},</p>
+<p>For the ${d_htmlEscape_(dimensionText)}${d_htmlEscape_(fabricText)} awning ${d_htmlEscape_(jobType)}, it will be around <strong>${d_htmlEscape_(priceText)}</strong>. Sound good?</p>
+<p style="white-space: pre-line;">${d_htmlEscape_(DRAFTS_V2.ROUGH_QUOTE_EMAIL.SIGNATURE)}</p>
+</div>`;
+    
+    // Check if email exists
+    if (customerEmail && d_isValidEmail_(customerEmail)) {
+      // Create Gmail draft
+      const subject = d_templateSafe_(DRAFTS_V2.ROUGH_QUOTE_EMAIL.SUBJECT_TEMPLATE, { displayName });
+      
+      try {
+        const draft = d_withRetry_(() => GmailApp.createDraft(customerEmail, subject, messageBody, { htmlBody }));
+        const draftMessageId = draft.getMessage().getId();
+        const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
+        
+        // Create rich text link for column B
+        const linkText = '💬 Rough: ';
+        const richText = SpreadsheetApp.newRichTextValue()
+          .setText(linkText)
+          .setLinkUrl(0, linkText.length, draftUrl)
+          .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+          .build();
+        
+        // Update column B
+        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+        logCell.setRichTextValue(richText);
+        
+        return { toast: 'Rough quote draft created & linked in column B' };
+        
+      } catch (err) {
+        const msg = d_specificErrorMessage_(err);
+        const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+        logCell.setValue(msg);
+        return { toast: msg };
+      }
+      
+    } else {
+      // No email - just put the text message in column B
+      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+      logCell.setValue('📱 TEXT MESSAGE (copy below):\n\n' + messageBody);
+      return { toast: 'Text message script placed in column B for copying' };
+    }
+    
+  } catch (err) {
+    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+    logCell.setValue('Error creating rough quote: ' + d_shortErr_(err));
+    return { toast: 'Error creating rough quote: ' + d_shortErr_(err) };
+  }
+}
+
 /** Backfill all rows where Stage == TARGET_STAGE. */
 function createDraftsForAllRows_V2() {
   const ss = v2_getSpreadsheet_();
@@ -990,69 +1122,59 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
     if (d_isGmailDraftUrl_(existing)) return { ok:true, skipped:true, toast:'Skipped (existing draft link in B).' };
   }
 
-  // Subject
   const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]) || 'Unnamed Lead';
   const jobType     = d_safeString_(vals[idx(DRAFTS_V2.COLS.JOB_TYPE)]);
-  const prefix      = DRAFTS_V2.EMAIL.SUBJECT_PREFIX || 'Proposal Review';
-  let subject = d_templateSafe_(DRAFTS_V2.EMAIL.SUBJECT_TEMPLATE, { prefix, displayName, jobType });
-  if (subject.length > DRAFTS_V2.EMAIL.SUBJECT_MAX_LENGTH) subject = subject.slice(0, DRAFTS_V2.EMAIL.SUBJECT_MAX_LENGTH - 1) + '…';
 
-  // Links
+  // Subject
+  const prefix = (DRAFTS_V2.EMAIL.SUBJECT_PREFIX || 'Proposal Review').trim();
+  let subject  = d_templateSafe_(DRAFTS_V2.EMAIL.SUBJECT_TEMPLATE, { prefix, displayName, jobType });
+  if (DRAFTS_V2.EMAIL.SUBJECT_MAX_LENGTH && subject.length > DRAFTS_V2.EMAIL.SUBJECT_MAX_LENGTH) {
+    subject = subject.substring(0, DRAFTS_V2.EMAIL.SUBJECT_MAX_LENGTH);
+  }
+
+  // URLs
   const photoUrl = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.FOLDER_URL)], rtv[idx(DRAFTS_V2.COLS.FOLDER_URL)], sh, row, DRAFTS_V2.COLS.FOLDER_URL);
   const geUrl    = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.GE_URL)],     rtv[idx(DRAFTS_V2.COLS.GE_URL)],     sh, row, DRAFTS_V2.COLS.GE_URL);
   const qbUrl    = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.QB_URL)],     rtv[idx(DRAFTS_V2.COLS.QB_URL)],     sh, row, DRAFTS_V2.COLS.QB_URL);
 
-  const ss = v2_getSpreadsheet_();
-  const recSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
-  const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
-
-  const norm = (s) => String(s || '')
-    .replace(/\u00A0/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-
-  // Set K2 and verify
-  if (!recSheet) {
-    notes.push('Re-cover sheet not found');
-  } else {
-    recSheet.getRange(DRAFTS_V2.RECOVER.SELECT_CELL_A1).setValue(customerName || '');
-    SpreadsheetApp.flush();
-    Utilities.sleep(DRAFTS_V2.RECOVER.WAIT_MS);
-
-    const k2 = norm(recSheet.getRange(DRAFTS_V2.RECOVER.SELECT_CELL_A1).getDisplayValue());
-    const cn = norm(customerName);
-    if (k2 !== cn) {
-      notes.push(`K2 mismatch: "${recSheet.getRange(DRAFTS_V2.RECOVER.SELECT_CELL_A1).getDisplayValue()}" ≠ "${customerName}"`);
-    }
-
-    // Probe content
-    const probe = recSheet.getRange(DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1).getDisplayValues();
-    const hasAny = probe.some(r => r.some(x => String(x || '').trim() !== ''));
-    if (!hasAny) notes.push('Snapshot range appears empty after setting K2');
-  }
-
-  // Try PNG first (exact-size). If missing, try HTML fallback.
-  let recoverHtml = null, recoverInlineBlob = null;
-
+  // Re-cover PNG
+  let recoverInlineBlob = null;
   try {
+    const ss = sh.getParent();
+    if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.SELECT_CELL_A1) {
+      const recoverSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
+      if (recoverSheet) {
+        const targetCellA1 = DRAFTS_V2.RECOVER.SELECT_CELL_A1;
+        const targetCell = recoverSheet.getRange(targetCellA1);
+        SpreadsheetApp.setActiveRange(targetCell);
+        Utilities.sleep(DRAFTS_V2.RECOVER.WAIT_MS || 2000);
+      }
+    }
     recoverInlineBlob = v2_exportRecoverRangeAsPng_(ss);
-    if (!recoverInlineBlob) notes.push('PNG export empty (using fallback if available)');
-  } catch (e) {
-    notes.push('PNG export error: ' + d_shortErr_(e));
+    if (!recoverInlineBlob) notes.push('Re-cover PNG empty');
+  } catch (pngErr) {
+    if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
+      console.error('PNG export failed:', pngErr);
+    }
+    notes.push('PNG fail');
   }
 
+  // Fallback HTML
+  let recoverHtml = null;
   if (!recoverInlineBlob) {
     try {
-      recoverHtml = v2_captureRecoverSnapshotHTML_(ss);
-      if (!recoverHtml) notes.push('HTML snapshot unavailable/empty (Sheets API disabled or no grid data)');
-    } catch (e2) {
-      notes.push('HTML snapshot error: ' + d_shortErr_(e2));
+      recoverHtml = v2_exportRecoverRangeAsHtml_(sh.getParent());
+      if (!recoverHtml) notes.push('Re-cover HTML empty');
+    } catch (htmlErr) {
+      if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
+        console.error('HTML export failed:', htmlErr);
+      }
+      notes.push('HTML fail');
     }
   }
 
-  // Build bodies
-  const html  = v2_buildHtmlBody_({ photoUrl, geUrl, qbUrl, recoverHtml, hasRecoverPng: !!recoverInlineBlob });
+  // Body
+  const html = v2_buildHtmlBody_({ photoUrl, geUrl, qbUrl, recoverHtml, hasRecoverPng: !!recoverInlineBlob });
   const plain = v2_buildPlainBody_({ photoUrl, geUrl, qbUrl });
 
   // Recipients
@@ -1075,7 +1197,7 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
     const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
 
     // Rich text in B: link + optional diagnostics if no snapshot could be embedded
-    const base = '✅ Draft';
+    const base = '✅ Est Draft';
     const suffix = (!recoverInlineBlob && !recoverHtml && notes.length) ? '\n' + notes.join(' | ') : '';
     const rich = SpreadsheetApp.newRichTextValue()
       .setText(base + suffix)
@@ -1150,62 +1272,73 @@ function v2_exportRecoverRangeAsPng_(ss) {
 /**
  * HTML fallback (requires Sheets API).
  */
-function v2_captureRecoverSnapshotHTML_(ss) {
-  if (typeof Sheets === 'undefined' || !Sheets.Spreadsheets || !Sheets.Spreadsheets.get) return null;
+function v2_exportRecoverRangeAsHtml_(ss) {
+  try {
+    const spreadsheetId = ss.getId();
+    const sheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
+    if (!sheet) return null;
 
-  const sheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
-  if (!sheet) return null;
+    const rangeA1 = DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1;
+    const rng = sheet.getRange(rangeA1);
 
-  const title = DRAFTS_V2.SHEETS.RECOVER;
-  const a1 = `${title}!${DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1}`;
+    const startCol = rng.getColumn() - 1;
+    const endCol   = startCol + rng.getNumColumns() - 1;
+    const startRow = rng.getRow() - 1;
+    const endRow   = startRow + rng.getNumRows() - 1;
 
-  const snapRange = sheet.getRange(DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1);
-  const startRow = snapRange.getRow() - 1;
-  const startCol = snapRange.getColumn() - 1;
-  const numRows  = snapRange.getNumRows();
-  const numCols  = snapRange.getNumColumns();
+    const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?ranges=${sheet.getSheetId()}!R${startRow}C${startCol}:R${endRow}C${endCol}&includeGridData=true&fields=sheets(data(rowData(values(effectiveValue,formattedValue,hyperlink,effectiveFormat)),rowMetadata,columnMetadata),merges)`;
 
-  const resp = Sheets.Spreadsheets.get(ss.getId(), { ranges: [a1], includeGridData: true });
-  const s = resp.sheets && resp.sheets[0];
-  if (!s || !s.data || !s.data[0]) return null;
+    const resp = UrlFetchApp.fetch(endpoint, {
+      headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+      muteHttpExceptions: true
+    });
 
-  const grid = s.data[0];
-  const rowData = grid.rowData || [];
-  const colMeta = grid.columnMetadata || [];
-  const rowMeta = grid.rowMetadata || [];
-  const mergesSheetLevel = s.merges || [];
+    if (resp.getResponseCode() !== 200) return null;
 
-  const hasAny = (rowData || []).some(r => (r.values || []).some(v => {
-    const fv = (v && (v.formattedValue || (v.effectiveValue && Object.values(v.effectiveValue)[0]))) || '';
-    return String(fv || '').trim() !== '';
-  }));
-  if (!hasAny) return null;
+    const json = JSON.parse(resp.getContentText());
+    const sheetData = (json && json.sheets && json.sheets[0]) ? json.sheets[0] : null;
+    if (!sheetData || !sheetData.data || !sheetData.data[0]) return null;
 
-  const merges = [];
-  mergesSheetLevel.forEach(m => {
-    const mSR = m.startRowIndex || 0, mER = m.endRowIndex || 0;
-    const mSC = m.startColumnIndex || 0, mEC = m.endColumnIndex || 0;
-    const interRow = !(mER <= startRow || mSR >= startRow + numRows);
-    const interCol = !(mEC <= startCol || mSC >= startCol + numCols);
-    if (interRow && interCol) {
-      const r0 = Math.max(0, mSR - startRow);
-      const c0 = Math.max(0, mSC - startCol);
-      const r1 = Math.min(numRows, mER - startRow);
-      const c1 = Math.min(numCols, mEC - startCol);
-      if (r1 > r0 && c1 > c0) merges.push({ r0, c0, rowspan: r1 - r0, colspan: c1 - c0 });
-    }
-  });
+    return v2_sheetsDataToHtml_(sheetData, sheet, rng);
+  } catch (_) {
+    return null;
+  }
+}
 
-  const mergedTopLeft = Array.from({length: numRows}, () => Array(numCols).fill(null));
-  const skipCell = Array.from({length: numRows}, () => Array(numCols).fill(false));
+function v2_sheetsDataToHtml_(sheetData, sheet, rng) {
+  const data = sheetData.data[0];
+  const rowData = data.rowData || [];
+
+  const merges = sheetData.merges || [];
+  const numRows = rng.getNumRows();
+  const numCols = rng.getNumColumns();
+  const startCol = rng.getColumn();
+  const startRow = rng.getRow();
+
+  const skipCell = Array.from({length: numRows}, ()=> Array(numCols).fill(false));
+  const mergedTopLeft = Array.from({length: numRows}, ()=> Array(numCols).fill(null));
+
   merges.forEach(m => {
-    mergedTopLeft[m.r0][m.c0] = { rowspan: m.rowspan, colspan: m.colspan };
-    for (let r = m.r0; r < m.r0 + m.rowspan; r++) {
-      for (let c = m.c0; c < m.c0 + m.colspan; c++) {
-        if (!(r === m.r0 && c === m.c0)) skipCell[r][c] = true;
+    const c0 = (m.startColumnIndex||0) - (startCol-1);
+    const c1 = ((m.endColumnIndex||0)-1) - (startCol-1);
+    const r0 = (m.startRowIndex||0) - (startRow-1);
+    const r1 = ((m.endRowIndex||0)-1) - (startRow-1);
+
+    if (c0 < 0 || c1 >= numCols || r0 < 0 || r1 >= numRows) return;
+
+    const colspan = c1 - c0 + 1;
+    const rowspan = r1 - r0 + 1;
+    mergedTopLeft[r0][c0] = { rowspan, colspan, r0, c0 };
+
+    for (let r = r0; r <= r1; r++) {
+      for (let c = c0; c <= c1; c++) {
+        if (!(r === r0 && c === c0)) skipCell[r][c] = true;
       }
     }
   });
+
+  const colMeta = data.columnMetadata || [];
+  const rowMeta = data.rowMetadata || [];
 
   const colWidths = Array.from({length: numCols}, (_, c) => {
     const m = colMeta[c] && colMeta[c].pixelSize;

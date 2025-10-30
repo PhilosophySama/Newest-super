@@ -451,8 +451,7 @@ model.commit_operation`;
 /**
  * Public wrapper for Lean-to template (for backward compatibility)
  */
-function r_getRubyExactTemplate() { 
-  return r_getLeanToTemplate_(); 
+function r_getRubyExactTemplate() {  
 }
 
 /**
