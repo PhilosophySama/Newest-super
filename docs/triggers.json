@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2025-10-18T18:24:33.510Z",
+    "lastUpdated": "2025-10-30T01:37:34.721Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,234 +8,248 @@
   },
   "stats": {
     "totalFiles": 10,
-    "totalFunctions": 133,
+    "totalFunctions": 136,
     "totalTriggers": 20,
-    "totalLines": 6093,
-    "publicFunctions": 43,
-    "helperFunctions": 121,
-    "avgFunctionsPerFile": 13,
-    "avgLinesPerFile": 609
+    "totalLines": 6434,
+    "publicFunctions": 45,
+    "helperFunctions": 123,
+    "avgFunctionsPerFile": 14,
+    "avgLinesPerFile": 643
   },
   "files": [
     {
       "path": "Draft Creator.gs",
       "filename": "Draft Creator.gs",
-      "purpose": "Create customer info request draft when \"Customer Info\" is selected",
-      "version": "01/05-09:30PM EST by Claude Opus 4.1",
+      "purpose": "Lead_Draft_Creator_V2.gs version# 10/21-11:50PM EST by Claude Opus 4.1 PURPOSE",
+      "version": "10/21-11:50PM EST by Claude Opus 4.1",
       "functions": [
         {
-          "name": "v2_createCustomerInfoDraft_",
-          "line": 4,
-          "description": "Create customer info request draft when \"Customer Info\" is selected",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "v2_createCOIDraft_",
-          "line": 148,
-          "description": "Create COI request draft when \"COI Req\" is selected",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "v2_createRoughQuote_",
-          "line": 295,
-          "description": "Create rough quote draft/message when \"Rough quote\" is selected",
-          "isPublic": false,
-          "isHelper": true
+          "name": "findCustomerInfoAttachmentFileIds",
+          "line": 188,
+          "description": "Helper function to find Google Drive file IDs by exact file names Run this ONCE to get the file IDs for CUSTOMER_INFO_ATTACHMENTS",
+          "isPublic": true,
+          "isHelper": false
         },
         {
           "name": "installTriggerDrafts_V2",
-          "line": 584,
+          "line": 225,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "handleEditDraft_V2",
-          "line": 598,
+          "line": 239,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_searchAndLinkEmail_",
-          "line": 680,
-          "description": "Search for existing email and link it in column B when \"Liz\" is selected",
+          "line": 321,
+          "description": "Search Gmail for existing emails/drafts and link in column B",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCustomerDraft_",
-          "line": 759,
+          "line": 411,
           "description": "Create customer follow-up draft when \"Email customer\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createHandoffDraft_",
-          "line": 855,
+          "line": 507,
           "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
+          "name": "v2_createCustomerInfoDraft_",
+          "line": 584,
+          "description": "Create customer info request draft when \"Customer Info\" is selected Version# [10/21-11:50PM EST] by Claude Opus 4.1",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_createCOIDraft_",
+          "line": 801,
+          "description": "Create COI request draft when \"COI Req\" is selected",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_createRoughQuote_",
+          "line": 948,
+          "description": "Create rough quote draft/message when \"Rough quote\" is selected",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "createDraftsForAllRows_V2",
-          "line": 929,
+          "line": 1061,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_createDraftForRow_",
-          "line": 976,
+          "line": 1108,
           "description": "Row → Draft creation ========================= */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_exportRecoverRangeAsPng_",
-          "line": 1099,
+          "line": 1221,
           "description": "PNG snapshot via Sheets export endpoint for Re-cover!A1:K14 at EXACT pixel size.",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "v2_captureRecoverSnapshotHTML_",
-          "line": 1153,
+          "name": "v2_exportRecoverRangeAsHtml_",
+          "line": 1275,
           "description": "HTML fallback (requires Sheets API).",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "v2_buildHtmlBody_",
+          "name": "v2_sheetsDataToHtml_",
           "line": 1308,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_buildHtmlBody_",
+          "line": 1441,
           "description": "Email body builders ================ */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildPlainBody_",
-          "line": 1337,
+          "line": 1470,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_extractUrlFromCell_",
-          "line": 1349,
+          "line": 1482,
           "description": "Helpers ===================== */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_looksLikeUrl_",
-          "line": 1399,
+          "line": 1532,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeString_",
-          "line": 1400,
+          "line": 1533,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_htmlEscape_",
-          "line": 1401,
+          "line": 1534,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_colLetterToIndex_",
-          "line": 1403,
+          "line": 1536,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_getSpreadsheet_",
-          "line": 1409,
+          "line": 1542,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_writeB_",
-          "line": 1416,
+          "line": 1549,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_withRetry_",
-          "line": 1427,
+          "line": 1560,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_specificErrorMessage_",
-          "line": 1443,
+          "line": 1576,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_shortErr_",
-          "line": 1450,
+          "line": 1583,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_validateConfig_",
-          "line": 1452,
+          "line": 1585,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isValidEmail_",
-          "line": 1459,
+          "line": 1592,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_firstLinkInRichText_",
-          "line": 1461,
+          "line": 1594,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isGmailDraftUrl_",
-          "line": 1473,
+          "line": 1606,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_templateSafe_",
-          "line": 1477,
+          "line": 1610,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_timestamp_",
-          "line": 1489,
+          "line": 1622,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeLogErrorToSheet_",
-          "line": 1495,
+          "line": 1628,
           "description": null,
           "isPublic": false,
           "isHelper": true
@@ -292,128 +306,136 @@
         }
       ],
       "dependencies": [
-        "v2_createCustomerInfoDraft_",
-        "d_colLetterToIndex_",
-        "d_safeString_",
-        "d_htmlEscape_",
-        "d_isValidEmail_",
-        "d_withRetry_",
-        "d_specificErrorMessage_",
-        "d_shortErr_",
-        "v2_createCOIDraft_",
-        "v2_createRoughQuote_",
-        "d_templateSafe_",
         "v2_validateConfig_",
         "v2_getSpreadsheet_",
+        "d_colLetterToIndex_",
         "v2_searchAndLinkEmail_",
         "v2_createCustomerDraft_",
         "v2_createHandoffDraft_",
+        "v2_createRoughQuote_",
+        "v2_createCustomerInfoDraft_",
+        "v2_createCOIDraft_",
         "v2_createDraftForRow_",
         "d_safeLogErrorToSheet_",
+        "d_safeString_",
+        "d_shortErr_",
         "d_extractUrlFromCell_",
+        "d_isValidEmail_",
+        "d_templateSafe_",
+        "d_htmlEscape_",
+        "d_withRetry_",
+        "d_specificErrorMessage_",
         "d_firstLinkInRichText_",
         "d_isGmailDraftUrl_",
         "v2_exportRecoverRangeAsPng_",
-        "v2_captureRecoverSnapshotHTML_",
+        "v2_exportRecoverRangeAsHtml_",
         "v2_buildHtmlBody_",
         "v2_buildPlainBody_",
         "d_writeB_",
         "d_timestamp_",
+        "v2_sheetsDataToHtml_",
         "d_looksLikeUrl_",
         "DRAFTS_V2"
       ],
-      "lines": 1508,
-      "size": 60544
+      "lines": 1641,
+      "size": 66607
     },
     {
       "path": "Email Reader.gs",
       "filename": "Email Reader.gs",
-      "purpose": "EMAIL READER AUTOMATION - RUBY PARSER Version: 01/13-03:00PM EST by Claude Opus 4.1 Enhanced Ruby email parsing with field-specific extraction",
-      "version": "01/13-03:00PM EST by Claude Opus 4.1",
+      "purpose": "EMAIL READER AUTOMATION - RUBY PARSER (FIXED VERSION) Version: 01/20-Enhanced with diagnostics FIXES:",
+      "version": "01/20-Enhanced with diagnostics",
       "functions": [
         {
+          "name": "er_diagnosticCheck",
+          "line": 81,
+          "description": "DIAGNOSTIC FUNCTION - Run this first to check setup",
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
           "name": "er_processEmail_",
-          "line": 87,
-          "description": null,
+          "line": 135,
+          "description": "Process a single email with improved error handling",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_tryEnhancedAIParsing_",
-          "line": 162,
-          "description": null,
+          "line": 237,
+          "description": "Try AI parsing with better error handling",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_tryRubyPatternParsing_",
-          "line": 227,
-          "description": null,
+          "line": 325,
+          "description": "Pattern parsing (unchanged but with better logging)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_tryStructuredExtraction_",
-          "line": 328,
-          "description": null,
+          "line": 428,
+          "description": "Structured extraction (unchanged)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_saveForManualReview_",
-          "line": 389,
-          "description": null,
+          "line": 496,
+          "description": "Save for manual review (unchanged)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_log_",
-          "line": 421,
-          "description": null,
+          "line": 529,
+          "description": "Logging function",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_installTrigger",
-          "line": 430,
-          "description": null,
+          "line": 542,
+          "description": "Install trigger",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_removeTrigger",
-          "line": 441,
-          "description": null,
+          "line": 556,
+          "description": "Remove trigger",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_processNewEmails",
-          "line": 450,
-          "description": null,
+          "line": 568,
+          "description": "Main processing function",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_testProcessing",
-          "line": 485,
-          "description": null,
+          "line": 650,
+          "description": "Test processing with detailed output",
           "isPublic": true,
           "isHelper": true
         }
       ],
       "triggers": [],
       "dependencies": [
-        "er_processEmail_",
         "er_log_",
+        "er_processEmail_",
         "er_tryEnhancedAIParsing_",
         "er_tryRubyPatternParsing_",
         "er_tryStructuredExtraction_",
         "er_saveForManualReview_",
         "Defines: EMAIL_READER_CONFIG"
       ],
-      "lines": 508,
-      "size": 14603
+      "lines": 715,
+      "size": 20618
     },
     {
       "path": "F/U and Send proposal.gs",
@@ -556,28 +578,28 @@
         },
         {
           "name": "r_getAFrameTemplate_",
-          "line": 461,
+          "line": 460,
           "description": "A-Frame Ruby template",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "r_writeRubyToDrive_",
-          "line": 716,
+          "line": 715,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "r_getRubyExportFolder_",
-          "line": 735,
+          "line": 734,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerLeanToRuby_",
-          "line": 750,
+          "line": 749,
           "description": null,
           "isPublic": false,
           "isHelper": true
@@ -595,14 +617,14 @@
         "installTriggerLeanToRuby_",
         "LEANTO_RUBY_EXPORT"
       ],
-      "lines": 757,
-      "size": 24812
+      "lines": 756,
+      "size": 24779
     },
     {
       "path": "Menus.gs",
       "filename": "Menus.gs",
-      "purpose": "Single shared menu for the project. Version# [01/13-11:45PM EST] - Added Email Reader menu by Claude Opus 4.1",
-      "version": "[01/13-11:45PM EST] - Added Email Reader menu",
+      "purpose": "Single shared menu for the project. Version# [01/20-Added Email Reader Diagnostics] by Claude Opus 4.1",
+      "version": "[01/20-Added Email Reader Diagnostics]",
       "functions": [
         {
           "name": "onOpen",
@@ -613,28 +635,28 @@
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 103,
+          "line": 105,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "debugMenuError_",
-          "line": 171,
+          "line": 173,
           "description": "Debug function to help identify menu issues",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "listAllTriggers_",
-          "line": 211,
+          "line": 213,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 230,
+          "line": 232,
           "description": "System utility: Remove all triggers",
           "isPublic": false,
           "isHelper": true
@@ -647,8 +669,8 @@
         "listAllTriggers_",
         "removeAllTriggers_"
       ],
-      "lines": 241,
-      "size": 7652
+      "lines": 243,
+      "size": 7770
     },
     {
       "path": "Miles Log.gs",
@@ -1345,10 +1367,10 @@
       ],
       "triggers": [],
       "dependencies": [
-        "handleEditLeanToRuby_"
+        "handleEditAwningRuby_"
       ],
       "lines": 39,
-      "size": 1457
+      "size": 1456
     }
   ],
   "categories": {
@@ -1356,222 +1378,236 @@
       {
         "path": "Draft Creator.gs",
         "filename": "Draft Creator.gs",
-        "purpose": "Create customer info request draft when \"Customer Info\" is selected",
-        "version": "01/05-09:30PM EST by Claude Opus 4.1",
+        "purpose": "Lead_Draft_Creator_V2.gs version# 10/21-11:50PM EST by Claude Opus 4.1 PURPOSE",
+        "version": "10/21-11:50PM EST by Claude Opus 4.1",
         "functions": [
           {
-            "name": "v2_createCustomerInfoDraft_",
-            "line": 4,
-            "description": "Create customer info request draft when \"Customer Info\" is selected",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "v2_createCOIDraft_",
-            "line": 148,
-            "description": "Create COI request draft when \"COI Req\" is selected",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "v2_createRoughQuote_",
-            "line": 295,
-            "description": "Create rough quote draft/message when \"Rough quote\" is selected",
-            "isPublic": false,
-            "isHelper": true
+            "name": "findCustomerInfoAttachmentFileIds",
+            "line": 188,
+            "description": "Helper function to find Google Drive file IDs by exact file names Run this ONCE to get the file IDs for CUSTOMER_INFO_ATTACHMENTS",
+            "isPublic": true,
+            "isHelper": false
           },
           {
             "name": "installTriggerDrafts_V2",
-            "line": 584,
+            "line": 225,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "handleEditDraft_V2",
-            "line": 598,
+            "line": 239,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_searchAndLinkEmail_",
-            "line": 680,
-            "description": "Search for existing email and link it in column B when \"Liz\" is selected",
+            "line": 321,
+            "description": "Search Gmail for existing emails/drafts and link in column B",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCustomerDraft_",
-            "line": 759,
+            "line": 411,
             "description": "Create customer follow-up draft when \"Email customer\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createHandoffDraft_",
-            "line": 855,
+            "line": 507,
             "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
+            "name": "v2_createCustomerInfoDraft_",
+            "line": 584,
+            "description": "Create customer info request draft when \"Customer Info\" is selected Version# [10/21-11:50PM EST] by Claude Opus 4.1",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_createCOIDraft_",
+            "line": 801,
+            "description": "Create COI request draft when \"COI Req\" is selected",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_createRoughQuote_",
+            "line": 948,
+            "description": "Create rough quote draft/message when \"Rough quote\" is selected",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "createDraftsForAllRows_V2",
-            "line": 929,
+            "line": 1061,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_createDraftForRow_",
-            "line": 976,
+            "line": 1108,
             "description": "Row → Draft creation ========================= */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_exportRecoverRangeAsPng_",
-            "line": 1099,
+            "line": 1221,
             "description": "PNG snapshot via Sheets export endpoint for Re-cover!A1:K14 at EXACT pixel size.",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "v2_captureRecoverSnapshotHTML_",
-            "line": 1153,
+            "name": "v2_exportRecoverRangeAsHtml_",
+            "line": 1275,
             "description": "HTML fallback (requires Sheets API).",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "v2_buildHtmlBody_",
+            "name": "v2_sheetsDataToHtml_",
             "line": 1308,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_buildHtmlBody_",
+            "line": 1441,
             "description": "Email body builders ================ */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildPlainBody_",
-            "line": 1337,
+            "line": 1470,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_extractUrlFromCell_",
-            "line": 1349,
+            "line": 1482,
             "description": "Helpers ===================== */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_looksLikeUrl_",
-            "line": 1399,
+            "line": 1532,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeString_",
-            "line": 1400,
+            "line": 1533,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_htmlEscape_",
-            "line": 1401,
+            "line": 1534,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_colLetterToIndex_",
-            "line": 1403,
+            "line": 1536,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_getSpreadsheet_",
-            "line": 1409,
+            "line": 1542,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_writeB_",
-            "line": 1416,
+            "line": 1549,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_withRetry_",
-            "line": 1427,
+            "line": 1560,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_specificErrorMessage_",
-            "line": 1443,
+            "line": 1576,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_shortErr_",
-            "line": 1450,
+            "line": 1583,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_validateConfig_",
-            "line": 1452,
+            "line": 1585,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isValidEmail_",
-            "line": 1459,
+            "line": 1592,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_firstLinkInRichText_",
-            "line": 1461,
+            "line": 1594,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isGmailDraftUrl_",
-            "line": 1473,
+            "line": 1606,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_templateSafe_",
-            "line": 1477,
+            "line": 1610,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_timestamp_",
-            "line": 1489,
+            "line": 1622,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeLogErrorToSheet_",
-            "line": 1495,
+            "line": 1628,
             "description": null,
             "isPublic": false,
             "isHelper": true
@@ -1628,38 +1664,39 @@
           }
         ],
         "dependencies": [
-          "v2_createCustomerInfoDraft_",
-          "d_colLetterToIndex_",
-          "d_safeString_",
-          "d_htmlEscape_",
-          "d_isValidEmail_",
-          "d_withRetry_",
-          "d_specificErrorMessage_",
-          "d_shortErr_",
-          "v2_createCOIDraft_",
-          "v2_createRoughQuote_",
-          "d_templateSafe_",
           "v2_validateConfig_",
           "v2_getSpreadsheet_",
+          "d_colLetterToIndex_",
           "v2_searchAndLinkEmail_",
           "v2_createCustomerDraft_",
           "v2_createHandoffDraft_",
+          "v2_createRoughQuote_",
+          "v2_createCustomerInfoDraft_",
+          "v2_createCOIDraft_",
           "v2_createDraftForRow_",
           "d_safeLogErrorToSheet_",
+          "d_safeString_",
+          "d_shortErr_",
           "d_extractUrlFromCell_",
+          "d_isValidEmail_",
+          "d_templateSafe_",
+          "d_htmlEscape_",
+          "d_withRetry_",
+          "d_specificErrorMessage_",
           "d_firstLinkInRichText_",
           "d_isGmailDraftUrl_",
           "v2_exportRecoverRangeAsPng_",
-          "v2_captureRecoverSnapshotHTML_",
+          "v2_exportRecoverRangeAsHtml_",
           "v2_buildHtmlBody_",
           "v2_buildPlainBody_",
           "d_writeB_",
           "d_timestamp_",
+          "v2_sheetsDataToHtml_",
           "d_looksLikeUrl_",
           "DRAFTS_V2"
         ],
-        "lines": 1508,
-        "size": 60544
+        "lines": 1641,
+        "size": 66607
       },
       {
         "path": "Stage Automation.gs",
@@ -2078,28 +2115,28 @@
           },
           {
             "name": "r_getAFrameTemplate_",
-            "line": 461,
+            "line": 460,
             "description": "A-Frame Ruby template",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "r_writeRubyToDrive_",
-            "line": 716,
+            "line": 715,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "r_getRubyExportFolder_",
-            "line": 735,
+            "line": 734,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerLeanToRuby_",
-            "line": 750,
+            "line": 749,
             "description": null,
             "isPublic": false,
             "isHelper": true
@@ -2117,8 +2154,8 @@
           "installTriggerLeanToRuby_",
           "LEANTO_RUBY_EXPORT"
         ],
-        "lines": 757,
-        "size": 24812
+        "lines": 756,
+        "size": 24779
       },
       {
         "path": "testrubygeneration.gs",
@@ -2136,10 +2173,10 @@
         ],
         "triggers": [],
         "dependencies": [
-          "handleEditLeanToRuby_"
+          "handleEditAwningRuby_"
         ],
         "lines": 39,
-        "size": 1457
+        "size": 1456
       }
     ],
     "integration": [
@@ -2284,8 +2321,8 @@
       {
         "path": "Menus.gs",
         "filename": "Menus.gs",
-        "purpose": "Single shared menu for the project. Version# [01/13-11:45PM EST] - Added Email Reader menu by Claude Opus 4.1",
-        "version": "[01/13-11:45PM EST] - Added Email Reader menu",
+        "purpose": "Single shared menu for the project. Version# [01/20-Added Email Reader Diagnostics] by Claude Opus 4.1",
+        "version": "[01/20-Added Email Reader Diagnostics]",
         "functions": [
           {
             "name": "onOpen",
@@ -2296,28 +2333,28 @@
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 103,
+            "line": 105,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "debugMenuError_",
-            "line": 171,
+            "line": 173,
             "description": "Debug function to help identify menu issues",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "listAllTriggers_",
-            "line": 211,
+            "line": 213,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 230,
+            "line": 232,
             "description": "System utility: Remove all triggers",
             "isPublic": false,
             "isHelper": true
@@ -2330,100 +2367,107 @@
           "listAllTriggers_",
           "removeAllTriggers_"
         ],
-        "lines": 241,
-        "size": 7652
+        "lines": 243,
+        "size": 7770
       }
     ],
     "other": [
       {
         "path": "Email Reader.gs",
         "filename": "Email Reader.gs",
-        "purpose": "EMAIL READER AUTOMATION - RUBY PARSER Version: 01/13-03:00PM EST by Claude Opus 4.1 Enhanced Ruby email parsing with field-specific extraction",
-        "version": "01/13-03:00PM EST by Claude Opus 4.1",
+        "purpose": "EMAIL READER AUTOMATION - RUBY PARSER (FIXED VERSION) Version: 01/20-Enhanced with diagnostics FIXES:",
+        "version": "01/20-Enhanced with diagnostics",
         "functions": [
           {
+            "name": "er_diagnosticCheck",
+            "line": 81,
+            "description": "DIAGNOSTIC FUNCTION - Run this first to check setup",
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
             "name": "er_processEmail_",
-            "line": 87,
-            "description": null,
+            "line": 135,
+            "description": "Process a single email with improved error handling",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_tryEnhancedAIParsing_",
-            "line": 162,
-            "description": null,
+            "line": 237,
+            "description": "Try AI parsing with better error handling",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_tryRubyPatternParsing_",
-            "line": 227,
-            "description": null,
+            "line": 325,
+            "description": "Pattern parsing (unchanged but with better logging)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_tryStructuredExtraction_",
-            "line": 328,
-            "description": null,
+            "line": 428,
+            "description": "Structured extraction (unchanged)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_saveForManualReview_",
-            "line": 389,
-            "description": null,
+            "line": 496,
+            "description": "Save for manual review (unchanged)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_log_",
-            "line": 421,
-            "description": null,
+            "line": 529,
+            "description": "Logging function",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_installTrigger",
-            "line": 430,
-            "description": null,
+            "line": 542,
+            "description": "Install trigger",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_removeTrigger",
-            "line": 441,
-            "description": null,
+            "line": 556,
+            "description": "Remove trigger",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_processNewEmails",
-            "line": 450,
-            "description": null,
+            "line": 568,
+            "description": "Main processing function",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_testProcessing",
-            "line": 485,
-            "description": null,
+            "line": 650,
+            "description": "Test processing with detailed output",
             "isPublic": true,
             "isHelper": true
           }
         ],
         "triggers": [],
         "dependencies": [
-          "er_processEmail_",
           "er_log_",
+          "er_processEmail_",
           "er_tryEnhancedAIParsing_",
           "er_tryRubyPatternParsing_",
           "er_tryStructuredExtraction_",
           "er_saveForManualReview_",
           "Defines: EMAIL_READER_CONFIG"
         ],
-        "lines": 508,
-        "size": 14603
+        "lines": 715,
+        "size": 20618
       },
       {
         "path": "F/U and Send proposal.gs",
