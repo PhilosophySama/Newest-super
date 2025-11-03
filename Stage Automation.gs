@@ -18,7 +18,7 @@
  * - Stage (col D) → Moves rows between sheets based on stage value (Leads, F/U, Awarded → Purgatory/Heaven/etc.)
  * - Stage Auto-Sort → Automatically sorts by Stage A-Z when changed (Leads, F/U, Awarded, Heaven)
  * - Split CSV (col A) → Auto-splits comma-separated values across columns (Leads sheet only)
- * - Calendar Event → "2. Sched" stage creates next-day ALL-DAY event in "Appointments with Customers" calendar
+ * - Calendar Event → "2. Sched" stage creates next-day event at 8:00 AM in "Appointments with Customers" calendar
  * - Column C Clear → Automatically cleared when rows move to F/U or Awarded sheets
  * - F/U Email Link (col B) → When moving to F/U, automatically searches for and links sent email in column B
  * - Empty Folder Check → Daily at 7am, checks columns F in Leads/F/U/Awarded for empty folders (red highlight)
@@ -483,7 +483,7 @@ function handleStageChange_(e, sheet, row, newStage) {
   if (isLeads && m_stageMatches_(stage, S.STAGE_MAPPINGS.schedule)) {
     const success = createNextDayGinoEvent_(sheet, row);
     SpreadsheetApp.getActive().toast(
-      success ? 'All-day calendar event created for tomorrow' : 'Failed to create calendar event',
+      success ? 'Calendar event created for tomorrow at 8:00 AM' : 'Failed to create calendar event',
       'Calendar Event',
       5
     );
@@ -1040,7 +1040,7 @@ function m_createPrintPacket_(sheet, row) {
   }
 }
 
-/*** CALENDAR EVENT CREATION - Updated for "Appointments with Customers" calendar and ALL-DAY events ***/
+/*** CALENDAR EVENT CREATION - Updated for "Appointments with Customers" calendar and timed events ***/
 function createNextDayGinoEvent_(sheet, row) {
   const S = MOVE_CONFIG;
   
@@ -1071,7 +1071,7 @@ function createNextDayGinoEvent_(sheet, row) {
       SpreadsheetApp.getActive().toast('Using default calendar due to access issue', 'Calendar Warning', 3);
     }
 
-    // Calculate tomorrow as an all-day event
+    // Calculate tomorrow at 8:00 AM
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1081,10 +1081,18 @@ function createNextDayGinoEvent_(sheet, row) {
     if (phone) description += `Phone: ${phone}\n`;
     if (address) description += `Address: ${address}`;
 
-    // Create ALL-DAY event
-    const event = targetCalendar.createAllDayEvent(
+    // Set tomorrow at 8:00 AM
+    tomorrow.setHours(8, 0, 0, 0);
+
+    // Set end time at 9:00 AM (1-hour event)
+    const endTime = new Date(tomorrow);
+    endTime.setHours(9, 0, 0, 0);
+
+    // Create timed event at 8am
+    const event = targetCalendar.createEvent(
       `Gino - ${name}`,
       tomorrow,
+      endTime,
       {
         location: address || '',
         description: description.trim()
@@ -1092,7 +1100,7 @@ function createNextDayGinoEvent_(sheet, row) {
     );
 
     if (S.ENABLE_LOGGING) {
-      m_logOperation_('All-day calendar event created', {
+      m_logOperation_('Calendar event created at 8:00 AM', {
         calendar: targetCalendar.getName(),
         title: `Gino - ${name}`,
         date: tomorrow,

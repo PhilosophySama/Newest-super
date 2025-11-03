@@ -141,6 +141,8 @@ function ml_processDayEvents(dayEvents, timestamp) {
   const entries = [];
   const validEvents = dayEvents.filter(ev => {
     const addr = ml_getEventAddress(ev);
+    // Include "returning" events even without addresses
+    if (ml_isReturnToOfficeEvent(ev)) return true;
     return addr && !ml_isOfficeAddress(addr);
   });
   if (validEvents.length === 0) return entries;
@@ -148,30 +150,45 @@ function ml_processDayEvents(dayEvents, timestamp) {
   validEvents.sort((a, b) => a.getStartTime() - b.getStartTime());
 
   let tripNumber = 1;
+  let lastLocation = MILEAGE_CONFIG.SHOP_ADDRESS;
+  let lastClientName = MILEAGE_CONFIG.SHOP_NAME;
 
   for (let i = 0; i < validEvents.length; i++) {
     const ev = validEvents[i];
     const evDate = ev.getStartTime();
-    const name = ev.getTitle().replace(MILEAGE_CONFIG.EVENT_PREFIX, '').trim();
-    const addr = ml_getEventAddress(ev);
-
-    let fromAddr, miles, note;
-
-    if (i === 0) {
-      fromAddr = MILEAGE_CONFIG.SHOP_ADDRESS;
-      miles = ml_calculateDistance(fromAddr, addr);
-      note = `${ml_getOrdinal(tripNumber)} - from office`;
-    } else {
-      const prevAddr = ml_getEventAddress(validEvents[i - 1]);
-      fromAddr = prevAddr;
-      miles = ml_calculateDistance(fromAddr, addr);
-      const prevName = validEvents[i - 1].getTitle().replace(MILEAGE_CONFIG.EVENT_PREFIX, '').trim();
-      note = `${ml_getOrdinal(tripNumber)} - from ${prevName}`;
+    
+    // Check if this is a "return to office" event
+    if (ml_isReturnToOfficeEvent(ev)) {
+      const returnMiles = ml_calculateDistance(lastLocation, MILEAGE_CONFIG.SHOP_ADDRESS);
+      entries.push([
+        evDate, returnMiles, 'One way',
+        MILEAGE_CONFIG.SHOP_ADDRESS, 'Return trip', 'Return to office',
+        , ml_flagDistance(`${ml_getOrdinal(tripNumber)} - to office`, returnMiles),
+        timestamp, lastLocation
+      ]);
+      tripNumber++;
+      
+      // Reset for next leg
+      lastLocation = MILEAGE_CONFIG.SHOP_ADDRESS;
+      lastClientName = MILEAGE_CONFIG.SHOP_NAME;
+      continue;
     }
 
-    entries.push([evDate, miles, 'One way', addr, name, 'Customer appointment', , ml_flagDistance(note, miles), timestamp, fromAddr]);
+    const name = ev.getTitle().replace(MILEAGE_CONFIG.EVENT_PREFIX, '').trim();
+    const addr = ml_getEventAddress(ev);
+    
+    const miles = ml_calculateDistance(lastLocation, addr);
+    const note = lastLocation === MILEAGE_CONFIG.SHOP_ADDRESS 
+      ? `${ml_getOrdinal(tripNumber)} - from office`
+      : `${ml_getOrdinal(tripNumber)} - from ${lastClientName}`;
+
+    entries.push([evDate, miles, 'One way', addr, name, 'Customer appointment', , ml_flagDistance(note, miles), timestamp, lastLocation]);
     tripNumber++;
 
+    lastLocation = addr;
+    lastClientName = name;
+
+    // Add final return only if this is the last event AND it's not a return event
     if (i === validEvents.length - 1) {
       const returnMiles = ml_calculateDistance(addr, MILEAGE_CONFIG.SHOP_ADDRESS);
       entries.push([
@@ -345,6 +362,87 @@ function ml_addEntriesToSheet(sheet, entries) {
     const date = entries[i][0];
     const toAddress = entries[i][3];
     const fromAddress = entries[i][9];
+
+    const dateRich = SpreadsheetApp.newRichTextValue()
+      .setText(ml_formatDate(date))
+      .setLinkUrl(ml_createCalendarLink(date))
+      .build();
+    dateRichValues.push([dateRich]);
+
+    if (toAddress && fromAddress) {
+      const addrRich = SpreadsheetApp.newRichTextValue()
+        .setText(toAddress)
+        .setLinkUrl(ml_createMapsLink(fromAddress, toAddress))
+        .build();
+      addrRichValues.push([addrRich]);
+    } else {
+      addrRichValues.push([SpreadsheetApp.newRichTextValue().setText(toAddress || "").build()]);
+    }
+  }
+
+  sheet.getRange(totalRow, MILEAGE_CONFIG.COLUMNS.DATE, entries.length, 1).setRichTextValues(dateRichValues);
+  sheet.getRange(totalRow, MILEAGE_CONFIG.COLUMNS.TO_ADDRESS, entries.length, 1).setRichTextValues(addrRichValues);
+
+  const tripRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(['One way', 'Round trip', 'N/A'], true)
+    .build();
+  sheet.getRange(totalRow, MILEAGE_CONFIG.COLUMNS.TRIP_TYPE, entries.length, 1).setDataValidation(tripRule);
+
+  const newTotalRow = totalRow + entries.length;
+  sheet.getRange(newTotalRow, MILEAGE_CONFIG.COLUMNS.AMT).setFormula(`=SUM(G2:G${newTotalRow - 1})`);
+}
+function ml_isReturnToOfficeEvent(event) {
+  const title = event.getTitle().toLowerCase();
+  const keywords = ['returning', 'return to office', 'back to office', 'return trip'];
+  return keywords.some(keyword => title.includes(keyword));
+}
+function ml_getGradientColor(tripNumber) {
+  // Progressive gray gradient that darkens with each trip
+  const shades = [
+    '#f3f3f3',  // 1st trip - lightest
+    '#e8e8e8',  // 2nd trip
+    '#dddddd',  // 3rd trip
+    '#d2d2d2',  // 4th trip
+    '#c7c7c7',  // 5th trip
+    '#bcbcbc',  // 6th trip
+    '#b1b1b1',  // 7th trip
+    '#a6a6a6',  // 8th trip (if you have very long days)
+  ];
+  
+  // If more than 8 trips, keep using the darkest shade
+  return shades[Math.min(tripNumber - 1, shades.length - 1)];
+}
+function ml_addEntriesToSheet(sheet, entries) {
+  if (!entries || entries.length === 0) return;
+
+  entries.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+
+  const totalRow = sheet.getLastRow();
+  sheet.insertRowsBefore(totalRow, entries.length);
+
+  const values = entries.map((e, i) => [
+    e[0], e[1], e[2], e[3], e[4], e[5],
+    MILEAGE_CONFIG.AMT_FORMULA(totalRow + i),
+    e[7], e[8]
+  ]);
+  sheet.getRange(totalRow, 1, entries.length, 9).setValues(values);
+
+  const dateRichValues = [];
+  const addrRichValues = [];
+
+  for (let i = 0; i < entries.length; i++) {
+    const date = entries[i][0];
+    const toAddress = entries[i][3];
+    const fromAddress = entries[i][9];
+    const note = entries[i][7];
+
+    // Add top border for "1st" trips (start of new day)
+    if (note && note.startsWith('1st')) {
+      sheet.getRange(totalRow + i, 1, 1, 9).setBorder(
+        true, null, null, null, null, null,  // top border only
+        'black', SpreadsheetApp.BorderStyle.SOLID
+      );
+    }
 
     const dateRich = SpreadsheetApp.newRichTextValue()
       .setText(ml_formatDate(date))

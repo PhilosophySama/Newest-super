@@ -1,6 +1,6 @@
 /**
  * Lead_Draft_Creator_V2.gs
- * version# 10/21-11:50PM EST by Claude Opus 4.1
+ * version# 01/05-10:15PM EST by Claude Opus 4.1
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
@@ -10,21 +10,16 @@
  * - Create rough quote drafts/messages when Stage (col D) becomes "Rough quote" on allowed sheets.
  * - Create customer info request drafts when Stage (col D) becomes "Customer Info" on Leads, F/U, and Awarded sheets.
  * - Create COI request drafts when Stage (col D) becomes "COI Req" on F/U, Awarded, and Heaven sheets only.
- * - Under PICS, embed a Re-cover!A1:K14 snapshot (PNG preferred; HTML fallback).
- * - PNG now exports at the exact pixel size of the range (column widths + row heights) with zero margins.
+ * - Under PICS, embed a Re-cover!A1:K14 snapshot (HTML only).
+ *
+ * CHANGES IN THIS VERSION:
+ * - Removed 5-second delay - drafts now create BEFORE row moves
+ * - "Email customer" now uses Job Type (R) instead of Job Description (K)
+ * - "Email customer" signature moved after QuickBooks button
  *
  * NOTES
- * - PNG path does NOT require Advanced Services.
- * - HTML fallback requires enabling "Google Sheets API" in Advanced Google Services + GCP Console.
+ * - HTML export requires enabling "Google Sheets API" in Advanced Google Services + GCP Console.
  * - Column F is both Display Name + PICS link (hyperlink supported).
- *
- * CO-EXISTENCE (Drafts side)
- * - Config object name: DRAFTS_V2
- * - Trigger handler: handleEditDraft_V2
- * - Trigger installer: installTriggerDrafts_V2
- * - Backfill runner: createDraftsForAllRows_V2
- * - Helper prefixes: d_* (generic), v2_* (draft-specific)
- * - NO onOpen() here. Keep the single onOpen() in Menus.gs.
  */
 
 const DRAFTS_V2 = {
@@ -88,9 +83,6 @@ const DRAFTS_V2 = {
     SELECT_CELL_A1:    'K2',
     SNAPSHOT_RANGE_A1: 'A1:K14',
     WAIT_MS:           2000,              // give calculations time to settle
-    INLINE_CID:        'recover_inline_png',
-    MIN_PNG_BYTES:     400,               // allow small but legitimate images
-    PNG_SCALE:         1,                 // 1 = 100% of computed pixel size; set 2 for 2x (retina)
     DEBUG:             true
   },
 
@@ -118,11 +110,9 @@ Thank you for considering Walker Awning! Linked is your custom quote for the awn
 
 Project Details:
 - Location: \${address}
-- Description: \${jobDescription}
+- Description: \${jobType}
 
-If you have any questions or would like to proceed with this project, please reach out via text or call.
-
-Best regards,`,
+If you have any questions or would like to proceed with this project, please reach out via text or call.`,
     HTML_BODY_TEMPLATE: `<div style="font-family: Arial, sans-serif; color: #333;">
 <p>Hello \${firstName},</p>
 
@@ -131,13 +121,10 @@ Best regards,`,
 <p><strong>Project Details:</strong></p>
 <ul style="line-height: 1.8;">
   <li><strong>Location:</strong> \${address}</li>
-  <li><strong>Description:</strong> \${jobDescription}</li>
+  <li><strong>Description:</strong> \${jobType}</li>
 </ul>
 
 <p>If you have any questions or would like to proceed with this project, please reach out via text or call.</p>
-
-<p>Best regards,<br>
-Walker Awning Team</p>
 </div>`
   },
 
@@ -225,13 +212,18 @@ function findCustomerInfoAttachmentFileIds() {
 function installTriggerDrafts_V2() {
   v2_validateConfig_();
   const handler = 'handleEditDraft_V2';
+  
+  // Remove existing triggers
   ScriptApp.getProjectTriggers()
     .filter(t => t.getHandlerFunction() === handler)
     .forEach(t => ScriptApp.deleteTrigger(t));
+  
+  // Install onEdit trigger
   ScriptApp.newTrigger(handler)
     .forSpreadsheet(v2_getSpreadsheet_().getId())
     .onEdit()
     .create();
+  
   SpreadsheetApp.getActive().toast('Drafts V2 trigger installed', 'Draft Creator', 4);
 }
 
@@ -262,11 +254,11 @@ function handleEditDraft_V2(e) {
       return;
     }
 
-    // Handle "Revise" stage - search for email BUT also pass through to Stage Automation
+    // Handle "Revise" stage - search for email
     if (newValLower === String(DRAFTS_V2.REVISE_STAGE).toLowerCase()) {
       const result = v2_searchAndLinkEmail_(sh, row);
       SpreadsheetApp.getActive().toast(result.message, 'Email Search', 5);
-      // DON'T return - let Stage Automation handle the move to Leads
+      return;
     }
     
     // Handle "Email customer" stage - create customer follow-up draft
@@ -297,21 +289,21 @@ function handleEditDraft_V2(e) {
       return;
     }
     
-    // Handle "COI Req" stage - create COI request draft (specific sheet check inside function)
+    // Handle "COI Req" stage - create COI request draft
     if (newValLower === String(DRAFTS_V2.COI_STAGE).toLowerCase()) {
       const result = v2_createCOIDraft_(sh, row);
       SpreadsheetApp.getActive().toast(result.toast, 'COI Request', 5);
       return;
     }
     
-    // Handle "qDraft" stage - create draft
+    // Handle "qDraft" stage - create main draft
     if (newValLower === String(DRAFTS_V2.TARGET_STAGE).toLowerCase()) {
       const result = v2_createDraftForRow_(sh, row, DRAFTS_V2.EMAIL.SKIP_IF_DRAFT_EXISTS);
       SpreadsheetApp.getActive().toast(result.toast, 'Draft Creator', 5);
     }
   } catch (err) {
-    d_safeLogErrorToSheet_(e && e.range ? e.range.getSheet() : null, e && e.range ? e.range.getRow() : null, err);
-    SpreadsheetApp.getActive().toast('Handler error. See col B / Executions.', 'Draft Creator', 8);
+    console.error('Handler error:', err);
+    SpreadsheetApp.getActive().toast('Error: ' + d_shortErr_(err), 'Draft Creator', 8);
   }
 }
 
@@ -421,7 +413,7 @@ function v2_createCustomerDraft_(sh, row) {
     const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
     const firstName = customerName ? customerName.split(' ')[0] : 'there';
     const address = d_safeString_(vals[idx(DRAFTS_V2.COLS.ADDRESS)]);
-    const jobDescription = d_safeString_(vals[idx(DRAFTS_V2.COLS.JOB_DESC)]);
+    const jobType = d_safeString_(vals[idx(DRAFTS_V2.COLS.JOB_TYPE)]); // Changed from JOB_DESC to JOB_TYPE (column R)
     const qbUrl = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.QB_URL)], rtv[idx(DRAFTS_V2.COLS.QB_URL)], sh, row, DRAFTS_V2.COLS.QB_URL);
     
     // Validate customer email
@@ -442,25 +434,34 @@ function v2_createCustomerDraft_(sh, row) {
     let plainBody = DRAFTS_V2.CUSTOMER_EMAIL.BODY_TEMPLATE;
     plainBody = plainBody.replace(/\$\{firstName\}/g, firstName);
     plainBody = plainBody.replace(/\$\{address\}/g, address || 'Not specified');
-    plainBody = plainBody.replace(/\$\{jobDescription\}/g, jobDescription || 'Not specified');
+    plainBody = plainBody.replace(/\$\{jobType\}/g, jobType || 'Not specified'); // Changed from jobDescription
     plainBody = plainBody.replace(/\$\{displayName\}/g, displayName);
     
-    // Add QuickBooks link if available
+    // Add QuickBooks link if available, then add signature
     if (qbUrl) {
-      plainBody += `\n\nView your quote online: ${qbUrl}`;
+      plainBody += `\n\nView your quote online: ${qbUrl}\n\nBest regards,\nWalker Awning Team`;
+    } else {
+      plainBody += '\n\nBest regards,\nWalker Awning Team';
     }
     
     // Create HTML body
     let htmlBody = DRAFTS_V2.CUSTOMER_EMAIL.HTML_BODY_TEMPLATE;
     htmlBody = htmlBody.replace(/\$\{firstName\}/g, d_htmlEscape_(firstName));
     htmlBody = htmlBody.replace(/\$\{address\}/g, d_htmlEscape_(address || 'Not specified'));
-    htmlBody = htmlBody.replace(/\$\{jobDescription\}/g, d_htmlEscape_(jobDescription || 'Not specified'));
+    htmlBody = htmlBody.replace(/\$\{jobType\}/g, d_htmlEscape_(jobType || 'Not specified')); // Changed from jobDescription
     htmlBody = htmlBody.replace(/\$\{displayName\}/g, d_htmlEscape_(displayName));
     
-    // Add QuickBooks link to HTML if available
+    // Add QuickBooks link to HTML if available, then add signature after button
     if (qbUrl) {
-      htmlBody = htmlBody.replace('</div>', 
-        `<p><a href="${d_htmlEscape_(qbUrl)}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">View Your Quote Online</a></p></div>`);
+      htmlBody += `<p><a href="${d_htmlEscape_(qbUrl)}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">View Your Quote Online</a></p>
+
+<p>Best regards,<br>
+Walker Awning Team</p>
+</div>`;
+    } else {
+      htmlBody += `<p>Best regards,<br>
+Walker Awning Team</p>
+</div>`;
     }
     
     // Create draft
@@ -579,7 +580,6 @@ function v2_createHandoffDraft_(sh, row) {
 
 /**
  * Create customer info request draft when "Customer Info" is selected
- * Version# [10/21-11:50PM EST] by Claude Opus 4.1
  */
 function v2_createCustomerInfoDraft_(sh, row) {
   try {
@@ -1137,8 +1137,8 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
   const geUrl    = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.GE_URL)],     rtv[idx(DRAFTS_V2.COLS.GE_URL)],     sh, row, DRAFTS_V2.COLS.GE_URL);
   const qbUrl    = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.QB_URL)],     rtv[idx(DRAFTS_V2.COLS.QB_URL)],     sh, row, DRAFTS_V2.COLS.QB_URL);
 
-  // Re-cover PNG
-  let recoverInlineBlob = null;
+  // Re-cover HTML snapshot
+  let recoverHtml = null;
   try {
     const ss = sh.getParent();
     if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.SELECT_CELL_A1) {
@@ -1150,31 +1150,17 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
         Utilities.sleep(DRAFTS_V2.RECOVER.WAIT_MS || 2000);
       }
     }
-    recoverInlineBlob = v2_exportRecoverRangeAsPng_(ss);
-    if (!recoverInlineBlob) notes.push('Re-cover PNG empty');
-  } catch (pngErr) {
+    recoverHtml = v2_exportRecoverRangeAsHtml_(ss);
+    if (!recoverHtml) notes.push('Re-cover HTML empty');
+  } catch (htmlErr) {
     if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
-      console.error('PNG export failed:', pngErr);
+      console.error('HTML export failed:', htmlErr);
     }
-    notes.push('PNG fail');
-  }
-
-  // Fallback HTML
-  let recoverHtml = null;
-  if (!recoverInlineBlob) {
-    try {
-      recoverHtml = v2_exportRecoverRangeAsHtml_(sh.getParent());
-      if (!recoverHtml) notes.push('Re-cover HTML empty');
-    } catch (htmlErr) {
-      if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
-        console.error('HTML export failed:', htmlErr);
-      }
-      notes.push('HTML fail');
-    }
+    notes.push('HTML fail');
   }
 
   // Body
-  const html = v2_buildHtmlBody_({ photoUrl, geUrl, qbUrl, recoverHtml, hasRecoverPng: !!recoverInlineBlob });
+  const html = v2_buildHtmlBody_({ photoUrl, geUrl, qbUrl, recoverHtml });
   const plain = v2_buildPlainBody_({ photoUrl, geUrl, qbUrl });
 
   // Recipients
@@ -1187,7 +1173,6 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
 
   const options = {};
   if (html) options.htmlBody = html;
-  if (recoverInlineBlob) options.inlineImages = { [DRAFTS_V2.RECOVER.INLINE_CID]: recoverInlineBlob };
   if (cc.length)  options.cc  = cc.join(',');
   if (bcc.length) options.bcc = bcc.join(',');
 
@@ -1196,9 +1181,9 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
     const draftMessageId = draft.getMessage().getId();
     const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
 
-    // Rich text in B: link + optional diagnostics if no snapshot could be embedded
+    // Rich text in B: link + optional diagnostics if snapshot failed
     const base = '✅ Est Draft';
-    const suffix = (!recoverInlineBlob && !recoverHtml && notes.length) ? '\n' + notes.join(' | ') : '';
+    const suffix = (!recoverHtml && notes.length) ? '\n' + notes.join(' | ') : '';
     const rich = SpreadsheetApp.newRichTextValue()
       .setText(base + suffix)
       .setLinkUrl(0, base.length, draftUrl)
@@ -1216,61 +1201,8 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
 }
 
 /**
- * PNG snapshot via Sheets export endpoint for Re-cover!A1:K14 at EXACT pixel size.
- */
-function v2_exportRecoverRangeAsPng_(ss) {
-  const sheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
-  if (!sheet) return null;
-
-  const rangeA1 = DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1;
-  const rng = sheet.getRange(rangeA1);
-
-  const cols = rng.getNumColumns();
-  const rows = rng.getNumRows();
-  const startCol = rng.getColumn();
-  const startRow = rng.getRow();
-
-  let totalW = 0, totalH = 0;
-  for (let c = 0; c < cols; c++) totalW += sheet.getColumnWidth(startCol + c);
-  for (let r = 0; r < rows; r++) totalH += sheet.getRowHeight(startRow + r);
-
-  const scale = Math.max(1, Number(DRAFTS_V2.RECOVER.PNG_SCALE || 1));
-  const w = Math.max(10, Math.round(totalW * scale));
-  const h = Math.max(10, Math.round(totalH * scale));
-
-  const spreadsheetId = ss.getId();
-  const gid = sheet.getSheetId();
-  const r = encodeURIComponent(rangeA1);
-
-  const url =
-    `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export` +
-    `?format=png&gid=${gid}` +
-    `&range=${r}` +
-    `&w=${w}&h=${h}` +
-    `&scale=1` +
-    `&fitw=false&fith=false` +
-    `&portrait=false` +
-    `&gridlines=false` +
-    `&printnotes=false` +
-    `&top_margin=0.00&bottom_margin=0.00&left_margin=0.00&right_margin=0.00`;
-
-  const resp = UrlFetchApp.fetch(url, {
-    headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
-    muteHttpExceptions: true,
-    followRedirects: true
-  });
-
-  const code = resp.getResponseCode();
-  if (code < 200 || code >= 300) return null;
-
-  const blob = resp.getBlob();
-  if (!blob || blob.getBytes().length < (DRAFTS_V2.RECOVER.MIN_PNG_BYTES || 400)) return null;
-
-  return blob.setName(`recover_${d_timestamp_()}.png`).setContentType('image/png');
-}
-
-/**
- * HTML fallback (requires Sheets API).
+ * HTML export of Re-cover range (FIXED VERSION)
+ * Uses proper A1 notation in the API call
  */
 function v2_exportRecoverRangeAsHtml_(ss) {
   try {
@@ -1278,51 +1210,61 @@ function v2_exportRecoverRangeAsHtml_(ss) {
     const sheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
     if (!sheet) return null;
 
-    const rangeA1 = DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1;
-    const rng = sheet.getRange(rangeA1);
-
-    const startCol = rng.getColumn() - 1;
-    const endCol   = startCol + rng.getNumColumns() - 1;
-    const startRow = rng.getRow() - 1;
-    const endRow   = startRow + rng.getNumRows() - 1;
-
-    const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?ranges=${sheet.getSheetId()}!R${startRow}C${startCol}:R${endRow}C${endCol}&includeGridData=true&fields=sheets(data(rowData(values(effectiveValue,formattedValue,hyperlink,effectiveFormat)),rowMetadata,columnMetadata),merges)`;
+    const rangeA1 = DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1; // e.g., "A1:K14"
+    const sheetName = sheet.getName();
+    
+    // Use proper A1 notation: SheetName!A1:K14
+    const fullRange = `${sheetName}!${rangeA1}`;
+    
+    const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}` +
+      `?ranges=${encodeURIComponent(fullRange)}` +
+      `&includeGridData=true` +
+      `&fields=sheets(data(rowData(values(effectiveValue,formattedValue,hyperlink,effectiveFormat)),rowMetadata,columnMetadata),merges)`;
 
     const resp = UrlFetchApp.fetch(endpoint, {
       headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
       muteHttpExceptions: true
     });
 
-    if (resp.getResponseCode() !== 200) return null;
+    if (resp.getResponseCode() !== 200) {
+      if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
+        console.error('API call failed:', resp.getResponseCode(), resp.getContentText());
+      }
+      return null;
+    }
 
     const json = JSON.parse(resp.getContentText());
     const sheetData = (json && json.sheets && json.sheets[0]) ? json.sheets[0] : null;
     if (!sheetData || !sheetData.data || !sheetData.data[0]) return null;
 
-    return v2_sheetsDataToHtml_(sheetData, sheet, rng);
-  } catch (_) {
+    return v2_sheetsDataToHtml_(sheetData, sheet);
+  } catch (err) {
+    if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
+      console.error('HTML export error:', err);
+    }
     return null;
   }
 }
 
-function v2_sheetsDataToHtml_(sheetData, sheet, rng) {
+function v2_sheetsDataToHtml_(sheetData, sheet) {
   const data = sheetData.data[0];
   const rowData = data.rowData || [];
 
   const merges = sheetData.merges || [];
-  const numRows = rng.getNumRows();
-  const numCols = rng.getNumColumns();
-  const startCol = rng.getColumn();
-  const startRow = rng.getRow();
+  const numRows = rowData.length;
+  if (numRows === 0) return null;
+  
+  const numCols = rowData[0].values ? rowData[0].values.length : 0;
+  if (numCols === 0) return null;
 
   const skipCell = Array.from({length: numRows}, ()=> Array(numCols).fill(false));
   const mergedTopLeft = Array.from({length: numRows}, ()=> Array(numCols).fill(null));
 
   merges.forEach(m => {
-    const c0 = (m.startColumnIndex||0) - (startCol-1);
-    const c1 = ((m.endColumnIndex||0)-1) - (startCol-1);
-    const r0 = (m.startRowIndex||0) - (startRow-1);
-    const r1 = ((m.endRowIndex||0)-1) - (startRow-1);
+    const c0 = m.startColumnIndex || 0;
+    const c1 = (m.endColumnIndex || 0) - 1;
+    const r0 = m.startRowIndex || 0;
+    const r1 = (m.endRowIndex || 0) - 1;
 
     if (c0 < 0 || c1 >= numCols || r0 < 0 || r1 >= numRows) return;
 
@@ -1342,11 +1284,11 @@ function v2_sheetsDataToHtml_(sheetData, sheet, rng) {
 
   const colWidths = Array.from({length: numCols}, (_, c) => {
     const m = colMeta[c] && colMeta[c].pixelSize;
-    return m || sheet.getColumnWidth(startCol + 1 + c);
+    return m || 100;
   });
   const rowHeights = Array.from({length: numRows}, (_, r) => {
     const m = rowMeta[r] && rowMeta[r].pixelSize;
-    return m || sheet.getRowHeight(startRow + 1 + r);
+    return m || 21;
   });
 
   const toHex = (c) => {
@@ -1450,8 +1392,6 @@ function v2_buildHtmlBody_(data) {
 
   if (data.recoverHtml) {
     html += data.recoverHtml + '<br>';
-  } else if (data.hasRecoverPng) {
-    html += '<img src="cid:' + esc(DRAFTS_V2.RECOVER.INLINE_CID) + '" alt="Re-cover snapshot" style="max-width:100%;border:1px solid #ddd;border-radius:4px;"><br>';
   }
 
   html += data.geUrl
@@ -1637,5 +1577,4 @@ function d_safeLogErrorToSheet_(sh, row, err) {
     console.error('Failed to log to sheet:', logErr, 'Original error:', err);
   }
 }
-
 /** end-of-file */
