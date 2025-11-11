@@ -475,7 +475,7 @@ Walker Awning Team</p>
       const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
       
       // Create rich text link for column B
-      const linkText = '📧 F/U ';
+      const linkText = '📧 Quote';
       const richText = SpreadsheetApp.newRichTextValue()
         .setText(linkText)
         .setLinkUrl(0, linkText.length, draftUrl)

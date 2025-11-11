@@ -1,14 +1,15 @@
 /**
  * Single shared menu for the project.
- * Version# [01/20-Added Email Reader Diagnostics]
- * by Claude Opus 4.1
+ * Version# [11/05-Added Gemini Lead Processor]
+ * by Claude Sonnet 4.5
  *
  * - Stage menu (Move automation)
  * - Drafts menu (Gmail drafts V2)
  * - Mileage menu (Mileage log automation)
  * - Ruby menu (Lean-to generator)
  * - QuickBooks menu (Auth + API tests)
- * - Email Reader menu (Automated email processing) - NOW WITH DIAGNOSTICS
+ * - Email Reader menu (Automated email processing)
+ * - Gemini Leads menu (Add lead label processor) - NEW!
  * - System utilities
  *
  * IMPORTANT: Do not define any other onOpen() anywhere else.
@@ -68,7 +69,7 @@ function onOpen() {
       .addItem('🔄 Reset Authorization', 'resetAuth')
       .addToUi();
 
-    // Email Reader Menu - ENHANCED
+    // Email Reader Menu
     ui.createMenu('Email Reader')
       .addItem('🔍 Run Diagnostic Check', 'er_diagnosticCheck')
       .addSeparator()
@@ -77,6 +78,18 @@ function onOpen() {
       .addSeparator()
       .addItem('⚙️ Setup Auto-Check (Every 15 min)', 'er_installTrigger')
       .addItem('🛑 Remove Auto-Check', 'er_removeTrigger')
+      .addToUi();
+
+    // Gemini Lead Processor Menu - NEW!
+    ui.createMenu('Setup (Gemini Leads)')
+      .addItem('🔍 Run Diagnostics', 'gl_diagnosticCheck')
+      .addItem('📋 Show Configuration', 'gl_showConfiguration')
+      .addSeparator()
+      .addItem('▶️ Process "Add lead" Emails Now', 'gl_processAddLeadEmails')
+      .addItem('🧪 Test One Email', 'gl_testProcessOneEmail')
+      .addSeparator()
+      .addItem('⚙️ Install Auto-Check Trigger', 'gl_installTrigger')
+      .addItem('🛑 Remove Trigger', 'gl_removeTrigger')
       .addToUi();
 
     // System utilities menu
@@ -184,7 +197,9 @@ function debugMenuError_() {
     'getScriptUrl',
     'convertEstimateToInvoice',
     'sendEstimateCurrentRow_',
-    'er_processNewEmails'
+    'er_processNewEmails',
+    'gl_diagnosticCheck',
+    'gl_processAddLeadEmails'
   ];
   
   functionsToCheck.forEach(funcName => {

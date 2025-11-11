@@ -1,11 +1,10 @@
 /**
- * AWNING RUBY GENERATOR (Lean-to & A-Frame) — Drive File Export
- * Version# [01/13-11:45PM EST] by Claude Opus 4.1
+ * AWNING RUBY GENERATOR (Lean-to & A-Frame) — Web App Display
+ * Version# [01/13-11:58PM EST] by Claude Opus 4.1
  *
  * Triggers on edits to Leads!T:AD (cols 20–30).
- * Generates Ruby files based on column AA awning type:
- *   - "Lean-to" or "Sloped L" → Lean-to awning
- *   - "A-Frame" or "A frame" → A-frame awning
+ * Generates Ruby code and creates clickable links that open in a web viewer.
+ * Click the link in column S to see Ruby code with copy button!
  *
  * Parameters changed:
  *   - AWNING_MATERIAL (AB): Sunbrella or Vinyl
@@ -17,13 +16,12 @@
  *   - HAS_POSTS (AD == "Yes" or checkbox TRUE → true; otherwise false)
  *   - TRUSSES: Sunbrella = roundup(length/3.5), Vinyl = roundup(length/5)
  *
- * Column S shows hyperlink "Ruby (.rb)". Falls back to writing into S if Drive fails.
+ * Column S shows hyperlink "Ruby (.rb)". Clicking opens web viewer with copy button.
  * Helper names prefixed r_ to avoid collisions.
  */
 
-const LEANTO_RUBY_EXPORT = {
-  FOLDER_ID: '',                        // optional fixed folder ID (leave blank to auto-create in My Drive)
-  FOLDER_NAME: 'SketchUp Ruby Exports', // used when FOLDER_ID is blank; created once and cached
+const AWNING_RUBY_CONFIG = {
+  WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbwtHBMWqpSefpxexUJxl7PiQGzEzW0EIs3rQIo4xxTjZL69OMcTUncN740OZVwj5jv3bQ/exec',
   LINK_TEXT: 'Ruby (.rb)'
 };
 
@@ -69,72 +67,286 @@ function handleEditAwningRuby_(e) {
     return;
   }
 
-  // Read parameters
-  const length    = Number(sheet.getRange(row, COLS.LENGTH).getValue())      || 50;
-  const width     = Number(sheet.getRange(row, COLS.WIDTH).getValue())       || 11;
-  const height    = Number(sheet.getRange(row, COLS.WING_HEIGHT).getValue()) || 5;
-  const frontBar  = Number(sheet.getRange(row, COLS.FRONT_BAR).getValue())   || 1;
-  const wingsNum  = Number(sheet.getRange(row, COLS.NUM_WINGS).getValue())   || 0;
-
-  const fabricRaw = sheet.getRange(row, COLS.FABRIC).getValue();
-  const postsVal  = sheet.getRange(row, COLS.POSTS).getValue();
-  const dispName  = String(sheet.getRange(row, COLS.DISPLAY).getDisplayValue() || '').trim();
-
-  const hasWings   = wingsNum > 0;
-  const fabricType = (typeof fabricRaw === 'string' && /vinyl/i.test(fabricRaw)) ? 'Vinyl' : 'Sunbrella';
-
-  // Calculate trusses based on material
-  const trussSpacing = fabricType === 'Sunbrella' ? 3.5 : 5.0;
-  const trusses = Math.ceil(length / trussSpacing);
-
-  // Robust posts flag
-  let hasPosts = false;
-  if (typeof postsVal === 'boolean') {
-    hasPosts = postsVal === true;
-  } else if (postsVal != null) {
-    hasPosts = /^\s*yes\s*$/i.test(String(postsVal));
-  }
-
-  // Build the Ruby script based on type
-  let rubyScript;
-  if (awningType === 'LEAN_TO') {
-    rubyScript = r_buildLeanToRuby_({
-      fabric:     fabricType,
-      length:     length,
-      projection: width,
-      height:     height,
-      frontBar:   frontBar,
-      hasWings:   hasWings,
-      hasPosts:   hasPosts,
-      trusses:    trusses
-    });
-  } else if (awningType === 'A_FRAME') {
-    rubyScript = r_buildAFrameRuby_({
-      fabric:     fabricType,
-      length:     length,
-      projection: width,
-      height:     height,
-      frontBar:   frontBar,
-      hasWings:   hasWings,
-      hasPosts:   hasPosts,
-      trusses:    trusses
-    });
-  }
-
   try {
-    const file = r_writeRubyToDrive_(rubyScript, row, dispName, awningType);
-    const url  = file.getUrl();
+    // Create web app URL with parameters
+    const ssId = SpreadsheetApp.getActive().getId();
+    const webAppUrl = `${AWNING_RUBY_CONFIG.WEB_APP_URL}?row=${row}&ss=${ssId}`;
 
     const rich = SpreadsheetApp.newRichTextValue()
-      .setText(LEANTO_RUBY_EXPORT.LINK_TEXT)
-      .setLinkUrl(url)
+      .setText(AWNING_RUBY_CONFIG.LINK_TEXT)
+      .setLinkUrl(webAppUrl)
       .build();
     sheet.getRange(row, COLS.RUBY_OUT).setRichTextValue(rich);
 
-    SpreadsheetApp.getActive().toast(`${awningType === 'LEAN_TO' ? 'Lean-to' : 'A-Frame'} Ruby export ready for row ${row}`, 'Success', 3);
+    SpreadsheetApp.getActive().toast(`${awningType === 'LEAN_TO' ? 'Lean-to' : 'A-Frame'} Ruby link ready for row ${row}`, 'Success', 3);
   } catch (err) {
-    sheet.getRange(row, COLS.RUBY_OUT).setValue(rubyScript); // fallback
-    SpreadsheetApp.getActive().toast('Drive write failed, wrote to S instead: ' + err.message, 'Warning', 5);
+    sheet.getRange(row, COLS.RUBY_OUT).setValue('Error: ' + err.message);
+    SpreadsheetApp.getActive().toast('Link creation failed: ' + err.message, 'Warning', 5);
+  }
+}
+
+/**
+ * Web app handler - shows Ruby code when hyperlink is clicked
+ */
+function doGet(e) {
+  const row = e.parameter.row;
+  const ssId = e.parameter.ss;
+  
+  if (!row || !ssId) {
+    return HtmlService.createHtmlOutput('Error: Missing parameters');
+  }
+  
+  try {
+    const ss = SpreadsheetApp.openById(ssId);
+    const sheet = ss.getSheetByName('Leads');
+    
+    const COLS = {
+      LENGTH: 20,        // T
+      WIDTH: 21,         // U
+      FRONT_BAR: 22,     // V
+      WING_HEIGHT: 24,   // X
+      NUM_WINGS: 25,     // Y
+      TYPE: 27,          // AA
+      FABRIC: 28,        // AB
+      POSTS: 30,         // AD
+      DISPLAY: 6         // F
+    };
+
+    const type = String(sheet.getRange(row, COLS.TYPE).getDisplayValue() || '').trim().toLowerCase();
+    const dispName = String(sheet.getRange(row, COLS.DISPLAY).getDisplayValue() || '').trim();
+    
+    // Determine awning type
+    let awningType = null;
+    let typeName = '';
+    if (type && (type.includes('lean') || type === 'sloped l')) {
+      awningType = 'LEAN_TO';
+      typeName = 'Lean-to';
+    } else if (type && (type.includes('a-frame') || type.includes('a frame'))) {
+      awningType = 'A_FRAME';
+      typeName = 'A-Frame';
+    } else {
+      return HtmlService.createHtmlOutput('Error: Invalid awning type');
+    }
+
+    // Read parameters
+    const length    = Number(sheet.getRange(row, COLS.LENGTH).getValue())      || 50;
+    const width     = Number(sheet.getRange(row, COLS.WIDTH).getValue())       || 11;
+    const height    = Number(sheet.getRange(row, COLS.WING_HEIGHT).getValue()) || 5;
+    const frontBar  = Number(sheet.getRange(row, COLS.FRONT_BAR).getValue())   || 1;
+    const wingsNum  = Number(sheet.getRange(row, COLS.NUM_WINGS).getValue())   || 0;
+    const fabricRaw = sheet.getRange(row, COLS.FABRIC).getValue();
+    const postsVal  = sheet.getRange(row, COLS.POSTS).getValue();
+
+    const hasWings   = wingsNum > 0;
+    const fabricType = (typeof fabricRaw === 'string' && /vinyl/i.test(fabricRaw)) ? 'Vinyl' : 'Sunbrella';
+    const trussSpacing = fabricType === 'Sunbrella' ? 3.5 : 5.0;
+    const trusses = Math.ceil(length / trussSpacing);
+
+    let hasPosts = false;
+    if (typeof postsVal === 'boolean') {
+      hasPosts = postsVal === true;
+    } else if (postsVal != null) {
+      hasPosts = /^\s*yes\s*$/i.test(String(postsVal));
+    }
+
+    // Generate Ruby script
+    let rubyScript;
+    if (awningType === 'LEAN_TO') {
+      rubyScript = r_buildLeanToRuby_({
+        fabric: fabricType,
+        length: length,
+        projection: width,
+        height: height,
+        frontBar: frontBar,
+        hasWings: hasWings,
+        hasPosts: hasPosts,
+        trusses: trusses
+      });
+    } else if (awningType === 'A_FRAME') {
+      rubyScript = r_buildAFrameRuby_({
+        fabric: fabricType,
+        length: length,
+        projection: width,
+        height: height,
+        frontBar: frontBar,
+        hasWings: hasWings,
+        hasPosts: hasPosts,
+        trusses: trusses
+      });
+    }
+
+    // Create HTML page
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Ruby Code - ${typeName}</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+              background: #1e1e1e;
+              color: #d4d4d4;
+              padding: 20px;
+              line-height: 1.6;
+            }
+            .container {
+              max-width: 1200px;
+              margin: 0 auto;
+            }
+            .header {
+              background: #2d2d30;
+              padding: 20px;
+              border-radius: 8px 8px 0 0;
+              border-bottom: 3px solid #007acc;
+            }
+            h1 {
+              color: #4ec9b0;
+              font-size: 24px;
+              margin-bottom: 8px;
+            }
+            .meta {
+              color: #858585;
+              font-size: 14px;
+            }
+            .actions {
+              background: #252526;
+              padding: 15px 20px;
+              display: flex;
+              gap: 10px;
+              align-items: center;
+            }
+            button {
+              padding: 10px 20px;
+              font-size: 14px;
+              font-weight: 600;
+              background: #007acc;
+              color: white;
+              border: none;
+              cursor: pointer;
+              border-radius: 4px;
+              transition: background 0.2s;
+            }
+            button:hover {
+              background: #005a9e;
+            }
+            button:active {
+              background: #004578;
+            }
+            .success {
+              color: #4ec9b0;
+              font-weight: 600;
+              display: none;
+              animation: fadeIn 0.3s;
+            }
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            .code-container {
+              background: #1e1e1e;
+              border: 1px solid #3e3e42;
+              border-radius: 0 0 8px 8px;
+              overflow: hidden;
+            }
+            #code {
+              width: 100%;
+              min-height: 600px;
+              border: none;
+              padding: 20px;
+              font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+              font-size: 13px;
+              line-height: 1.5;
+              background: #1e1e1e;
+              color: #d4d4d4;
+              white-space: pre;
+              overflow: auto;
+              resize: vertical;
+            }
+            #code:focus {
+              outline: none;
+              background: #1a1a1a;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 20px;
+              color: #858585;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎨 ${typeName} Ruby Script</h1>
+              <div class="meta">
+                ${dispName ? `<strong>${dispName}</strong> • ` : ''}
+                Row ${row} • 
+                ${length}' × ${width}' • 
+                ${fabricType} • 
+                ${hasWings ? 'With Wings' : 'No Wings'}
+              </div>
+            </div>
+            
+            <div class="actions">
+              <button onclick="copyCode()">📋 Copy to Clipboard</button>
+              <button onclick="selectAll()">✨ Select All</button>
+              <span class="success" id="success">✓ Copied to clipboard!</span>
+            </div>
+            
+            <div class="code-container">
+              <textarea id="code" spellcheck="false">${rubyScript.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+            </div>
+            
+            <div class="footer">
+              Generated by Awning Ruby Generator • Click code to select • Press Ctrl+C to copy
+            </div>
+          </div>
+          
+          <script>
+            const codeElement = document.getElementById('code');
+            const successElement = document.getElementById('success');
+            
+            function copyCode() {
+              codeElement.select();
+              document.execCommand('copy');
+              showSuccess();
+            }
+            
+            function selectAll() {
+              codeElement.select();
+            }
+            
+            function showSuccess() {
+              successElement.style.display = 'inline';
+              setTimeout(() => {
+                successElement.style.display = 'none';
+              }, 2000);
+            }
+            
+            // Auto-select on load for easy copying
+            window.addEventListener('load', () => {
+              codeElement.focus();
+            });
+            
+            // Click anywhere on code to select all
+            codeElement.addEventListener('click', selectAll);
+          </script>
+        </body>
+      </html>
+    `;
+    
+    return HtmlService.createHtmlOutput(html)
+      .setTitle(`Ruby Code - ${typeName}`)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+      
+  } catch (error) {
+    return HtmlService.createHtmlOutput('Error: ' + error.message);
   }
 }
 
@@ -451,7 +663,8 @@ model.commit_operation`;
 /**
  * Public wrapper for Lean-to template (for backward compatibility)
  */
-function r_getRubyExactTemplate() {  
+function r_getRubyExactTemplate() { 
+  return r_getLeanToTemplate_(); 
 }
 
 /**
@@ -709,40 +922,6 @@ group_entities.add_dimension_linear(
 # === NAME GROUP + COMMIT ===
 aframe_group.name = "#{AWNING_TYPE} (#{AWNING_MATERIAL}) #{LENGTH}x#{PROJECTION}x#{PEAK_HEIGHT}-FB#{FRONT_BAR_HEIGHT}-POST#{COLUMN_HEIGHT}"
 model.commit_operation`;
-}
-
-/** Write the Ruby to Drive as a .rb file and return the File. */
-function r_writeRubyToDrive_(rubyScript, row, dispName, awningType) {
-  const folder = r_getRubyExportFolder_();
-  const typeLabel = awningType === 'LEAN_TO' ? 'Lean-to' : 'A-Frame';
-  const safeName = (dispName || ('Row ' + row))
-    .replace(/[\\/:*?"<>|#\[\]\r\n]+/g, ' ')
-    .trim()
-    .substring(0, 80);
-
-  const filename = `${typeLabel} Ruby - ${safeName || ('Row ' + row)}.rb`;
-
-  // Remove any old file(s) with same name (keeps folder tidy)
-  const existing = folder.getFilesByName(filename);
-  while (existing.hasNext()) existing.next().setTrashed(true);
-
-  const blob = Utilities.newBlob(rubyScript, 'text/plain', filename);
-  return folder.createFile(blob);
-}
-
-/** Get/create the export folder once and cache its ID. */
-function r_getRubyExportFolder_() {
-  if (LEANTO_RUBY_EXPORT.FOLDER_ID) {
-    return DriveApp.getFolderById(LEANTO_RUBY_EXPORT.FOLDER_ID);
-  }
-  const prop = PropertiesService.getScriptProperties();
-  const cached = prop.getProperty('LEANTO_RUBY_EXPORT_FOLDER_ID');
-  if (cached) {
-    try { return DriveApp.getFolderById(cached); } catch (_) { /* recreate below */ }
-  }
-  const folder = DriveApp.createFolder(LEANTO_RUBY_EXPORT.FOLDER_NAME);
-  prop.setProperty('LEANTO_RUBY_EXPORT_FOLDER_ID', folder.getId());
-  return folder;
 }
 
 /** Trigger installer (use from menu: Setup (Ruby) → Install On-Edit Trigger (Lean-to Ruby)) */

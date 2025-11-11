@@ -1,12 +1,15 @@
 /**
  * STAGE AUTOMATION (standalone)
- * Version: 01/10-09:15PM EST by Claude Opus 4.1
+ * Version: 11/04-11:45PM EST by Claude Sonnet 4.5
  * Moves rows between sheets, creates Drive folders, writes Google Earth links,
  * formats hyperlink cells, PRESERVES rich links/notes on row moves,
  * includes column M formula automation, expanded link generation, email linking,
  * daily empty folder checking, and AUTO-SORT by Stage column.
  *
  * IMPORTANT: This file must NOT define onOpen(). Use Menus.gs (single onOpen).
+ *
+ * RACE CONDITION FIX: Returns true when handling a stage to prevent Draft Creator
+ * from processing the same edit on a moved row.
  *
  * AUTOMATED FEATURES:
  * - Display Name (col F) → Creates/finds Drive folder in Photos folder & makes F a hyperlink (Leads, F/U, Awarded)
@@ -159,19 +162,21 @@ function handleEditMove_(e) {
   if (col === S.COLS.QB_URL) { handleQbUrlChange_(sheet, row, r.getValue()); return; }
 
   // Stage moves: allowed on Leads, F/U, and Awarded only
-  // Only return if stage was actually handled by handleStageChange_
+  // **CRITICAL FIX**: Store the original row number BEFORE processing
   if ((isLeads || isFU || isAwarded) && col === S.COLS.STAGE) {
     const handled = handleStageChange_(e, sheet, row, r.getValue());
     
-    // Auto-sort after stage change (whether moved or not)
-    if (shouldAutoSort) {
+    // Auto-sort after stage change if this handler processed it
+    // Only sort if the row still exists (wasn't moved)
+    if (shouldAutoSort && !handled) {
       // Small delay to ensure all operations complete
       Utilities.sleep(100);
       m_autoSortByStage_(sheet);
     }
     
-    if (handled) return; // Only return if this handler processed the stage
-    // If not handled, allow other handlers (like Draft Creator) to run
+    // **CRITICAL**: Return true to signal this edit was fully handled
+    // This prevents Draft Creator from processing the same edit
+    if (handled) return;
   }
   
   // Auto-sort if Stage column was edited but no move occurred
