@@ -170,7 +170,7 @@ function handleEditMove_(e) {
     // Only sort if the row still exists (wasn't moved)
     if (shouldAutoSort && !handled) {
       // Small delay to ensure all operations complete
-      Utilities.sleep(100);
+      Utilities.sleep(2000);
       m_autoSortByStage_(sheet);
     }
     
@@ -181,7 +181,7 @@ function handleEditMove_(e) {
   
   // Auto-sort if Stage column was edited but no move occurred
   if (shouldAutoSort && col === S.COLS.STAGE) {
-    Utilities.sleep(100);
+    Utilities.sleep(2000);
     m_autoSortByStage_(sheet);
   }
 }
@@ -210,6 +210,9 @@ function m_autoSortByStage_(sheet) {
       .setFontSize(10)
       .setVerticalAlignment('middle')
       .setBackground(null); // Clear background (no fill)
+    
+    // Check for empty folders and highlight them red
+    m_checkEmptyFoldersInSheet_(sheet);
     
     if (S.ENABLE_LOGGING) {
       m_logOperation_('Auto-sorted and formatted', {
@@ -485,7 +488,7 @@ function handleStageChange_(e, sheet, row, newStage) {
   }
 
   // Special case: "2. Sched" in Leads creates a calendar event (no move)
-  if (isLeads && m_stageMatches_(stage, S.STAGE_MAPPINGS.schedule)) {
+  if ((isLeads || isFU || isAwarded) && m_stageMatches_(stage, S.STAGE_MAPPINGS.schedule)) {
     const success = createNextDayGinoEvent_(sheet, row);
     SpreadsheetApp.getActive().toast(
       success ? 'Calendar event created for tomorrow at 8:00 AM' : 'Failed to create calendar event',
@@ -571,7 +574,7 @@ function handleStageChange_(e, sheet, row, newStage) {
       
       // Auto-sort destination sheet if it's in the auto-sort list
       if (S.AUTO_SORT.ENABLED && S.AUTO_SORT.SHEETS.includes(dest.getName())) {
-        Utilities.sleep(100);
+        Utilities.sleep(2000);
         m_autoSortByStage_(dest);
       }
       
@@ -1387,9 +1390,9 @@ function m_checkEmptyFoldersInSheet_(sheet) {
     const row = i + 2; // Actual sheet row
     const richText = richTextValues[i][0];
     
-    // Skip empty cells
+    // Skip empty cells - reset to table default
     if (!richText || !richText.getText()) {
-      backgrounds.push(['#ffffff']); // reset background for empty
+      backgrounds.push([null]); // Reset to table default
       continue;
     }
     
@@ -1397,14 +1400,14 @@ function m_checkEmptyFoldersInSheet_(sheet) {
     const folderUrl = richText.getLinkUrl();
     
     if (!folderUrl) {
-      backgrounds.push(['#ffffff']); // No link = reset background
+      backgrounds.push([null]); // No link = reset to table default
       continue;
     }
     
     // Extract folder ID from URL
     const match = folderUrl.match(/[-\w]{25,}/);
     if (!match) {
-      backgrounds.push(['#ffffff']); // Invalid URL = reset background
+      backgrounds.push([null]); // Invalid URL = reset to table default
       continue;
     }
     
@@ -1418,11 +1421,11 @@ function m_checkEmptyFoldersInSheet_(sheet) {
       checked++;
       
       if (files.hasNext()) {
-        // Folder has files - reset background (or clear any existing color)
-        backgrounds.push(['#ffffff']);
+        // Folder has files - reset to table default
+        backgrounds.push([null]);
       } else {
-        // Folder is empty - red background
-        backgrounds.push(['#ff0000']);
+        // Folder is empty - light red background
+        backgrounds.push(['#ffb4b4']);
         empty++;
       }
       
