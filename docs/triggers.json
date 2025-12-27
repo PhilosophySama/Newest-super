@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2025-12-27T01:50:45.692Z",
+    "lastUpdated": "2025-12-27T01:51:46.727Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -10,11 +10,11 @@
     "totalFiles": 10,
     "totalFunctions": 153,
     "totalTriggers": 20,
-    "totalLines": 7510,
-    "publicFunctions": 57,
-    "helperFunctions": 137,
+    "totalLines": 7329,
+    "publicFunctions": 53,
+    "helperFunctions": 141,
     "avgFunctionsPerFile": 15,
-    "avgLinesPerFile": 751
+    "avgLinesPerFile": 733
   },
   "files": [
     {
@@ -650,99 +650,102 @@
     {
       "path": "Lean-to generator.gs",
       "filename": "Lean-to generator.gs",
-      "purpose": "AWNING RUBY GENERATOR (Lean-to & A-Frame) — Web App Display Version# [01/13-11:58PM EST] by Claude Opus 4.1 Triggers on edits to Leads!T:AD (cols 20–30).",
-      "version": "[01/13-11:58PM EST] by Claude Opus 4.1",
+      "purpose": "LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export Version# [INTEGRATED] by Gino + ChatGPT Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:",
+      "version": "[INTEGRATED] by Gino + ChatGPT",
       "functions": [
         {
           "name": "handleEditAwningRuby_",
-          "line": 28,
+          "line": 29,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "doGet",
-          "line": 91,
-          "description": "Web app handler - shows Ruby code when hyperlink is clicked",
-          "isPublic": true,
-          "isHelper": false
-        },
-        {
-          "name": "copyCode",
-          "line": 315,
-          "description": null,
-          "isPublic": true,
-          "isHelper": false
-        },
-        {
-          "name": "selectAll",
-          "line": 321,
-          "description": null,
-          "isPublic": true,
-          "isHelper": false
-        },
-        {
-          "name": "showSuccess",
-          "line": 325,
-          "description": null,
-          "isPublic": true,
-          "isHelper": false
-        },
-        {
-          "name": "r_buildLeanToRuby_",
-          "line": 356,
-          "description": "Build Lean-to Ruby script with parameters",
+          "name": "r_buildRubyFromLeanToTemplate_",
+          "line": 144,
+          "description": "Replace ONLY the parameter literals in the Lean-to Ruby template. Every other character (including spacing and comments) is preserved verbatim.",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "r_buildAFrameRuby_",
-          "line": 413,
-          "description": "Build A-Frame Ruby script with parameters",
+          "name": "r_buildRubyFromAFrameTemplate_",
+          "line": 196,
+          "description": "Replace ONLY the parameter literals in the A-Frame Ruby template. Every other character (including spacing and comments) is preserved verbatim.",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "r_getLeanToTemplate_",
-          "line": 471,
-          "description": "Lean-to Ruby template (exact copy from original)",
+          "name": "r_getLeanToRubyTemplate_",
+          "line": 249,
+          "description": "LEAN-TO RUBY TEMPLATE — DO NOT CHANGE ANYTHING HERE. We substitute only the parameter values via r_buildRubyFromLeanToTemplate_().",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "r_getRubyExactTemplate",
-          "line": 666,
-          "description": "Public wrapper for Lean-to template (for backward compatibility)",
-          "isPublic": true,
+          "name": "r_getAFrameRubyTemplate_",
+          "line": 444,
+          "description": "A-FRAME RUBY TEMPLATE — DO NOT CHANGE ANYTHING HERE. We substitute only the parameter values via r_buildRubyFromAFrameTemplate_().",
+          "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "r_getAFrameTemplate_",
-          "line": 673,
-          "description": "A-Frame Ruby template",
+          "name": "r_writeRubyToDrive_",
+          "line": 698,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "r_getRubyExportFolder_",
+          "line": 716,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installTriggerAwningRuby_",
+          "line": 731,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "handleEditLeanToRuby_",
+          "line": 743,
+          "description": "Backward compatibility wrappers for old function names",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerLeanToRuby_",
-          "line": 928,
+          "line": 747,
           "description": null,
           "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "r_getRubyExactTemplate",
+          "line": 751,
+          "description": null,
+          "isPublic": true,
           "isHelper": true
         }
       ],
       "triggers": [],
       "dependencies": [
         "handleEditAwningRuby_",
-        "r_buildLeanToRuby_",
-        "r_buildAFrameRuby_",
-        "r_getLeanToTemplate_",
-        "r_getAFrameTemplate_",
-        "installTriggerLeanToRuby_",
-        "Defines: AWNING_RUBY_CONFIG"
+        "r_buildRubyFromLeanToTemplate_",
+        "r_buildRubyFromAFrameTemplate_",
+        "r_writeRubyToDrive_",
+        "r_getLeanToRubyTemplate_",
+        "r_getAFrameRubyTemplate_",
+        "r_getRubyExportFolder_",
+        "installTriggerAwningRuby_",
+        "handleEditLeanToRuby_",
+        "installTriggerLeanToRuby_"
       ],
-      "lines": 935,
-      "size": 29989
+      "lines": 754,
+      "size": 24931
     },
     {
       "path": "Menus.gs",
@@ -2191,99 +2194,102 @@
       {
         "path": "Lean-to generator.gs",
         "filename": "Lean-to generator.gs",
-        "purpose": "AWNING RUBY GENERATOR (Lean-to & A-Frame) — Web App Display Version# [01/13-11:58PM EST] by Claude Opus 4.1 Triggers on edits to Leads!T:AD (cols 20–30).",
-        "version": "[01/13-11:58PM EST] by Claude Opus 4.1",
+        "purpose": "LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export Version# [INTEGRATED] by Gino + ChatGPT Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:",
+        "version": "[INTEGRATED] by Gino + ChatGPT",
         "functions": [
           {
             "name": "handleEditAwningRuby_",
-            "line": 28,
+            "line": 29,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "doGet",
-            "line": 91,
-            "description": "Web app handler - shows Ruby code when hyperlink is clicked",
-            "isPublic": true,
-            "isHelper": false
-          },
-          {
-            "name": "copyCode",
-            "line": 315,
-            "description": null,
-            "isPublic": true,
-            "isHelper": false
-          },
-          {
-            "name": "selectAll",
-            "line": 321,
-            "description": null,
-            "isPublic": true,
-            "isHelper": false
-          },
-          {
-            "name": "showSuccess",
-            "line": 325,
-            "description": null,
-            "isPublic": true,
-            "isHelper": false
-          },
-          {
-            "name": "r_buildLeanToRuby_",
-            "line": 356,
-            "description": "Build Lean-to Ruby script with parameters",
+            "name": "r_buildRubyFromLeanToTemplate_",
+            "line": 144,
+            "description": "Replace ONLY the parameter literals in the Lean-to Ruby template. Every other character (including spacing and comments) is preserved verbatim.",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "r_buildAFrameRuby_",
-            "line": 413,
-            "description": "Build A-Frame Ruby script with parameters",
+            "name": "r_buildRubyFromAFrameTemplate_",
+            "line": 196,
+            "description": "Replace ONLY the parameter literals in the A-Frame Ruby template. Every other character (including spacing and comments) is preserved verbatim.",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "r_getLeanToTemplate_",
-            "line": 471,
-            "description": "Lean-to Ruby template (exact copy from original)",
+            "name": "r_getLeanToRubyTemplate_",
+            "line": 249,
+            "description": "LEAN-TO RUBY TEMPLATE — DO NOT CHANGE ANYTHING HERE. We substitute only the parameter values via r_buildRubyFromLeanToTemplate_().",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "r_getRubyExactTemplate",
-            "line": 666,
-            "description": "Public wrapper for Lean-to template (for backward compatibility)",
-            "isPublic": true,
+            "name": "r_getAFrameRubyTemplate_",
+            "line": 444,
+            "description": "A-FRAME RUBY TEMPLATE — DO NOT CHANGE ANYTHING HERE. We substitute only the parameter values via r_buildRubyFromAFrameTemplate_().",
+            "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "r_getAFrameTemplate_",
-            "line": 673,
-            "description": "A-Frame Ruby template",
+            "name": "r_writeRubyToDrive_",
+            "line": 698,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "r_getRubyExportFolder_",
+            "line": 716,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installTriggerAwningRuby_",
+            "line": 731,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "handleEditLeanToRuby_",
+            "line": 743,
+            "description": "Backward compatibility wrappers for old function names",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerLeanToRuby_",
-            "line": 928,
+            "line": 747,
             "description": null,
             "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "r_getRubyExactTemplate",
+            "line": 751,
+            "description": null,
+            "isPublic": true,
             "isHelper": true
           }
         ],
         "triggers": [],
         "dependencies": [
           "handleEditAwningRuby_",
-          "r_buildLeanToRuby_",
-          "r_buildAFrameRuby_",
-          "r_getLeanToTemplate_",
-          "r_getAFrameTemplate_",
-          "installTriggerLeanToRuby_",
-          "Defines: AWNING_RUBY_CONFIG"
+          "r_buildRubyFromLeanToTemplate_",
+          "r_buildRubyFromAFrameTemplate_",
+          "r_writeRubyToDrive_",
+          "r_getLeanToRubyTemplate_",
+          "r_getAFrameRubyTemplate_",
+          "r_getRubyExportFolder_",
+          "installTriggerAwningRuby_",
+          "handleEditLeanToRuby_",
+          "installTriggerLeanToRuby_"
         ],
-        "lines": 935,
-        "size": 29989
+        "lines": 754,
+        "size": 24931
       }
     ],
     "integration": [
