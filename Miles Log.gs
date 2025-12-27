@@ -1,5 +1,5 @@
 /**
- * Mileage Log Automation Script
+ * Miles Log
  * Version 8.1 [09/10-11:00AM EST] by Claude Opus 4.1
  *
  * Features:
