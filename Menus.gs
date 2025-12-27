@@ -1,7 +1,7 @@
 /**
- * Single shared menu for the project.
- * Version# [11/05-Added Gemini Lead Processor]
- * by Claude Sonnet 4.5
+ * Menus.gs
+ * Version# [12/05-04:15PM EST] - Added Empty Folder Check menu items
+ * by Claude Opus 4.1
  *
  * - Stage menu (Move automation)
  * - Drafts menu (Gmail drafts V2)
@@ -9,7 +9,7 @@
  * - Ruby menu (Lean-to generator)
  * - QuickBooks menu (Auth + API tests)
  * - Email Reader menu (Automated email processing)
- * - Gemini Leads menu (Add lead label processor) - NEW!
+ * - Gemini Leads menu (Add lead label processor)
  * - System utilities
  *
  * IMPORTANT: Do not define any other onOpen() anywhere else.
@@ -25,6 +25,9 @@ function onOpen() {
       .addItem('Test Drive Access', 'testDriveAccess_')
       .addItem('Test Calendar Access', 'testCalendarAccess_')
       .addItem('Validate Sheet Structure', 'validateSheetStructure_')
+      .addSeparator()
+      .addItem('🔍 Check Empty Folders Now', 'checkEmptyFoldersNow_')
+      .addItem('⏰ Install Daily Folder Check (7am)', 'installDailyFolderCheckTrigger_')
       .addToUi();
 
     // Draft Creator menu
@@ -80,7 +83,7 @@ function onOpen() {
       .addItem('🛑 Remove Auto-Check', 'er_removeTrigger')
       .addToUi();
 
-    // Gemini Lead Processor Menu - NEW!
+    // Gemini Lead Processor Menu
     ui.createMenu('Setup (Gemini Leads)')
       .addItem('🔍 Run Diagnostics', 'gl_diagnosticCheck')
       .addItem('📋 Show Configuration', 'gl_showConfiguration')
@@ -101,7 +104,6 @@ function onOpen() {
     console.log('Menus created successfully');
   } catch (error) {
     console.error('Error creating menus:', error);
-    // Still try to create a basic menu if there's an error
     try {
       SpreadsheetApp.getUi().createMenu('🔧 Debug')
         .addItem('Check Menu Error', 'debugMenuError_')
@@ -140,11 +142,11 @@ STEP 3: Configure Script Properties
 ------------------------------------
 In Script Editor: Project Settings → Script Properties
 Add these properties:
-• QBO_CLIENT_ID: From your Intuit Developer app
-• QBO_CLIENT_SECRET: From your Intuit Developer app
-• QBO_REDIRECT_URI: From Step 2
-• QBO_ENVIRONMENT: "production" or "sandbox"
-• QBO_REALM_ID: (set automatically during auth)
+- QBO_CLIENT_ID: From your Intuit Developer app
+- QBO_CLIENT_SECRET: From your Intuit Developer app
+- QBO_REDIRECT_URI: From Step 2
+- QBO_ENVIRONMENT: "production" or "sandbox"
+- QBO_REALM_ID: (set automatically during auth)
 
 STEP 4: Configure Intuit App
 -----------------------------
@@ -186,7 +188,6 @@ If you get "undefined didn't connect":
 function debugMenuError_() {
   const ui = SpreadsheetApp.getUi();
   
-  // Check if key functions exist
   const missingFunctions = [];
   const functionsToCheck = [
     'installTriggerMove_',
@@ -199,7 +200,9 @@ function debugMenuError_() {
     'sendEstimateCurrentRow_',
     'er_processNewEmails',
     'gl_diagnosticCheck',
-    'gl_processAddLeadEmails'
+    'gl_processAddLeadEmails',
+    'checkEmptyFoldersNow_',
+    'installDailyFolderCheckTrigger_'
   ];
   
   functionsToCheck.forEach(funcName => {
