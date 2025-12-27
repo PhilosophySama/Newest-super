@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2025-12-27T01:52:27.780Z",
+    "lastUpdated": "2025-12-27T01:53:23.589Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -10,11 +10,11 @@
     "totalFiles": 10,
     "totalFunctions": 153,
     "totalTriggers": 20,
-    "totalLines": 7334,
+    "totalLines": 7338,
     "publicFunctions": 53,
     "helperFunctions": 141,
     "avgFunctionsPerFile": 15,
-    "avgLinesPerFile": 733
+    "avgLinesPerFile": 734
   },
   "files": [
     {
@@ -1149,189 +1149,189 @@
         },
         {
           "name": "updateJobDescription_",
-          "line": 233,
+          "line": 236,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleDisplayNameChange_",
-          "line": 308,
+          "line": 311,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleEmailChange_",
-          "line": 347,
+          "line": 350,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleAddressChange_",
-          "line": 381,
+          "line": 384,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createEarthLink_",
-          "line": 411,
+          "line": 414,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleQbUrlChange_",
-          "line": 444,
+          "line": 447,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleStageChange_",
-          "line": 461,
+          "line": 464,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "moveRow_",
-          "line": 592,
+          "line": 595,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_searchAndLinkSentEmail_",
-          "line": 653,
+          "line": 656,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_linkQuoteSentEmail_",
-          "line": 735,
+          "line": 738,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_createPrintPacket_",
-          "line": 842,
+          "line": 845,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createNextDayGinoEvent_",
-          "line": 1049,
+          "line": 1052,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testCalendarAccess_",
-          "line": 1128,
+          "line": 1131,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_stageMatches_",
-          "line": 1139,
+          "line": 1142,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_looksLikeUrl_",
-          "line": 1143,
+          "line": 1146,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_getUrlFromCell_",
-          "line": 1147,
+          "line": 1150,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_cleanAddressForGoogleEarth_",
-          "line": 1177,
+          "line": 1180,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_geocodeAddress_",
-          "line": 1194,
+          "line": 1197,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_extractCoordinates_",
-          "line": 1217,
+          "line": 1220,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_logOperation_",
-          "line": 1227,
+          "line": 1230,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testDriveAccess_",
-          "line": 1234,
+          "line": 1237,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "validateSheetStructure_",
-          "line": 1245,
+          "line": 1248,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerMove_",
-          "line": 1290,
+          "line": 1293,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersDaily_",
-          "line": 1305,
+          "line": 1308,
           "description": "Check empty folders daily at 7am (time-driven trigger)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersNow_",
-          "line": 1340,
+          "line": 1343,
           "description": "Check empty folders immediately (manual trigger from menu)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_checkEmptyFoldersInSheet_",
-          "line": 1369,
+          "line": 1372,
           "description": "Check all folders in a single sheet and highlight empty ones",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installDailyFolderCheckTrigger_",
-          "line": 1454,
+          "line": 1457,
           "description": "Install daily folder check trigger (7am)",
           "isPublic": false,
           "isHelper": true
@@ -1473,6 +1473,7 @@
         "handleQbUrlChange_",
         "handleStageChange_",
         "m_autoSortByStage_",
+        "m_checkEmptyFoldersInSheet_",
         "createEarthLink_",
         "m_geocodeAddress_",
         "m_cleanAddressForGoogleEarth_",
@@ -1490,14 +1491,13 @@
         "validateSheetStructure_",
         "installTriggerMove_",
         "checkEmptyFoldersDaily_",
-        "m_checkEmptyFoldersInSheet_",
         "checkEmptyFoldersNow_",
         "installDailyFolderCheckTrigger_",
         "MOVE_CONFIG",
         "Defines: MOVE_CONFIG"
       ],
-      "lines": 1478,
-      "size": 53638
+      "lines": 1482,
+      "size": 53759
     }
   ],
   "categories": {
@@ -1839,189 +1839,189 @@
           },
           {
             "name": "updateJobDescription_",
-            "line": 233,
+            "line": 236,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleDisplayNameChange_",
-            "line": 308,
+            "line": 311,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleEmailChange_",
-            "line": 347,
+            "line": 350,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleAddressChange_",
-            "line": 381,
+            "line": 384,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createEarthLink_",
-            "line": 411,
+            "line": 414,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleQbUrlChange_",
-            "line": 444,
+            "line": 447,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleStageChange_",
-            "line": 461,
+            "line": 464,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "moveRow_",
-            "line": 592,
+            "line": 595,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_searchAndLinkSentEmail_",
-            "line": 653,
+            "line": 656,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_linkQuoteSentEmail_",
-            "line": 735,
+            "line": 738,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_createPrintPacket_",
-            "line": 842,
+            "line": 845,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createNextDayGinoEvent_",
-            "line": 1049,
+            "line": 1052,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testCalendarAccess_",
-            "line": 1128,
+            "line": 1131,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_stageMatches_",
-            "line": 1139,
+            "line": 1142,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_looksLikeUrl_",
-            "line": 1143,
+            "line": 1146,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_getUrlFromCell_",
-            "line": 1147,
+            "line": 1150,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_cleanAddressForGoogleEarth_",
-            "line": 1177,
+            "line": 1180,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_geocodeAddress_",
-            "line": 1194,
+            "line": 1197,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_extractCoordinates_",
-            "line": 1217,
+            "line": 1220,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_logOperation_",
-            "line": 1227,
+            "line": 1230,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testDriveAccess_",
-            "line": 1234,
+            "line": 1237,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "validateSheetStructure_",
-            "line": 1245,
+            "line": 1248,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerMove_",
-            "line": 1290,
+            "line": 1293,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersDaily_",
-            "line": 1305,
+            "line": 1308,
             "description": "Check empty folders daily at 7am (time-driven trigger)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersNow_",
-            "line": 1340,
+            "line": 1343,
             "description": "Check empty folders immediately (manual trigger from menu)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_checkEmptyFoldersInSheet_",
-            "line": 1369,
+            "line": 1372,
             "description": "Check all folders in a single sheet and highlight empty ones",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installDailyFolderCheckTrigger_",
-            "line": 1454,
+            "line": 1457,
             "description": "Install daily folder check trigger (7am)",
             "isPublic": false,
             "isHelper": true
@@ -2163,6 +2163,7 @@
           "handleQbUrlChange_",
           "handleStageChange_",
           "m_autoSortByStage_",
+          "m_checkEmptyFoldersInSheet_",
           "createEarthLink_",
           "m_geocodeAddress_",
           "m_cleanAddressForGoogleEarth_",
@@ -2180,14 +2181,13 @@
           "validateSheetStructure_",
           "installTriggerMove_",
           "checkEmptyFoldersDaily_",
-          "m_checkEmptyFoldersInSheet_",
           "checkEmptyFoldersNow_",
           "installDailyFolderCheckTrigger_",
           "MOVE_CONFIG",
           "Defines: MOVE_CONFIG"
         ],
-        "lines": 1478,
-        "size": 53638
+        "lines": 1482,
+        "size": 53759
       }
     ],
     "automation": [
