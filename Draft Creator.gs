@@ -1,5 +1,5 @@
 /**
- * Lead_Draft_Creator_V2.gs
+ * Draft Creator.gs
  * version# 01/05-10:15PM EST by Claude Opus 4.1
  *
  * PURPOSE
