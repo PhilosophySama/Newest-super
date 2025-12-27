@@ -1,27 +1,28 @@
 /**
- * AWNING RUBY GENERATOR (Lean-to & A-Frame) — Web App Display
- * Version# [01/13-11:58PM EST] by Claude Opus 4.1
+ * LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export
+ * Version# [INTEGRATED] by Gino + ChatGPT
  *
- * Triggers on edits to Leads!T:AD (cols 20–30).
- * Generates Ruby code and creates clickable links that open in a web viewer.
- * Click the link in column S to see Ruby code with copy button!
+ * Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:
+ *   - "Lean-to" or "Sloped L" → generates Lean-to Ruby
+ *   - "A-frame" or "A frame" → generates A-frame Ruby
  *
- * Parameters changed:
- *   - AWNING_MATERIAL (AB): Sunbrella or Vinyl
+ * Generates plain-text .rb files in Drive with parameters:
+ *   - AWNING_MATERIAL (AB)
  *   - LENGTH (T)
  *   - PROJECTION (U)
- *   - HEIGHT (X): Wing Height
+ *   - HEIGHT (X)
  *   - FRONT_BAR_HEIGHT (V)
  *   - HAS_WINGS (Y > 0 → true, else false)
- *   - HAS_POSTS (AD == "Yes" or checkbox TRUE → true; otherwise false)
- *   - TRUSSES: Sunbrella = roundup(length/3.5), Vinyl = roundup(length/5)
+ *   - HAS_POSTS (AD == "Yes" → true; checkbox TRUE → true; otherwise false)
  *
- * Column S shows hyperlink "Ruby (.rb)". Clicking opens web viewer with copy button.
+ * Column S shows a hyperlink "Ruby (.rb)". If Drive write fails, falls back to writing into S.
+ *
  * Helper names prefixed r_ to avoid collisions.
  */
 
-const AWNING_RUBY_CONFIG = {
-  WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbwtHBMWqpSefpxexUJxl7PiQGzEzW0EIs3rQIo4xxTjZL69OMcTUncN740OZVwj5jv3bQ/exec',
+const AWNING_RUBY_EXPORT = {
+  FOLDER_ID: '',                        // optional fixed folder ID (leave blank to auto-create in My Drive)
+  FOLDER_NAME: 'SketchUp Ruby Exports', // used when FOLDER_ID is blank; created once and cached
   LINK_TEXT: 'Ruby (.rb)'
 };
 
@@ -46,10 +47,10 @@ function handleEditAwningRuby_(e) {
     WIDTH: 21,         // U
     FRONT_BAR: 22,     // V
     WING_HEIGHT: 24,   // X
-    NUM_WINGS: 25,     // Y
+    NUM_WINGS: 25,     // Y  (0 => false, else true)
     TYPE: 27,          // AA
     FABRIC: 28,        // AB
-    POSTS: 30,         // AD
+    POSTS: 30,         // AD  ("Yes" or checkbox TRUE → true; else false)
     DISPLAY: 6         // F - optional for nicer filenames
   };
 
@@ -62,299 +63,86 @@ function handleEditAwningRuby_(e) {
   } else if (type && (type.includes('a-frame') || type.includes('a frame'))) {
     awningType = 'A_FRAME';
   } else {
-    // Not a supported type, clear output
     sheet.getRange(row, COLS.RUBY_OUT).clearContent();
     return;
   }
 
+  // Read parameters
+  const length    = Number(sheet.getRange(row, COLS.LENGTH).getValue())      || 50;
+  const width     = Number(sheet.getRange(row, COLS.WIDTH).getValue())       || 11;
+  const height    = Number(sheet.getRange(row, COLS.WING_HEIGHT).getValue()) || 5;
+  const frontBar  = Number(sheet.getRange(row, COLS.FRONT_BAR).getValue())   || 1;
+  const wingsNum  = Number(sheet.getRange(row, COLS.NUM_WINGS).getValue())   || 0;
+
+  const fabricRaw = sheet.getRange(row, COLS.FABRIC).getValue();   // could be text/formula
+  const postsVal  = sheet.getRange(row, COLS.POSTS).getValue();    // could be text/checkbox boolean
+  const dispName  = String(sheet.getRange(row, COLS.DISPLAY).getDisplayValue() || '').trim();
+
+  const hasWings   = wingsNum > 0;
+  const fabricType = (typeof fabricRaw === 'string' && /vinyl/i.test(fabricRaw)) ? 'Vinyl' : 'Sunbrella';
+
+  // Robust posts flag:
+  //  - TRUE if checkbox is checked (boolean true)
+  //  - TRUE if text equals "yes" (case-insensitive, trimmed)
+  //  - FALSE for blank, false, anything else
+  let hasPosts = false;
+  if (typeof postsVal === 'boolean') {
+    hasPosts = postsVal === true;
+  } else if (postsVal != null) {
+    hasPosts = /^\s*yes\s*$/i.test(String(postsVal));
+  }
+
+  // Build the Ruby script based on awning type
+  let rubyExact;
+  let typeName;
+  
+  if (awningType === 'LEAN_TO') {
+    rubyExact = r_buildRubyFromLeanToTemplate_({
+      fabric:     fabricType,
+      length:     length,
+      projection: width,
+      height:     height,
+      frontBar:   frontBar,
+      hasWings:   hasWings,
+      hasPosts:   hasPosts
+    });
+    typeName = 'Lean-to';
+  } else if (awningType === 'A_FRAME') {
+    rubyExact = r_buildRubyFromAFrameTemplate_({
+      fabric:     fabricType,
+      length:     length,
+      projection: width,
+      height:     height,
+      frontBar:   frontBar,
+      hasWings:   hasWings,
+      hasPosts:   hasPosts
+    });
+    typeName = 'A-Frame';
+  }
+
   try {
-    // Create web app URL with parameters
-    const ssId = SpreadsheetApp.getActive().getId();
-    const webAppUrl = `${AWNING_RUBY_CONFIG.WEB_APP_URL}?row=${row}&ss=${ssId}`;
+    const file = r_writeRubyToDrive_(rubyExact, row, dispName, typeName);
+    const url  = file.getUrl();
 
     const rich = SpreadsheetApp.newRichTextValue()
-      .setText(AWNING_RUBY_CONFIG.LINK_TEXT)
-      .setLinkUrl(webAppUrl)
+      .setText(AWNING_RUBY_EXPORT.LINK_TEXT)
+      .setLinkUrl(url)
       .build();
     sheet.getRange(row, COLS.RUBY_OUT).setRichTextValue(rich);
 
-    SpreadsheetApp.getActive().toast(`${awningType === 'LEAN_TO' ? 'Lean-to' : 'A-Frame'} Ruby link ready for row ${row}`, 'Success', 3);
+    SpreadsheetApp.getActive().toast('Ruby export ready for row ' + row, 'Success', 3);
   } catch (err) {
-    sheet.getRange(row, COLS.RUBY_OUT).setValue('Error: ' + err.message);
-    SpreadsheetApp.getActive().toast('Link creation failed: ' + err.message, 'Warning', 5);
+    sheet.getRange(row, COLS.RUBY_OUT).setValue(rubyExact); // fallback
+    SpreadsheetApp.getActive().toast('Drive write failed, wrote to S instead: ' + err.message, 'Warning', 5);
   }
 }
 
 /**
- * Web app handler - shows Ruby code when hyperlink is clicked
+ * Replace ONLY the parameter literals in the Lean-to Ruby template.
+ * Every other character (including spacing and comments) is preserved verbatim.
  */
-function doGet(e) {
-  const row = e.parameter.row;
-  const ssId = e.parameter.ss;
-  
-  if (!row || !ssId) {
-    return HtmlService.createHtmlOutput('Error: Missing parameters');
-  }
-  
-  try {
-    const ss = SpreadsheetApp.openById(ssId);
-    const sheet = ss.getSheetByName('Leads');
-    
-    const COLS = {
-      LENGTH: 20,        // T
-      WIDTH: 21,         // U
-      FRONT_BAR: 22,     // V
-      WING_HEIGHT: 24,   // X
-      NUM_WINGS: 25,     // Y
-      TYPE: 27,          // AA
-      FABRIC: 28,        // AB
-      POSTS: 30,         // AD
-      DISPLAY: 6         // F
-    };
-
-    const type = String(sheet.getRange(row, COLS.TYPE).getDisplayValue() || '').trim().toLowerCase();
-    const dispName = String(sheet.getRange(row, COLS.DISPLAY).getDisplayValue() || '').trim();
-    
-    // Determine awning type
-    let awningType = null;
-    let typeName = '';
-    if (type && (type.includes('lean') || type === 'sloped l')) {
-      awningType = 'LEAN_TO';
-      typeName = 'Lean-to';
-    } else if (type && (type.includes('a-frame') || type.includes('a frame'))) {
-      awningType = 'A_FRAME';
-      typeName = 'A-Frame';
-    } else {
-      return HtmlService.createHtmlOutput('Error: Invalid awning type');
-    }
-
-    // Read parameters
-    const length    = Number(sheet.getRange(row, COLS.LENGTH).getValue())      || 50;
-    const width     = Number(sheet.getRange(row, COLS.WIDTH).getValue())       || 11;
-    const height    = Number(sheet.getRange(row, COLS.WING_HEIGHT).getValue()) || 5;
-    const frontBar  = Number(sheet.getRange(row, COLS.FRONT_BAR).getValue())   || 1;
-    const wingsNum  = Number(sheet.getRange(row, COLS.NUM_WINGS).getValue())   || 0;
-    const fabricRaw = sheet.getRange(row, COLS.FABRIC).getValue();
-    const postsVal  = sheet.getRange(row, COLS.POSTS).getValue();
-
-    const hasWings   = wingsNum > 0;
-    const fabricType = (typeof fabricRaw === 'string' && /vinyl/i.test(fabricRaw)) ? 'Vinyl' : 'Sunbrella';
-    const trussSpacing = fabricType === 'Sunbrella' ? 3.5 : 5.0;
-    const trusses = Math.ceil(length / trussSpacing);
-
-    let hasPosts = false;
-    if (typeof postsVal === 'boolean') {
-      hasPosts = postsVal === true;
-    } else if (postsVal != null) {
-      hasPosts = /^\s*yes\s*$/i.test(String(postsVal));
-    }
-
-    // Generate Ruby script
-    let rubyScript;
-    if (awningType === 'LEAN_TO') {
-      rubyScript = r_buildLeanToRuby_({
-        fabric: fabricType,
-        length: length,
-        projection: width,
-        height: height,
-        frontBar: frontBar,
-        hasWings: hasWings,
-        hasPosts: hasPosts,
-        trusses: trusses
-      });
-    } else if (awningType === 'A_FRAME') {
-      rubyScript = r_buildAFrameRuby_({
-        fabric: fabricType,
-        length: length,
-        projection: width,
-        height: height,
-        frontBar: frontBar,
-        hasWings: hasWings,
-        hasPosts: hasPosts,
-        trusses: trusses
-      });
-    }
-
-    // Create HTML page
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Ruby Code - ${typeName}</title>
-          <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-              background: #1e1e1e;
-              color: #d4d4d4;
-              padding: 20px;
-              line-height: 1.6;
-            }
-            .container {
-              max-width: 1200px;
-              margin: 0 auto;
-            }
-            .header {
-              background: #2d2d30;
-              padding: 20px;
-              border-radius: 8px 8px 0 0;
-              border-bottom: 3px solid #007acc;
-            }
-            h1 {
-              color: #4ec9b0;
-              font-size: 24px;
-              margin-bottom: 8px;
-            }
-            .meta {
-              color: #858585;
-              font-size: 14px;
-            }
-            .actions {
-              background: #252526;
-              padding: 15px 20px;
-              display: flex;
-              gap: 10px;
-              align-items: center;
-            }
-            button {
-              padding: 10px 20px;
-              font-size: 14px;
-              font-weight: 600;
-              background: #007acc;
-              color: white;
-              border: none;
-              cursor: pointer;
-              border-radius: 4px;
-              transition: background 0.2s;
-            }
-            button:hover {
-              background: #005a9e;
-            }
-            button:active {
-              background: #004578;
-            }
-            .success {
-              color: #4ec9b0;
-              font-weight: 600;
-              display: none;
-              animation: fadeIn 0.3s;
-            }
-            @keyframes fadeIn {
-              from { opacity: 0; }
-              to { opacity: 1; }
-            }
-            .code-container {
-              background: #1e1e1e;
-              border: 1px solid #3e3e42;
-              border-radius: 0 0 8px 8px;
-              overflow: hidden;
-            }
-            #code {
-              width: 100%;
-              min-height: 600px;
-              border: none;
-              padding: 20px;
-              font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-              font-size: 13px;
-              line-height: 1.5;
-              background: #1e1e1e;
-              color: #d4d4d4;
-              white-space: pre;
-              overflow: auto;
-              resize: vertical;
-            }
-            #code:focus {
-              outline: none;
-              background: #1a1a1a;
-            }
-            .footer {
-              text-align: center;
-              margin-top: 20px;
-              color: #858585;
-              font-size: 12px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>🎨 ${typeName} Ruby Script</h1>
-              <div class="meta">
-                ${dispName ? `<strong>${dispName}</strong> • ` : ''}
-                Row ${row} • 
-                ${length}' × ${width}' • 
-                ${fabricType} • 
-                ${hasWings ? 'With Wings' : 'No Wings'}
-              </div>
-            </div>
-            
-            <div class="actions">
-              <button onclick="copyCode()">📋 Copy to Clipboard</button>
-              <button onclick="selectAll()">✨ Select All</button>
-              <span class="success" id="success">✓ Copied to clipboard!</span>
-            </div>
-            
-            <div class="code-container">
-              <textarea id="code" spellcheck="false">${rubyScript.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-            </div>
-            
-            <div class="footer">
-              Generated by Awning Ruby Generator • Click code to select • Press Ctrl+C to copy
-            </div>
-          </div>
-          
-          <script>
-            const codeElement = document.getElementById('code');
-            const successElement = document.getElementById('success');
-            
-            function copyCode() {
-              codeElement.select();
-              document.execCommand('copy');
-              showSuccess();
-            }
-            
-            function selectAll() {
-              codeElement.select();
-            }
-            
-            function showSuccess() {
-              successElement.style.display = 'inline';
-              setTimeout(() => {
-                successElement.style.display = 'none';
-              }, 2000);
-            }
-            
-            // Auto-select on load for easy copying
-            window.addEventListener('load', () => {
-              codeElement.focus();
-            });
-            
-            // Click anywhere on code to select all
-            codeElement.addEventListener('click', selectAll);
-          </script>
-        </body>
-      </html>
-    `;
-    
-    return HtmlService.createHtmlOutput(html)
-      .setTitle(`Ruby Code - ${typeName}`)
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-      
-  } catch (error) {
-    return HtmlService.createHtmlOutput('Error: ' + error.message);
-  }
-}
-
-/**
- * Build Lean-to Ruby script with parameters
- */
-function r_buildLeanToRuby_(p) {
-  let txt = r_getLeanToTemplate_();
+function r_buildRubyFromLeanToTemplate_(p) {
+  let txt = r_getLeanToRubyTemplate_();
 
   // AWNING_MATERIAL
   txt = txt.replace(
@@ -398,20 +186,15 @@ function r_buildLeanToRuby_(p) {
     `$1${p.hasPosts}$3`
   );
 
-  // TRUSSES
-  txt = txt.replace(
-    /^(TRUSSES\s*=\s*)\(.*?\)(\s*#.*)$/m,
-    `$1${p.trusses}$2`
-  );
-
   return txt;
 }
 
 /**
- * Build A-Frame Ruby script with parameters
+ * Replace ONLY the parameter literals in the A-Frame Ruby template.
+ * Every other character (including spacing and comments) is preserved verbatim.
  */
-function r_buildAFrameRuby_(p) {
-  let txt = r_getAFrameTemplate_();
+function r_buildRubyFromAFrameTemplate_(p) {
+  let txt = r_getAFrameRubyTemplate_();
 
   // AWNING_MATERIAL
   txt = txt.replace(
@@ -425,7 +208,7 @@ function r_buildAFrameRuby_(p) {
     `$1${p.length}$2`
   );
 
-  // PROJECTION (divide by 2 for A-frame since template expects per-side, but spreadsheet has total width)
+  // PROJECTION (divide by 2 for A-frame since spreadsheet has total width)
   txt = txt.replace(
     /^(PROJECTION\s*=\s*)[0-9.]+(\s*#.*)$/m,
     `$1${p.projection / 2}$2`
@@ -446,7 +229,7 @@ function r_buildAFrameRuby_(p) {
 
   // NUM_WINGS
   txt = txt.replace(
-    /^(NUM_WINGS\s*=\s*)[0-9.]+(\s*#.*)$/m,
+    /^(NUM_WINGS\s*=\s*)[0-9]+(\s*#.*)$/m,
     `$1${p.hasWings ? 2 : 0}$2`
   );
 
@@ -456,19 +239,14 @@ function r_buildAFrameRuby_(p) {
     `$1${p.hasPosts}$3`
   );
 
-  // TRUSSES
-  txt = txt.replace(
-    /^(TRUSSES\s*=\s*)[0-9.]+(\s*#.*)$/m,
-    `$1${p.trusses}$2`
-  );
-
   return txt;
 }
 
 /**
- * Lean-to Ruby template (exact copy from original)
+ * LEAN-TO RUBY TEMPLATE — DO NOT CHANGE ANYTHING HERE.
+ * We substitute only the parameter values via r_buildRubyFromLeanToTemplate_().
  */
-function r_getLeanToTemplate_() {
+function r_getLeanToRubyTemplate_() {
   return String.raw`# Ver: ChatGPT - 09/13 - 02:25 AM - Lean-to Awnings (Material Spacing + Swapped Wings + 2x2 Posts)
 
 # === AWNING CONFIGURATION ===
@@ -483,7 +261,6 @@ HAS_DIAGONAL_BRACING = true         # true = diagonal bracing inside wings
 HAS_POSTS            = false        # true = add vertical posts, false = no posts
 COLUMN_HEIGHT        = 7            # column height in feet (default 7')
 POST_SIZE            = 2.0          # post size in inches (square cross-section)
-TRUSSES              = (50.0 / 5).ceil  # Number of truss sections
 
 # === SCRIPT BEGINS - DO NOT MODIFY BELOW ===
 model = Sketchup.active_model
@@ -499,14 +276,14 @@ col_height       = COLUMN_HEIGHT * 12
 
 # Determine rafter spacing (in inches) based on material
 spacing_ft = if AWNING_MATERIAL.downcase == "sunbrella"
-               3.5
+               3.6
              else
                5.0
              end
 spacing_in = spacing_ft * 12
 
 # Compute number of spans/rafters
-num_spans     = TRUSSES
+num_spans     = (length / spacing_in).ceil
 num_supports  = num_spans + 1
 spacing       = length.to_f / num_spans
 
@@ -661,16 +438,10 @@ model.commit_operation`;
 }
 
 /**
- * Public wrapper for Lean-to template (for backward compatibility)
+ * A-FRAME RUBY TEMPLATE — DO NOT CHANGE ANYTHING HERE.
+ * We substitute only the parameter values via r_buildRubyFromAFrameTemplate_().
  */
-function r_getRubyExactTemplate() { 
-  return r_getLeanToTemplate_(); 
-}
-
-/**
- * A-Frame Ruby template
- */
-function r_getAFrameTemplate_() {
+function r_getAFrameRubyTemplate_() {
   return String.raw`# A-Frame Awning Generator
 # Ver: Claude Opus 4.1 - 01/13 - 11:45 PM EST
 
@@ -685,7 +456,6 @@ NUM_WINGS            = 2            # Wings on both ends (0 or 2)
 HAS_POSTS            = false        # true = add vertical posts, false = no posts
 COLUMN_HEIGHT        = 7            # column height in feet (default 7')
 POST_SIZE            = 2.0          # post size in inches (square cross-section)
-TRUSSES              = 4            # Number of truss sections
 
 # === SCRIPT BEGINS - DO NOT MODIFY BELOW ===
 model = Sketchup.active_model
@@ -699,9 +469,9 @@ peak_height      = PEAK_HEIGHT * 12
 front_bar_height = FRONT_BAR_HEIGHT * 12
 col_height       = COLUMN_HEIGHT * 12
 
-# Compute truss spacing
-num_trusses   = TRUSSES + 1  # Number of trusses
-truss_spacing = length.to_f / TRUSSES
+# Determine truss spacing
+num_trusses   = 4 + 1  # Number of trusses
+truss_spacing = length.to_f / 4
 
 # Create main group
 aframe_group = entities.add_group
@@ -710,13 +480,13 @@ group_entities = aframe_group.entities
 # === A-FRAME GEOMETRY ===
 # Peak runs along the x-axis at center
 peak_left = [0, 0, peak_height]
-peak_right = [LENGTH * 12, 0, peak_height]
+peak_right = [length, 0, peak_height]
 ground_left_front = [0, -projection, front_bar_height]
-ground_left_back = [LENGTH * 12, -projection, front_bar_height]
+ground_left_back = [length, -projection, front_bar_height]
 
 # Right slope (positive y direction)
 ground_right_front = [0, projection, front_bar_height]
-ground_right_back = [LENGTH * 12, projection, front_bar_height]
+ground_right_back = [length, projection, front_bar_height]
 
 # Create left slope face (normal should point outward/left = negative y)
 left_face = group_entities.add_face(
@@ -743,7 +513,7 @@ end
 group_entities.add_line(peak_left, peak_right)
 
 # === FRONT BAR VERTICALS (LEFT SIDE) ===
-num_verticals = (TRUSSES * 2) + 1
+num_verticals = (4 * 2) + 1
 (0...num_verticals).each do |i|
   x_pos = [i * (truss_spacing / 2), length].min
   group_entities.add_line([x_pos, -projection, front_bar_height], [x_pos, -projection, 0])
@@ -924,12 +694,60 @@ aframe_group.name = "#{AWNING_TYPE} (#{AWNING_MATERIAL}) #{LENGTH}x#{PROJECTION}
 model.commit_operation`;
 }
 
-/** Trigger installer (use from menu: Setup (Ruby) → Install On-Edit Trigger (Lean-to Ruby)) */
-function installTriggerLeanToRuby_() {
+/** Write the Ruby to Drive as a .rb file and return the File. */
+function r_writeRubyToDrive_(rubyScript, row, dispName, typeName) {
+  const folder = r_getRubyExportFolder_();
+  const safeName = (dispName || ('Row ' + row))
+    .replace(/[\\/:*?"<>|#\[\]\r\n]+/g, ' ')
+    .trim()
+    .substring(0, 80);
+
+  const filename = `${typeName} Ruby - ${safeName || ('Row ' + row)}.rb`;
+
+  // Remove any old file(s) with same name (keeps folder tidy)
+  const existing = folder.getFilesByName(filename);
+  while (existing.hasNext()) existing.next().setTrashed(true);
+
+  const blob = Utilities.newBlob(rubyScript, 'text/plain', filename);
+  return folder.createFile(blob);
+}
+
+/** Get/create the export folder once and cache its ID. */
+function r_getRubyExportFolder_() {
+  if (AWNING_RUBY_EXPORT.FOLDER_ID) {
+    return DriveApp.getFolderById(AWNING_RUBY_EXPORT.FOLDER_ID);
+  }
+  const prop = PropertiesService.getScriptProperties();
+  const cached = prop.getProperty('AWNING_RUBY_EXPORT_FOLDER_ID');
+  if (cached) {
+    try { return DriveApp.getFolderById(cached); } catch (_) { /* recreate below */ }
+  }
+  const folder = DriveApp.createFolder(AWNING_RUBY_EXPORT.FOLDER_NAME);
+  prop.setProperty('AWNING_RUBY_EXPORT_FOLDER_ID', folder.getId());
+  return folder;
+}
+
+/** Trigger installer (use from menu: Setup → Install On-Edit Trigger (Awning Ruby)) */
+function installTriggerAwningRuby_() {
   const ssId = SpreadsheetApp.getActive().getId();
   ScriptApp.getProjectTriggers().forEach(t => {
     if (t.getHandlerFunction() === 'handleEditAwningRuby_') ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger('handleEditAwningRuby_').forSpreadsheet(ssId).onEdit().create();
   SpreadsheetApp.getActive().toast('Awning Ruby generator trigger installed!', 'Setup Complete', 3);
+}
+
+/**
+ * Backward compatibility wrappers for old function names
+ */
+function handleEditLeanToRuby_(e) {
+  return handleEditAwningRuby_(e);
+}
+
+function installTriggerLeanToRuby_() {
+  return installTriggerAwningRuby_();
+}
+
+function r_getRubyExactTemplate() { 
+  return r_getLeanToRubyTemplate_(); 
 }
