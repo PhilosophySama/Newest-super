@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2025-12-27T01:49:54.927Z",
+    "lastUpdated": "2025-12-27T01:50:13.940Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,13 +8,13 @@
   },
   "stats": {
     "totalFiles": 10,
-    "totalFunctions": 152,
+    "totalFunctions": 153,
     "totalTriggers": 20,
-    "totalLines": 7352,
+    "totalLines": 7509,
     "publicFunctions": 57,
-    "helperFunctions": 136,
+    "helperFunctions": 137,
     "avgFunctionsPerFile": 15,
-    "avgLinesPerFile": 735
+    "avgLinesPerFile": 751
   },
   "files": [
     {
@@ -335,82 +335,89 @@
     {
       "path": "Email Reader.gs",
       "filename": "Email Reader.gs",
-      "purpose": "EMAIL READER AUTOMATION - RUBY PARSER (FIXED VERSION) Version: 01/20-Enhanced with diagnostics FIXES:",
-      "version": "01/20-Enhanced with diagnostics",
+      "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION (VERSION 3.0.1) Version: 01/20-Enhanced with separate stricter AI for manual leads FEATURES:",
+      "version": "01/20-Enhanced with separate stricter AI for manual leads",
       "functions": [
         {
           "name": "er_diagnosticCheck",
-          "line": 81,
+          "line": 111,
           "description": "DIAGNOSTIC FUNCTION - Run this first to check setup",
           "isPublic": true,
           "isHelper": true
         },
         {
+          "name": "er_isRubyEmail_",
+          "line": 182,
+          "description": "Determine if email is from Ruby",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "er_processEmail_",
-          "line": 135,
-          "description": "Process a single email with improved error handling",
+          "line": 190,
+          "description": "Process a single email with source awareness",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "er_tryEnhancedAIParsing_",
-          "line": 237,
-          "description": "Try AI parsing with better error handling",
+          "name": "er_tryAIParsing_",
+          "line": 313,
+          "description": "Try AI parsing with format awareness",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "er_tryRubyPatternParsing_",
-          "line": 325,
-          "description": "Pattern parsing (unchanged but with better logging)",
+          "name": "er_tryPatternParsing_",
+          "line": 411,
+          "description": "Pattern parsing with source awareness",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_tryStructuredExtraction_",
-          "line": 428,
-          "description": "Structured extraction (unchanged)",
+          "line": 560,
+          "description": "Structured extraction (generic)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_saveForManualReview_",
-          "line": 496,
-          "description": "Save for manual review (unchanged)",
+          "line": 632,
+          "description": "Save for manual review",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_log_",
-          "line": 529,
+          "line": 666,
           "description": "Logging function",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_installTrigger",
-          "line": 542,
+          "line": 679,
           "description": "Install trigger",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_removeTrigger",
-          "line": 556,
+          "line": 693,
           "description": "Remove trigger",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_processNewEmails",
-          "line": 568,
-          "description": "Main processing function",
+          "line": 705,
+          "description": "Main processing function - handles both Ruby and Manual leads",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_testProcessing",
-          "line": 650,
+          "line": 794,
           "description": "Test processing with detailed output",
           "isPublic": true,
           "isHelper": true
@@ -419,15 +426,16 @@
       "triggers": [],
       "dependencies": [
         "er_log_",
+        "er_isRubyEmail_",
         "er_processEmail_",
-        "er_tryEnhancedAIParsing_",
-        "er_tryRubyPatternParsing_",
+        "er_tryAIParsing_",
+        "er_tryPatternParsing_",
         "er_tryStructuredExtraction_",
         "er_saveForManualReview_",
         "Defines: EMAIL_READER_CONFIG"
       ],
-      "lines": 715,
-      "size": 20618
+      "lines": 872,
+      "size": 27284
     },
     {
       "path": "F/U and Send proposal.gs",
@@ -2474,82 +2482,89 @@
       {
         "path": "Email Reader.gs",
         "filename": "Email Reader.gs",
-        "purpose": "EMAIL READER AUTOMATION - RUBY PARSER (FIXED VERSION) Version: 01/20-Enhanced with diagnostics FIXES:",
-        "version": "01/20-Enhanced with diagnostics",
+        "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION (VERSION 3.0.1) Version: 01/20-Enhanced with separate stricter AI for manual leads FEATURES:",
+        "version": "01/20-Enhanced with separate stricter AI for manual leads",
         "functions": [
           {
             "name": "er_diagnosticCheck",
-            "line": 81,
+            "line": 111,
             "description": "DIAGNOSTIC FUNCTION - Run this first to check setup",
             "isPublic": true,
             "isHelper": true
           },
           {
+            "name": "er_isRubyEmail_",
+            "line": 182,
+            "description": "Determine if email is from Ruby",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "er_processEmail_",
-            "line": 135,
-            "description": "Process a single email with improved error handling",
+            "line": 190,
+            "description": "Process a single email with source awareness",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "er_tryEnhancedAIParsing_",
-            "line": 237,
-            "description": "Try AI parsing with better error handling",
+            "name": "er_tryAIParsing_",
+            "line": 313,
+            "description": "Try AI parsing with format awareness",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "er_tryRubyPatternParsing_",
-            "line": 325,
-            "description": "Pattern parsing (unchanged but with better logging)",
+            "name": "er_tryPatternParsing_",
+            "line": 411,
+            "description": "Pattern parsing with source awareness",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_tryStructuredExtraction_",
-            "line": 428,
-            "description": "Structured extraction (unchanged)",
+            "line": 560,
+            "description": "Structured extraction (generic)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_saveForManualReview_",
-            "line": 496,
-            "description": "Save for manual review (unchanged)",
+            "line": 632,
+            "description": "Save for manual review",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_log_",
-            "line": 529,
+            "line": 666,
             "description": "Logging function",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_installTrigger",
-            "line": 542,
+            "line": 679,
             "description": "Install trigger",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_removeTrigger",
-            "line": 556,
+            "line": 693,
             "description": "Remove trigger",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_processNewEmails",
-            "line": 568,
-            "description": "Main processing function",
+            "line": 705,
+            "description": "Main processing function - handles both Ruby and Manual leads",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_testProcessing",
-            "line": 650,
+            "line": 794,
             "description": "Test processing with detailed output",
             "isPublic": true,
             "isHelper": true
@@ -2558,15 +2573,16 @@
         "triggers": [],
         "dependencies": [
           "er_log_",
+          "er_isRubyEmail_",
           "er_processEmail_",
-          "er_tryEnhancedAIParsing_",
-          "er_tryRubyPatternParsing_",
+          "er_tryAIParsing_",
+          "er_tryPatternParsing_",
           "er_tryStructuredExtraction_",
           "er_saveForManualReview_",
           "Defines: EMAIL_READER_CONFIG"
         ],
-        "lines": 715,
-        "size": 20618
+        "lines": 872,
+        "size": 27284
       },
       {
         "path": "F/U and Send proposal.gs",
