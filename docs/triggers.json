@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2025-12-27T01:51:46.727Z",
+    "lastUpdated": "2025-12-27T01:52:07.264Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -10,7 +10,7 @@
     "totalFiles": 10,
     "totalFunctions": 153,
     "totalTriggers": 20,
-    "totalLines": 7329,
+    "totalLines": 7333,
     "publicFunctions": 53,
     "helperFunctions": 141,
     "avgFunctionsPerFile": 15,
@@ -750,8 +750,8 @@
     {
       "path": "Menus.gs",
       "filename": "Menus.gs",
-      "purpose": "Single shared menu for the project. Version# [11/05-Added Gemini Lead Processor] by Claude Sonnet 4.5",
-      "version": "[11/05-Added Gemini Lead Processor]",
+      "purpose": "Menus.gs Version# [12/05-04:15PM EST] - Added Empty Folder Check menu items by Claude Opus 4.1",
+      "version": "[12/05-04:15PM EST] - Added Empty Folder Check menu items",
       "functions": [
         {
           "name": "onOpen",
@@ -762,28 +762,28 @@
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 118,
+          "line": 120,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "debugMenuError_",
-          "line": 186,
+          "line": 188,
           "description": "Debug function to help identify menu issues",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "listAllTriggers_",
-          "line": 228,
+          "line": 231,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 247,
+          "line": 250,
           "description": "System utility: Remove all triggers",
           "isPublic": false,
           "isHelper": true
@@ -796,8 +796,8 @@
         "listAllTriggers_",
         "removeAllTriggers_"
       ],
-      "lines": 258,
-      "size": 8383
+      "lines": 262,
+      "size": 8517
     },
     {
       "path": "Miles Log.gs",
@@ -2434,8 +2434,8 @@
       {
         "path": "Menus.gs",
         "filename": "Menus.gs",
-        "purpose": "Single shared menu for the project. Version# [11/05-Added Gemini Lead Processor] by Claude Sonnet 4.5",
-        "version": "[11/05-Added Gemini Lead Processor]",
+        "purpose": "Menus.gs Version# [12/05-04:15PM EST] - Added Empty Folder Check menu items by Claude Opus 4.1",
+        "version": "[12/05-04:15PM EST] - Added Empty Folder Check menu items",
         "functions": [
           {
             "name": "onOpen",
@@ -2446,28 +2446,28 @@
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 118,
+            "line": 120,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "debugMenuError_",
-            "line": 186,
+            "line": 188,
             "description": "Debug function to help identify menu issues",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "listAllTriggers_",
-            "line": 228,
+            "line": 231,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 247,
+            "line": 250,
             "description": "System utility: Remove all triggers",
             "isPublic": false,
             "isHelper": true
@@ -2480,8 +2480,8 @@
           "listAllTriggers_",
           "removeAllTriggers_"
         ],
-        "lines": 258,
-        "size": 8383
+        "lines": 262,
+        "size": 8517
       }
     ],
     "other": [
