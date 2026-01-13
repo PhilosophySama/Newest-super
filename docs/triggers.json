@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-01-13T03:50:34.453Z",
+    "lastUpdated": "2026-01-13T04:55:17.821Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -10,11 +10,11 @@
     "totalFiles": 11,
     "totalFunctions": 159,
     "totalTriggers": 20,
-    "totalLines": 7502,
-    "publicFunctions": 56,
+    "totalLines": 7480,
+    "publicFunctions": 57,
     "helperFunctions": 144,
     "avgFunctionsPerFile": 14,
-    "avgLinesPerFile": 682
+    "avgLinesPerFile": 680
   },
   "files": [
     {
@@ -366,89 +366,89 @@
     {
       "path": "Email Reader.gs",
       "filename": "Email Reader.gs",
-      "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version# [12/31-07:45PM EST] by Claude Opus 4.1 FEATURES:",
-      "version": "[12/31-07:45PM EST] by Claude Opus 4.1",
+      "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version# [01/12-06:45PM EST] by Claude Opus 4.1 FEATURES:",
+      "version": "[01/12-06:45PM EST] by Claude Opus 4.1",
       "functions": [
         {
+          "name": "er_buildCSV_",
+          "line": 117,
+          "description": "Build a 29-column CSV string from extracted data Columns: A-AC (Date through Awning Type)",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "er_diagnosticCheck",
-          "line": 110,
+          "line": 151,
           "description": "DIAGNOSTIC FUNCTION - Quick check, no popup",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_isRubyEmail_",
-          "line": 136,
+          "line": 177,
           "description": "Determine if email is from Ruby",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_processEmail_",
-          "line": 145,
-          "description": "Process a single email - SAME PROCESS for Ruby and \"Add lead\" ALWAYS adds \"LeadProcessed\" label after processing",
+          "line": 186,
+          "description": "Process a single email - writes CSV to column A Stage Automation will split it across columns",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "er_tryAIParsing_",
-          "line": 264,
-          "description": "Try AI parsing - Same formula for all emails",
+          "name": "er_extractWithPatterns_",
+          "line": 329,
+          "description": "Extract data using pattern matching",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "er_tryPatternParsing_",
-          "line": 345,
-          "description": "Pattern parsing - fallback for both Ruby and Add lead",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "er_tryStructuredExtraction_",
-          "line": 476,
-          "description": "Structured extraction (generic fallback)",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "er_saveForManualReview_",
-          "line": 538,
-          "description": "Save for manual review when all parsing fails",
+          "name": "er_extractStructured_",
+          "line": 434,
+          "description": "Extract data using structured key:value parsing",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_log_",
-          "line": 572,
+          "line": 508,
           "description": "Logging function",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_installTrigger",
-          "line": 585,
+          "line": 521,
           "description": "Install trigger - runs every 15 minutes for BOTH Ruby and \"Add lead\"",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_removeTrigger",
-          "line": 603,
+          "line": 539,
           "description": "Remove trigger",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_processNewEmails",
-          "line": 616,
+          "line": 552,
           "description": "MAIN: Process ALL pending emails (Ruby + Add lead) - runs automatically",
           "isPublic": true,
           "isHelper": true
         },
         {
+          "name": "er_processAddLeadEmails",
+          "line": 625,
+          "description": "Process only \"Add lead\" emails manually",
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
           "name": "er_testProcessing",
-          "line": 689,
+          "line": 667,
           "description": "Test processing - no popup, just runs and shows toast",
           "isPublic": true,
           "isHelper": true
@@ -456,17 +456,16 @@
       ],
       "triggers": [],
       "dependencies": [
+        "er_buildCSV_",
         "er_log_",
         "er_isRubyEmail_",
         "er_processEmail_",
-        "er_tryAIParsing_",
-        "er_tryPatternParsing_",
-        "er_tryStructuredExtraction_",
-        "er_saveForManualReview_",
+        "er_extractWithPatterns_",
+        "er_extractStructured_",
         "Defines: EMAIL_READER_CONFIG"
       ],
-      "lines": 741,
-      "size": 22444
+      "lines": 719,
+      "size": 21964
     },
     {
       "path": "Gemini Lead processor.gs",
@@ -2585,89 +2584,89 @@
       {
         "path": "Email Reader.gs",
         "filename": "Email Reader.gs",
-        "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version# [12/31-07:45PM EST] by Claude Opus 4.1 FEATURES:",
-        "version": "[12/31-07:45PM EST] by Claude Opus 4.1",
+        "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version# [01/12-06:45PM EST] by Claude Opus 4.1 FEATURES:",
+        "version": "[01/12-06:45PM EST] by Claude Opus 4.1",
         "functions": [
           {
+            "name": "er_buildCSV_",
+            "line": 117,
+            "description": "Build a 29-column CSV string from extracted data Columns: A-AC (Date through Awning Type)",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "er_diagnosticCheck",
-            "line": 110,
+            "line": 151,
             "description": "DIAGNOSTIC FUNCTION - Quick check, no popup",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_isRubyEmail_",
-            "line": 136,
+            "line": 177,
             "description": "Determine if email is from Ruby",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_processEmail_",
-            "line": 145,
-            "description": "Process a single email - SAME PROCESS for Ruby and \"Add lead\" ALWAYS adds \"LeadProcessed\" label after processing",
+            "line": 186,
+            "description": "Process a single email - writes CSV to column A Stage Automation will split it across columns",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "er_tryAIParsing_",
-            "line": 264,
-            "description": "Try AI parsing - Same formula for all emails",
+            "name": "er_extractWithPatterns_",
+            "line": 329,
+            "description": "Extract data using pattern matching",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "er_tryPatternParsing_",
-            "line": 345,
-            "description": "Pattern parsing - fallback for both Ruby and Add lead",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "er_tryStructuredExtraction_",
-            "line": 476,
-            "description": "Structured extraction (generic fallback)",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "er_saveForManualReview_",
-            "line": 538,
-            "description": "Save for manual review when all parsing fails",
+            "name": "er_extractStructured_",
+            "line": 434,
+            "description": "Extract data using structured key:value parsing",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_log_",
-            "line": 572,
+            "line": 508,
             "description": "Logging function",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_installTrigger",
-            "line": 585,
+            "line": 521,
             "description": "Install trigger - runs every 15 minutes for BOTH Ruby and \"Add lead\"",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_removeTrigger",
-            "line": 603,
+            "line": 539,
             "description": "Remove trigger",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_processNewEmails",
-            "line": 616,
+            "line": 552,
             "description": "MAIN: Process ALL pending emails (Ruby + Add lead) - runs automatically",
             "isPublic": true,
             "isHelper": true
           },
           {
+            "name": "er_processAddLeadEmails",
+            "line": 625,
+            "description": "Process only \"Add lead\" emails manually",
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
             "name": "er_testProcessing",
-            "line": 689,
+            "line": 667,
             "description": "Test processing - no popup, just runs and shows toast",
             "isPublic": true,
             "isHelper": true
@@ -2675,17 +2674,16 @@
         ],
         "triggers": [],
         "dependencies": [
+          "er_buildCSV_",
           "er_log_",
           "er_isRubyEmail_",
           "er_processEmail_",
-          "er_tryAIParsing_",
-          "er_tryPatternParsing_",
-          "er_tryStructuredExtraction_",
-          "er_saveForManualReview_",
+          "er_extractWithPatterns_",
+          "er_extractStructured_",
           "Defines: EMAIL_READER_CONFIG"
         ],
-        "lines": 741,
-        "size": 22444
+        "lines": 719,
+        "size": 21964
       },
       {
         "path": "Gemini Lead processor.gs",
