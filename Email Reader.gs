@@ -1,18 +1,19 @@
 /**
  * EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION
- * Version# [12/31-07:45PM EST] by Claude Opus 4.1
+ * Version# [01/12-06:45PM EST] by Claude Opus 4.1
  * 
  * FEATURES:
  * - Ruby emails: Automatically detected and processed
  * - "Add lead" emails: Automatically processed (same schedule as Ruby)
- * - Both use identical AI prompt for consistent results
+ * - Writes CSV to column A, Stage Automation splits it
  * - ALL processed emails get "LeadProcessed" label
  * - Uses LABELS (not read/unread) to prevent duplicates
  * - Three-tier fallback system (AI → Pattern → Structured → Manual Review)
  * 
  * CHANGES IN THIS VERSION:
- * - Removed diagnostic dialog popup
- * - Diagnostic now just shows toast + logs to console
+ * - Changed to write 29-column CSV to column A
+ * - Stage Automation handles the split
+ * - Simplified flow - no more direct column writes
  */
 
 const EMAIL_READER_CONFIG = {
@@ -27,8 +28,6 @@ const EMAIL_READER_CONFIG = {
       settings: {
         stage: '1. F/U',
         category: 'Res',
-        autoSplit: true,
-        markAsRead: false,
         useAI: true,
         useFallback: true
       }
@@ -41,8 +40,6 @@ const EMAIL_READER_CONFIG = {
       settings: {
         stage: '1. F/U',
         category: 'Res',
-        autoSplit: false,
-        markAsRead: false,
         useAI: true,
         useFallback: true
       }
@@ -52,6 +49,10 @@ const EMAIL_READER_CONFIG = {
   PROCESSED_LABEL: 'LeadProcessed',
   ADD_LEAD_LABEL: 'Add lead',
   
+  // Column count for CSV (A through AC = 29 columns)
+  TOTAL_COLUMNS: 29,
+  
+  // Column indices (1-based)
   COLS: {
     DATE: 1,           // A
     LINK_B: 2,         // B
@@ -64,20 +65,25 @@ const EMAIL_READER_CONFIG = {
     EMAIL: 9,          // I
     ADDRESS: 10,       // J
     DESC: 11,          // K
-    LINK_L: 12,        // L
+    L: 12,             // L (blank)
     JOB_DESC_M: 13,    // M
     QUOTE: 14,         // N
     CALCS: 15,         // O
     QB_URL: 16,        // P
     EARTH_LINK: 17,    // Q
     JOB_TYPE: 18,      // R
-    MISC_S: 19,        // S
+    S: 19,             // S (blank)
     LENGTH: 20,        // T
-    WIDTH: 21          // U
+    WIDTH: 21,         // U
+    FRONT_BAR: 22,     // V
+    SHELF: 23,         // W
+    WING_HEIGHT: 24,   // X
+    NUM_WINGS: 25,     // Y
+    VALANCE: 26,       // Z
+    FRAME: 27,         // AA
+    FABRIC: 28,        // AB
+    AWNING_TYPE: 29    // AC
   },
-  
-  // UNIFIED AI FORMULA - Used for BOTH Ruby emails AND "Add lead" emails
-  AI_FORMULA: `=AI("Parse this email and extract lead information. Extract: First name, Last name, Phone, Company, Email, Address, Regarding/Subject, Actions/Notes. Return exactly 21 comma-separated values: Date(MM/DD), blank, blank, '1. F/U', Full Name, Company, 'Res', Phone, Email, Address(no commas), Regarding, Actions, then 9 blanks. If a field is not found, leave it blank but keep the comma. Example: 01/20,,,1. F/U,John Smith,ABC Corp,Res,954-555-1234,john@email.com,123 Main St,Quote request,Call back,,,,,,,,",B{ROW})`,
 
   MAX_EMAILS_PER_RUN: 10,
   WAIT_FOR_AI_MS: 8000,
@@ -99,10 +105,45 @@ const EMAIL_READER_CONFIG = {
   // Generic patterns (for any email fallback)
   GENERIC_PATTERNS: {
     phone: /(\+?1[-.\s]?)?(\()?(\d{3})(\))?[-.\s]?(\d{3})[-.\s]?(\d{4})/,
-    email: /[^\s@]+@[^\s@]+\.[^\s@]+/,
-    address: /(\d+\s+[a-z\s]+(?:st|street|ave|avenue|rd|road|ln|lane|blvd|boulevard|dr|drive|ct|court))/i
+    email: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
+    address: /(\d+\s+[a-zA-Z0-9\s]+(?:st|street|ave|avenue|rd|road|ln|lane|blvd|boulevard|dr|drive|ct|court|way|pl|place|cir|circle)[,\s]+[a-zA-Z\s]+(?:,\s*)?(?:FL|Florida)?(?:\s+\d{5})?)/i
   }
 };
+
+/**
+ * Build a 29-column CSV string from extracted data
+ * Columns: A-AC (Date through Awning Type)
+ */
+function er_buildCSV_(data) {
+  const C = EMAIL_READER_CONFIG;
+  
+  // Create array of 29 empty strings
+  const values = new Array(C.TOTAL_COLUMNS).fill('');
+  
+  // Fill in the values we have (0-indexed)
+  values[0] = data.date || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MM/dd');  // A - Date
+  values[1] = '';  // B - Will be overwritten with link after split
+  values[2] = '';  // C - Comments
+  values[3] = data.stage || '1. F/U';  // D - Stage
+  values[4] = data.name || '';  // E - Customer Name
+  values[5] = data.company || '';  // F - Display Name
+  values[6] = data.type || 'Res';  // G - Type
+  values[7] = data.phone || '';  // H - Phone
+  values[8] = data.email || '';  // I - Email
+  values[9] = data.address || '';  // J - Address (NO COMMAS!)
+  values[10] = data.regarding || '';  // K - Job Description
+  // L through AC remain blank unless we have awning specs
+  
+  // Clean all values - remove commas and extra whitespace
+  const cleanedValues = values.map(v => {
+    return String(v)
+      .replace(/,/g, ' ')  // Remove ALL commas
+      .replace(/\s+/g, ' ')  // Collapse whitespace
+      .trim();
+  });
+  
+  return cleanedValues.join(',');
+}
 
 /**
  * DIAGNOSTIC FUNCTION - Quick check, no popup
@@ -139,8 +180,8 @@ function er_isRubyEmail_(message) {
 }
 
 /**
- * Process a single email - SAME PROCESS for Ruby and "Add lead"
- * ALWAYS adds "LeadProcessed" label after processing
+ * Process a single email - writes CSV to column A
+ * Stage Automation will split it across columns
  */
 function er_processEmail_(message, searchConfig, processedLabel) {
   const C = EMAIL_READER_CONFIG;
@@ -166,14 +207,13 @@ function er_processEmail_(message, searchConfig, processedLabel) {
     };
     
     const gmailUrl = `https://mail.google.com/mail/u/0/#inbox/${emailData.messageId}`;
-    const emailContent = emailData.body;
     
     if (C.ENABLE_LOGGING) {
       er_log_('Processing email', {
         from: emailData.from,
         subject: emailData.subject,
         sourceType: emailData.isRuby ? 'Ruby' : 'Add lead',
-        bodyLength: emailContent.length,
+        bodyLength: emailData.body.length,
         messageId: emailData.messageId
       });
     }
@@ -185,39 +225,64 @@ function er_processEmail_(message, searchConfig, processedLabel) {
       throw new Error(`Sheet "${C.TARGET_SHEET}" not found`);
     }
     
-    const lastRow = sheet.getLastRow();
-    const newRow = lastRow + 1;
-    
-    // Write email content to column B for AI to parse
-    const contentCell = sheet.getRange(newRow, C.COLS.LINK_B);
-    contentCell.setValue(emailContent);
-    SpreadsheetApp.flush();
-    
-    let parseSuccess = false;
+    // Extract data from email
+    let extractedData = null;
     let parseMethod = 'none';
     
-    // Try AI parsing first
-    if (searchConfig.settings.useAI) {
-      parseSuccess = er_tryAIParsing_(sheet, newRow, emailData, gmailUrl);
-      if (parseSuccess) parseMethod = 'AI';
+    // Try pattern parsing first (more reliable than AI for structured emails)
+    extractedData = er_extractWithPatterns_(emailData);
+    if (extractedData && (extractedData.name || extractedData.phone || extractedData.email)) {
+      parseMethod = 'Pattern';
     }
     
-    // Try pattern parsing if AI failed
-    if (!parseSuccess && searchConfig.settings.useFallback) {
-      parseSuccess = er_tryPatternParsing_(sheet, newRow, emailData, gmailUrl);
-      if (parseSuccess) parseMethod = 'Pattern';
+    // If pattern parsing didn't get much, try structured extraction
+    if (!extractedData || (!extractedData.name && !extractedData.phone && !extractedData.email)) {
+      extractedData = er_extractStructured_(emailData);
+      if (extractedData && (extractedData.name || extractedData.phone || extractedData.email)) {
+        parseMethod = 'Structured';
+      }
     }
     
-    // Try structured extraction as last resort
-    if (!parseSuccess) {
-      parseSuccess = er_tryStructuredExtraction_(sheet, newRow, emailData, gmailUrl);
-      if (parseSuccess) parseMethod = 'Structured';
-    }
-    
-    // If still failed, save for manual review
-    if (!parseSuccess) {
-      er_saveForManualReview_(sheet, newRow, emailData, gmailUrl);
+    // If still nothing, create minimal data for manual review
+    if (!extractedData || (!extractedData.name && !extractedData.phone && !extractedData.email && !extractedData.address)) {
+      extractedData = {
+        date: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MM/dd'),
+        stage: '1. F/U',
+        type: 'Res',
+        regarding: emailData.subject || 'NEEDS MANUAL REVIEW'
+      };
       parseMethod = 'Manual Review';
+    }
+    
+    // Build CSV string (29 columns)
+    const csvString = er_buildCSV_(extractedData);
+    
+    // Write CSV to column A of new row
+    const lastRow = sheet.getLastRow();
+    const newRow = lastRow + 1;
+
+    sheet.getRange(newRow, 1).setValue(csvString);
+    SpreadsheetApp.flush();
+
+    // DO THE SPLIT OURSELVES (Stage Automation won't trigger on programmatic writes)
+    sheet.getRange(newRow, 1).splitTextToColumns(SpreadsheetApp.TextToColumnsDelimiter.COMMA);
+    SpreadsheetApp.flush();
+    
+    // Now add the email link to column B
+    const linkCell = sheet.getRange(newRow, C.COLS.LINK_B);
+    const sourceLabel = emailData.isRuby ? '[Ruby]' : '[Add lead]';
+    const richText = SpreadsheetApp.newRichTextValue()
+      .setText(sourceLabel)
+      .setLinkUrl(gmailUrl)
+      .build();
+    linkCell.setRichTextValue(richText);
+    
+    // If manual review needed, highlight row and add note
+    if (parseMethod === 'Manual Review') {
+      sheet.getRange(newRow, 1, 1, C.TOTAL_COLUMNS).setBackground('#ffebee');
+      sheet.getRange(newRow, C.COLS.COMMENTS).setNote(
+        `Email Content:\n\n${emailData.body.substring(0, 500)}${emailData.body.length > 500 ? '...' : ''}`
+      );
     }
     
     // ALWAYS add "LeadProcessed" label after processing
@@ -243,7 +308,7 @@ function er_processEmail_(message, searchConfig, processedLabel) {
         row: newRow,
         method: parseMethod,
         sourceType: emailData.isRuby ? 'Ruby' : 'Add lead',
-        labelAdded: 'LeadProcessed'
+        csvPreview: csvString.substring(0, 100)
       });
     }
     
@@ -259,311 +324,182 @@ function er_processEmail_(message, searchConfig, processedLabel) {
 }
 
 /**
- * Try AI parsing - Same formula for all emails
+ * Extract data using pattern matching
  */
-function er_tryAIParsing_(sheet, row, emailData, gmailUrl) {
+function er_extractWithPatterns_(emailData) {
   const C = EMAIL_READER_CONFIG;
+  const body = emailData.body;
   
-  try {
-    const formula = C.AI_FORMULA.replace('{ROW}', row);
-    const formulaCell = sheet.getRange(row, C.COLS.DATE);
-    
-    er_log_('Setting AI formula', { 
-      row, 
-      sourceType: emailData.isRuby ? 'Ruby' : 'Add lead'
-    });
-    
-    formulaCell.setFormula(formula);
-    SpreadsheetApp.flush();
-    
-    for (let attempt = 1; attempt <= C.MAX_AI_RETRIES; attempt++) {
-      Utilities.sleep(C.WAIT_FOR_AI_MS);
-      
-      const result = formulaCell.getValue();
-      
-      er_log_('AI attempt result', { 
-        row, 
-        attempt, 
-        resultLength: String(result).length,
-        resultPreview: String(result).substring(0, 100)
-      });
-      
-      if (result && String(result).trim() !== '' && !String(result).includes('#ERROR') && !String(result).includes('Loading')) {
-        const values = String(result).split(',');
-        
-        if (values.length >= 12) {
-          // Pad to 21 columns
-          while (values.length < 21) values.push('');
-          if (values.length > 21) values.length = 21;
-          
-          const cleanedValues = values.map(v => 
-            String(v).trim()
-              .replace(/^["']|["']$/g, '')
-              .replace(/\s+/g, ' ')
-          );
-          
-          const targetRange = sheet.getRange(row, 1, 1, 21);
-          targetRange.setValues([cleanedValues]);
-          
-          // Create link in column B
-          const linkCell = sheet.getRange(row, C.COLS.LINK_B);
-          const sourceLabel = emailData.isRuby ? '[Ruby]' : '[Add lead]';
-          const richText = SpreadsheetApp.newRichTextValue()
-            .setText(sourceLabel)
-            .setLinkUrl(gmailUrl)
-            .build();
-          linkCell.setRichTextValue(richText);
-          
-          er_log_('AI parsing successful', { 
-            row, 
-            attempt,
-            sourceType: emailData.isRuby ? 'Ruby' : 'Add lead',
-            fieldsFound: cleanedValues.filter(v => v).length 
-          });
-          
-          return true;
-        }
-      }
-      
-      if (attempt < C.MAX_AI_RETRIES) {
-        Utilities.sleep(3000);
+  const extracted = {
+    date: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MM/dd'),
+    stage: '1. F/U',
+    type: 'Res',
+    name: '',
+    company: '',
+    phone: '',
+    email: '',
+    address: '',
+    regarding: ''
+  };
+  
+  // Try Ruby-specific patterns first
+  const P = C.RUBY_PATTERNS;
+  
+  let firstName = '';
+  let lastName = '';
+  
+  const firstMatch = body.match(P.first);
+  if (firstMatch) firstName = firstMatch[1].trim();
+  
+  const lastMatch = body.match(P.last);
+  if (lastMatch) lastName = lastMatch[1].trim();
+  
+  extracted.name = `${firstName} ${lastName}`.trim();
+  
+  const phoneMatch = body.match(P.phone);
+  if (phoneMatch) {
+    const digits = phoneMatch[1].trim().replace(/\D/g, '');
+    if (digits.length === 10) {
+      extracted.phone = digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    } else if (digits.length === 11 && digits.startsWith('1')) {
+      extracted.phone = digits.substring(1).replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    }
+  }
+  
+  const companyMatch = body.match(P.company);
+  if (companyMatch) extracted.company = companyMatch[1].trim();
+  
+  const emailMatch = body.match(P.email);
+  if (emailMatch) {
+    // Extract just the email address
+    const emailAddr = emailMatch[1].match(C.GENERIC_PATTERNS.email);
+    if (emailAddr) extracted.email = emailAddr[0];
+  }
+  
+  const addressMatch = body.match(P.address);
+  if (addressMatch) {
+    // Remove commas from address!
+    extracted.address = addressMatch[1].trim().replace(/,/g, ' ').replace(/\s+/g, ' ');
+  }
+  
+  const regardingMatch = body.match(P.regarding);
+  if (regardingMatch) extracted.regarding = regardingMatch[1].trim();
+  
+  // If Ruby patterns didn't find phone, try generic
+  if (!extracted.phone) {
+    const genericPhone = body.match(C.GENERIC_PATTERNS.phone);
+    if (genericPhone) {
+      const digits = genericPhone[0].replace(/\D/g, '');
+      if (digits.length === 10) {
+        extracted.phone = digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+      } else if (digits.length === 11) {
+        extracted.phone = digits.substring(1).replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
       }
     }
-    
-    er_log_('AI parsing failed after all retries', { row });
-    return false;
-    
-  } catch (err) {
-    er_log_('AI parsing error', { row, error: err.toString() });
-    return false;
   }
+  
+  // If no email found, try generic
+  if (!extracted.email) {
+    const genericEmail = body.match(C.GENERIC_PATTERNS.email);
+    if (genericEmail) extracted.email = genericEmail[0];
+  }
+  
+  // If no address found, try generic
+  if (!extracted.address) {
+    const genericAddress = body.match(C.GENERIC_PATTERNS.address);
+    if (genericAddress) {
+      extracted.address = genericAddress[0].replace(/,/g, ' ').replace(/\s+/g, ' ');
+    }
+  }
+  
+  // If no regarding, use subject
+  if (!extracted.regarding) {
+    extracted.regarding = emailData.subject || '';
+  }
+  
+  // If no name found, try to get from "From" field
+  if (!extracted.name) {
+    const fromMatch = emailData.from.match(/^([^<]+)</);
+    if (fromMatch) {
+      extracted.name = fromMatch[1].trim();
+    }
+  }
+  
+  return extracted;
 }
 
 /**
- * Pattern parsing - fallback for both Ruby and Add lead
+ * Extract data using structured key:value parsing
  */
-function er_tryPatternParsing_(sheet, row, emailData, gmailUrl) {
+function er_extractStructured_(emailData) {
   const C = EMAIL_READER_CONFIG;
+  const body = emailData.body;
   
-  try {
-    const body = emailData.body;
-    const isRuby = emailData.isRuby;
-    
-    const extracted = {
-      date: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MM/dd'),
-      first: '',
-      last: '',
-      phone: '',
-      company: '',
-      email: '',
-      address: '',
-      regarding: '',
-      actions: ''
-    };
-    
-    // Try Ruby-specific patterns first
-    const P = C.RUBY_PATTERNS;
-    
-    const firstMatch = body.match(P.first);
-    if (firstMatch) extracted.first = firstMatch[1].trim();
-    
-    const lastMatch = body.match(P.last);
-    if (lastMatch) extracted.last = lastMatch[1].trim();
-    
-    const phoneMatch = body.match(P.phone);
-    if (phoneMatch) {
-      extracted.phone = phoneMatch[1].trim().replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+  const extracted = {
+    date: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MM/dd'),
+    stage: '1. F/U',
+    type: 'Res',
+    name: '',
+    company: '',
+    phone: '',
+    email: '',
+    address: '',
+    regarding: ''
+  };
+  
+  const lines = body.split('\n');
+  const data = {};
+  
+  for (const line of lines) {
+    const colonIndex = line.indexOf(':');
+    if (colonIndex > 0 && colonIndex < 30) {
+      const key = line.substring(0, colonIndex).trim().toLowerCase();
+      const value = line.substring(colonIndex + 1).trim();
+      if (value) data[key] = value;
     }
-    
-    const companyMatch = body.match(P.company);
-    if (companyMatch) extracted.company = companyMatch[1].trim();
-    
-    const emailMatch = body.match(P.email);
-    if (emailMatch) extracted.email = emailMatch[1].trim();
-    
-    const addressMatch = body.match(P.address);
-    if (addressMatch) {
-      extracted.address = addressMatch[1].trim().replace(/,/g, ' ').replace(/\s+/g, ' ');
-    }
-    
-    const regardingMatch = body.match(P.regarding);
-    if (regardingMatch) extracted.regarding = regardingMatch[1].trim();
-    
-    const actionsMatch = body.match(P.actions);
-    if (actionsMatch) extracted.actions = actionsMatch[1].trim();
-    
-    // If Ruby patterns didn't find much, try generic patterns
-    if (!extracted.phone) {
-      const genericPhone = body.match(C.GENERIC_PATTERNS.phone);
-      if (genericPhone) {
-        const digits = genericPhone[0].replace(/\D/g, '');
-        if (digits.length === 10) {
-          extracted.phone = digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-        } else if (digits.length === 11) {
-          extracted.phone = digits.replace(/(\d{1})(\d{3})(\d{3})(\d{4})/, '$2-$3-$4');
-        }
-      }
-    }
-    
-    if (!extracted.email) {
-      const genericEmail = body.match(C.GENERIC_PATTERNS.email);
-      if (genericEmail) extracted.email = genericEmail[0];
-    }
-    
-    if (!extracted.address) {
-      const genericAddress = body.match(C.GENERIC_PATTERNS.address);
-      if (genericAddress) {
-        extracted.address = genericAddress[0].replace(/,/g, ' ').replace(/\s+/g, ' ');
-      }
-    }
-    
-    if (!extracted.regarding) {
-      extracted.regarding = emailData.subject;
-    }
-    
-    const fullName = `${extracted.first} ${extracted.last}`.trim();
-    
-    const rowData = [
-      extracted.date,
-      '',
-      '',
-      '1. F/U',
-      fullName,
-      extracted.company,
-      'Res',
-      extracted.phone,
-      extracted.email,
-      extracted.address,
-      extracted.regarding,
-      extracted.actions,
-      '', '', '', '', '', '', '', '', ''
-    ];
-    
-    const hasData = fullName || extracted.phone || extracted.email || extracted.address;
-    
-    if (hasData) {
-      const targetRange = sheet.getRange(row, 1, 1, 21);
-      targetRange.setValues([rowData]);
-      
-      const linkCell = sheet.getRange(row, C.COLS.LINK_B);
-      const sourceLabel = isRuby ? '[Ruby]' : '[Add lead]';
-      const richText = SpreadsheetApp.newRichTextValue()
-        .setText(sourceLabel)
-        .setLinkUrl(gmailUrl)
-        .build();
-      linkCell.setRichTextValue(richText);
-      
-      er_log_('Pattern parsing successful', { 
-        row, 
-        sourceType: isRuby ? 'Ruby' : 'Add lead',
-        name: fullName
-      });
-      
-      return true;
-    }
-    
-    return false;
-    
-  } catch (err) {
-    er_log_('Pattern parsing error', { row, error: err.toString() });
-    return false;
   }
-}
-
-/**
- * Structured extraction (generic fallback)
- */
-function er_tryStructuredExtraction_(sheet, row, emailData, gmailUrl) {
-  const C = EMAIL_READER_CONFIG;
   
-  try {
-    const lines = emailData.body.split('\n');
-    const data = {};
-    
-    for (const line of lines) {
-      const colonIndex = line.indexOf(':');
-      if (colonIndex > 0 && colonIndex < 30) {
-        const key = line.substring(0, colonIndex).trim().toLowerCase();
-        const value = line.substring(colonIndex + 1).trim();
-        if (value) data[key] = value;
-      }
-    }
-    
-    const firstName = data['first'] || '';
-    const lastName = data['last'] || '';
-    const fullName = `${firstName} ${lastName}`.trim();
-    
-    const rowData = [
-      Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MM/dd'),
-      '',
-      '',
-      '1. F/U',
-      fullName || data['name'] || data['contact'] || '',
-      data['company'] || '',
-      'Res',
-      (data['phone number'] || data['phone'] || '').replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'),
-      data['email'] || '',
-      (data['project address'] || data['address'] || '').replace(/,/g, ' '),
-      data['regarding'] || emailData.subject || '',
-      data['actions'] || '',
-      '', '', '', '', '', '', '', '', ''
-    ];
-    
-    if (rowData[4] || rowData[7] || rowData[8]) {
-      const targetRange = sheet.getRange(row, 1, 1, 21);
-      targetRange.setValues([rowData]);
-      
-      const linkCell = sheet.getRange(row, C.COLS.LINK_B);
-      const sourceLabel = emailData.isRuby ? '[Ruby]' : '[Add lead]';
-      const richText = SpreadsheetApp.newRichTextValue()
-        .setText(sourceLabel)
-        .setLinkUrl(gmailUrl)
-        .build();
-      linkCell.setRichTextValue(richText);
-      
-      return true;
-    }
-    
-    return false;
-    
-  } catch (err) {
-    er_log_('Structured extraction error', { row, error: err.toString() });
-    return false;
+  // Map extracted data
+  const firstName = data['first'] || '';
+  const lastName = data['last'] || '';
+  extracted.name = `${firstName} ${lastName}`.trim() || data['name'] || data['contact'] || '';
+  
+  extracted.company = data['company'] || '';
+  
+  // Clean phone
+  const rawPhone = data['phone number'] || data['phone'] || '';
+  const phoneDigits = rawPhone.replace(/\D/g, '');
+  if (phoneDigits.length === 10) {
+    extracted.phone = phoneDigits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+  } else if (phoneDigits.length === 11 && phoneDigits.startsWith('1')) {
+    extracted.phone = phoneDigits.substring(1).replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
   }
-}
-
-/**
- * Save for manual review when all parsing fails
- */
-function er_saveForManualReview_(sheet, row, emailData, gmailUrl) {
-  const C = EMAIL_READER_CONFIG;
-  const sourceLabel = emailData.isRuby ? 'Ruby' : 'Add lead';
   
-  const rowData = [
-    Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MM/dd'),
-    '',
-    `⚠️ NEEDS MANUAL PARSING - ${sourceLabel}`,
-    '1. F/U',
-    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
-  ];
+  // Clean email
+  const rawEmail = data['email'] || '';
+  const emailMatch = rawEmail.match(C.GENERIC_PATTERNS.email);
+  extracted.email = emailMatch ? emailMatch[0] : '';
   
-  const targetRange = sheet.getRange(row, 1, 1, 21);
-  targetRange.setValues([rowData]);
+  // If no email in fields, try body
+  if (!extracted.email) {
+    const bodyEmail = emailData.body.match(C.GENERIC_PATTERNS.email);
+    if (bodyEmail) extracted.email = bodyEmail[0];
+  }
   
-  const linkCell = sheet.getRange(row, C.COLS.LINK_B);
-  const richText = SpreadsheetApp.newRichTextValue()
-    .setText('[Click to View Email]')
-    .setLinkUrl(gmailUrl)
-    .build();
-  linkCell.setRichTextValue(richText);
+  // Address (remove commas!)
+  extracted.address = (data['project address'] || data['address'] || '').replace(/,/g, ' ').replace(/\s+/g, ' ');
   
-  sheet.getRange(row, 1, 1, 21).setBackground('#ffebee');
+  extracted.regarding = data['regarding'] || emailData.subject || '';
   
-  sheet.getRange(row, C.COLS.COMMENTS).setNote(
-    `${sourceLabel} Email Content:\n\n${emailData.body.substring(0, 500)}${emailData.body.length > 500 ? '...' : ''}`
-  );
+  // If no name, try from field
+  if (!extracted.name) {
+    const fromMatch = emailData.from.match(/^([^<]+)</);
+    if (fromMatch) {
+      extracted.name = fromMatch[1].trim();
+    }
+  }
   
-  er_log_('Saved for manual review', { row, sourceType: sourceLabel });
+  return extracted;
 }
 
 /**
@@ -680,6 +616,48 @@ function er_processNewEmails() {
     er_log_('Batch processing error', { error: err.toString() });
     SpreadsheetApp.getActive().toast(`Error: ${err.message}`, 'Email Reader Error', 5);
     throw err;
+  }
+}
+
+/**
+ * Process only "Add lead" emails manually
+ */
+function er_processAddLeadEmails() {
+  const C = EMAIL_READER_CONFIG;
+  
+  try {
+    let processedLabel = GmailApp.getUserLabelByName(C.PROCESSED_LABEL);
+    if (!processedLabel) {
+      processedLabel = GmailApp.createLabel(C.PROCESSED_LABEL);
+    }
+    
+    const searchConfig = C.SEARCHES.find(s => s.sourceType === 'addlead');
+    if (!searchConfig) {
+      SpreadsheetApp.getActive().toast('Add lead search not configured', 'Error', 5);
+      return;
+    }
+    
+    const threads = GmailApp.search(searchConfig.query, 0, C.MAX_EMAILS_PER_RUN);
+    
+    if (threads.length === 0) {
+      SpreadsheetApp.getActive().toast('No "Add lead" emails found', 'Info', 3);
+      return;
+    }
+    
+    let processed = 0;
+    
+    for (const thread of threads) {
+      const messages = thread.getMessages();
+      for (const message of messages) {
+        const success = er_processEmail_(message, searchConfig, processedLabel);
+        if (success) processed++;
+      }
+    }
+    
+    SpreadsheetApp.getActive().toast(`✅ Processed ${processed} "Add lead" email(s)`, 'Complete', 5);
+    
+  } catch (err) {
+    SpreadsheetApp.getActive().toast(`Error: ${err.message}`, 'Error', 5);
   }
 }
 
