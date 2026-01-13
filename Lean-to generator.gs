@@ -751,3 +751,171 @@ function installTriggerLeanToRuby_() {
 function r_getRubyExactTemplate() { 
   return r_getLeanToRubyTemplate_(); 
 }
+/**
+ * Copy Ruby code for the selected row to clipboard via dialog
+ * Version# [12/29-10:45AM EST] by Claude Opus 4.1
+ */
+function copyRubyForSelectedRow_() {
+  const ui = SpreadsheetApp.getUi();
+  const sheet = SpreadsheetApp.getActiveSheet();
+  
+  if (sheet.getName() !== 'Leads') {
+    ui.alert('Please select a row in the Leads sheet');
+    return;
+  }
+  
+  const row = sheet.getActiveCell().getRow();
+  if (row === 1) {
+    ui.alert('Please select a data row, not the header');
+    return;
+  }
+  
+  // Get the Ruby link from column S (19)
+  const rubyCell = sheet.getRange(row, 19);
+  const richText = rubyCell.getRichTextValue();
+  
+  if (!richText) {
+    ui.alert('No Ruby file found in column S for this row.\n\nMake sure columns T-AD have awning data and column AA has "Lean-to" or "A-frame".');
+    return;
+  }
+  
+  const rubyUrl = richText.getLinkUrl();
+  
+  if (!rubyUrl) {
+    ui.alert('No Ruby link found in column S.\n\nThe cell may have text but no hyperlink.');
+    return;
+  }
+  
+  // Extract file ID from Drive URL
+  const fileIdMatch = rubyUrl.match(/[-\w]{25,}/);
+  if (!fileIdMatch) {
+    ui.alert('Could not extract file ID from Ruby link:\n' + rubyUrl);
+    return;
+  }
+  
+  const fileId = fileIdMatch[0];
+  
+  try {
+    // Get the Ruby file content from Drive
+    const file = DriveApp.getFileById(fileId);
+    const rubyCode = file.getBlob().getDataAsString();
+    
+    // Get display name for the dialog title
+    const displayName = sheet.getRange(row, 6).getDisplayValue() || 'Row ' + row;
+    
+    // Create HTML dialog with copy functionality
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <base target="_top">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 15px;
+              margin: 0;
+            }
+            h3 {
+              margin-top: 0;
+              color: #1a73e8;
+            }
+            .info {
+              background: #e8f0fe;
+              padding: 10px;
+              border-radius: 4px;
+              margin-bottom: 15px;
+              font-size: 13px;
+            }
+            textarea {
+              width: 100%;
+              height: 300px;
+              font-family: 'Courier New', monospace;
+              font-size: 11px;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              resize: vertical;
+            }
+            .button-row {
+              margin-top: 15px;
+              display: flex;
+              gap: 10px;
+            }
+            button {
+              padding: 10px 24px;
+              font-size: 14px;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+            .copy-btn {
+              background: #1a73e8;
+              color: white;
+            }
+            .copy-btn:hover {
+              background: #1557b0;
+            }
+            .close-btn {
+              background: #f1f3f4;
+              color: #333;
+            }
+            .close-btn:hover {
+              background: #e0e0e0;
+            }
+            .success {
+              color: #1e8e3e;
+              font-weight: bold;
+              margin-left: 15px;
+              display: none;
+            }
+          </style>
+        </head>
+        <body>
+          <h3>Ruby Code: ${displayName}</h3>
+          <div class="info">
+            <strong>Instructions:</strong> Click "Copy to Clipboard", then paste into SketchUp's Ruby Console (Window → Ruby Console)
+          </div>
+          <textarea id="rubyCode" readonly>${rubyCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+          <div class="button-row">
+            <button class="copy-btn" onclick="copyCode()">📋 Copy to Clipboard</button>
+            <button class="close-btn" onclick="google.script.host.close()">Close</button>
+            <span class="success" id="successMsg">✓ Copied!</span>
+          </div>
+          <script>
+            function copyCode() {
+              const textarea = document.getElementById('rubyCode');
+              textarea.select();
+              textarea.setSelectionRange(0, 99999);
+              
+              navigator.clipboard.writeText(textarea.value).then(function() {
+                document.getElementById('successMsg').style.display = 'inline';
+                setTimeout(function() {
+                  document.getElementById('successMsg').style.display = 'none';
+                }, 2000);
+              }).catch(function(err) {
+                // Fallback for older browsers
+                document.execCommand('copy');
+                document.getElementById('successMsg').style.display = 'inline';
+                setTimeout(function() {
+                  document.getElementById('successMsg').style.display = 'none';
+                }, 2000);
+              });
+            }
+            
+            // Auto-select all text on load for easy copying
+            document.getElementById('rubyCode').select();
+          </script>
+        </body>
+      </html>
+    `;
+    
+    const htmlOutput = HtmlService.createHtmlOutput(htmlContent)
+      .setWidth(700)
+      .setHeight(500);
+    
+    ui.showModalDialog(htmlOutput, 'Copy Ruby Code');
+    
+  } catch (err) {
+    ui.alert('Error loading Ruby file:\n\n' + err.message);
+  }
+}

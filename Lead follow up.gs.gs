@@ -1,5 +1,5 @@
 /**
- * Lead_Followup_Draft_V2.gs
+ * Lead Follow up.gs
  * version# 09/23-05:05PM EST by Chatgpt5
  *
  * PURPOSE

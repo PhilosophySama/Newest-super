@@ -1,18 +1,10 @@
 /**
  * Menus.gs
- * Version# [12/05-04:15PM EST] - Added Empty Folder Check menu items
- * by Claude Opus 4.1
+ * Version# [12/31-06:45PM EST] by Claude Opus 4.1
  *
- * - Stage menu (Move automation)
- * - Drafts menu (Gmail drafts V2)
- * - Mileage menu (Mileage log automation)
- * - Ruby menu (Lean-to generator)
- * - QuickBooks menu (Auth + API tests)
- * - Email Reader menu (Automated email processing)
- * - Gemini Leads menu (Add lead label processor)
- * - System utilities
- *
- * IMPORTANT: Do not define any other onOpen() anywhere else.
+ * CHANGES:
+ * - Updated Email Reader menu with separate options for Ruby vs Add lead
+ * - Removed Gemini Leads menu (consolidated into Email Reader)
  */
 function onOpen() {
   try {
@@ -72,27 +64,16 @@ function onOpen() {
       .addItem('🔄 Reset Authorization', 'resetAuth')
       .addToUi();
 
-    // Email Reader Menu
+    // Email Reader Menu - UPDATED
     ui.createMenu('Email Reader')
       .addItem('🔍 Run Diagnostic Check', 'er_diagnosticCheck')
       .addSeparator()
-      .addItem('▶️ Run Email Reader Now', 'er_processNewEmails')
+      .addItem('📧 Process "Add lead" Emails', 'er_processAddLeadEmails')
+      .addItem('▶️ Process ALL Pending Emails', 'er_processNewEmails')
       .addItem('🧪 Test Email Processing', 'er_testProcessing')
       .addSeparator()
-      .addItem('⚙️ Setup Auto-Check (Every 15 min)', 'er_installTrigger')
+      .addItem('⚙️ Setup Auto-Check (Ruby Only)', 'er_installTrigger')
       .addItem('🛑 Remove Auto-Check', 'er_removeTrigger')
-      .addToUi();
-
-    // Gemini Lead Processor Menu
-    ui.createMenu('Setup (Gemini Leads)')
-      .addItem('🔍 Run Diagnostics', 'gl_diagnosticCheck')
-      .addItem('📋 Show Configuration', 'gl_showConfiguration')
-      .addSeparator()
-      .addItem('▶️ Process "Add lead" Emails Now', 'gl_processAddLeadEmails')
-      .addItem('🧪 Test One Email', 'gl_testProcessOneEmail')
-      .addSeparator()
-      .addItem('⚙️ Install Auto-Check Trigger', 'gl_installTrigger')
-      .addItem('🛑 Remove Trigger', 'gl_removeTrigger')
       .addToUi();
 
     // System utilities menu
@@ -104,13 +85,6 @@ function onOpen() {
     console.log('Menus created successfully');
   } catch (error) {
     console.error('Error creating menus:', error);
-    try {
-      SpreadsheetApp.getUi().createMenu('🔧 Debug')
-        .addItem('Check Menu Error', 'debugMenuError_')
-        .addToUi();
-    } catch (fallbackError) {
-      console.error('Fallback menu creation also failed:', fallbackError);
-    }
   }
 }
 
@@ -180,49 +154,6 @@ If you get "undefined didn't connect":
 `;
   
   ui.alert('QuickBooks Setup Guide', instructions, ui.ButtonSet.OK);
-}
-
-/**
- * Debug function to help identify menu issues
- */
-function debugMenuError_() {
-  const ui = SpreadsheetApp.getUi();
-  
-  const missingFunctions = [];
-  const functionsToCheck = [
-    'installTriggerMove_',
-    'installTriggerDrafts_V2',
-    'er_diagnosticCheck',
-    'authorize',
-    'testQuickBooksConnection_',
-    'getScriptUrl',
-    'convertEstimateToInvoice',
-    'sendEstimateCurrentRow_',
-    'er_processNewEmails',
-    'gl_diagnosticCheck',
-    'gl_processAddLeadEmails',
-    'checkEmptyFoldersNow_',
-    'installDailyFolderCheckTrigger_'
-  ];
-  
-  functionsToCheck.forEach(funcName => {
-    try {
-      if (typeof eval(funcName) !== 'function') {
-        missingFunctions.push(funcName);
-      }
-    } catch (e) {
-      missingFunctions.push(funcName + ' (error: ' + e.message + ')');
-    }
-  });
-  
-  if (missingFunctions.length > 0) {
-    ui.alert('Missing Functions', 
-      'The following functions are missing or have errors:\n\n' + 
-      missingFunctions.join('\n'), 
-      ui.ButtonSet.OK);
-  } else {
-    ui.alert('Debug Check', 'All checked functions appear to be available.', ui.ButtonSet.OK);
-  }
 }
 
 /**

@@ -91,7 +91,7 @@ const DRAFTS_V2 = {
     CC: [],
     BCC: [],
     SUBJECT_PREFIX: 'Proposal Review',
-    LINK_LABELS: { PHOTOS:'PICS', EARTH:'Google Earth', QUICKBOOKS:'Quickbooks' },
+    LINK_LABELS: { PHOTOS:'PICS', EARTH:'Google Earth', QUICKBOOKS:'Quickbooks', ROUTE_MAP:'Route Map' },
     SUBJECT_TEMPLATE: '${prefix}: ${displayName} - ${jobType}',
     SUBJECT_MAX_LENGTH: 120,
     SKIP_IF_DRAFT_EXISTS: true
@@ -157,12 +157,23 @@ Thanks,`,
   COI_REQUEST: {
     ATTACHMENT_FILE_ID: '1G1yVE4Ys7JI03h8QA20ONHM6Y3nDPhgY',  // W9 2025.pdf from Google Drive
     RECIPIENTS: [
-      'JGonzalez@keyescoverage.com',
       'ccardozo@keyescoverage.com',
       'ealvarado@keyescoverage.com',
       'jsirias@keyescoverage.com',
       'gonzalo@keyescoverage.com'
     ]
+  },
+
+  // Google Maps Static API configuration
+  MAPS_CONFIG: {
+    SHOP_ADDRESS: '5190 NW 10th Terrace, Fort Lauderdale, FL 33309',
+    MAP_WIDTH: 640,
+    MAP_HEIGHT: 400,
+    MAP_TYPE: 'roadmap',
+    ROUTE_COLOR: '0x4285F4',
+    ROUTE_WEIGHT: 6,
+    MARKER_ORIGIN_COLOR: 'green',
+    MARKER_DEST_COLOR: 'red'
   },
 
   RETRY: { MAX_ATTEMPTS: 3, DELAYS_MS: [5000, 15000, 30000] }
@@ -1136,22 +1147,49 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
   const photoUrl = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.FOLDER_URL)], rtv[idx(DRAFTS_V2.COLS.FOLDER_URL)], sh, row, DRAFTS_V2.COLS.FOLDER_URL);
   const geUrl    = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.GE_URL)],     rtv[idx(DRAFTS_V2.COLS.GE_URL)],     sh, row, DRAFTS_V2.COLS.GE_URL);
   const qbUrl    = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.QB_URL)],     rtv[idx(DRAFTS_V2.COLS.QB_URL)],     sh, row, DRAFTS_V2.COLS.QB_URL);
+// NEW: Generate route map data (includes distance/duration)
+  let routeMapData = null;
+  const address = d_safeString_(vals[idx(DRAFTS_V2.COLS.ADDRESS)]);
+  if (address) {
+    try {
+      routeMapData = d_generateRouteMapUrl_(address);
+      if (!routeMapData || !routeMapData.mapUrl) notes.push('Route map failed');
+    } catch (mapErr) {
+      console.error('Route map generation error:', mapErr);
+      notes.push('Route map error');
+    }
+  } else {
+    notes.push('No address for route map');
+  }
+
+  // Generate satellite aerial view
+  let satelliteMapUrl = null;
+  if (address) {
+    try {
+      satelliteMapUrl = d_generateSatelliteMapUrl_(address);
+      if (!satelliteMapUrl) notes.push('Satellite map failed');
+    } catch (satErr) {
+      console.error('Satellite map generation error:', satErr);
+      notes.push('Satellite map error');
+    }
+  }
 
   // Re-cover HTML snapshot
   let recoverHtml = null;
   try {
     const ss = sh.getParent();
-    if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.SELECT_CELL_A1) {
-      const recoverSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
-      if (recoverSheet) {
-        const targetCellA1 = DRAFTS_V2.RECOVER.SELECT_CELL_A1;
-        const targetCell = recoverSheet.getRange(targetCellA1);
-        SpreadsheetApp.setActiveRange(targetCell);
-        Utilities.sleep(DRAFTS_V2.RECOVER.WAIT_MS || 2000);
-      }
-    }
+    console.log('Starting Re-cover HTML export for spreadsheet: ' + ss.getId());
+    
+    // Just wait for calculations, don't try to change active range (fails in triggers)
+    Utilities.sleep(DRAFTS_V2.RECOVER.WAIT_MS || 2000);
+    
     recoverHtml = v2_exportRecoverRangeAsHtml_(ss);
-    if (!recoverHtml) notes.push('Re-cover HTML empty');
+    if (!recoverHtml) {
+      notes.push('Re-cover HTML empty');
+      console.log('recoverHtml is NULL or empty');
+    } else {
+      console.log('recoverHtml generated, length: ' + recoverHtml.length);
+    }
   } catch (htmlErr) {
     if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
       console.error('HTML export failed:', htmlErr);
@@ -1160,7 +1198,7 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
   }
 
   // Body
-  const html = v2_buildHtmlBody_({ photoUrl, geUrl, qbUrl, recoverHtml });
+  const html = v2_buildHtmlBody_({ photoUrl, geUrl, qbUrl, recoverHtml, routeMapData, address, satelliteMapUrl });
   const plain = v2_buildPlainBody_({ photoUrl, geUrl, qbUrl });
 
   // Recipients
@@ -1397,7 +1435,39 @@ function v2_buildHtmlBody_(data) {
   html += data.geUrl
     ? '<a href="' + esc(data.geUrl) + '" target="_blank" style="font-size:24pt;">' + esc(L.EARTH) + '</a>'
     : '<span style="font-size:24pt;">' + esc(L.EARTH) + ' (No URL)</span>';
-  html += '<br><br>';
+  html += '<br>';
+
+  // Satellite aerial view image - clickable to Google Earth
+  if (data.satelliteMapUrl && data.geUrl) {
+    html += '<a href="' + esc(data.geUrl) + '" target="_blank">';
+    html += '<img src="' + esc(data.satelliteMapUrl) + '" alt="Aerial View" style="max-width:100%; border:1px solid #ccc; border-radius:8px;">';
+    html += '</a><br>';
+  }
+
+  // Route Map - simple display
+  if (data.routeMapData && data.routeMapData.mapUrl && data.address) {
+    const mapsDirectionsUrl = 'https://www.google.com/maps/dir/' + encodeURIComponent(DRAFTS_V2.MAPS_CONFIG.SHOP_ADDRESS) + '/' + encodeURIComponent(data.address);
+    
+    // Distance and Time - plain text
+    if (data.routeMapData.distance || data.routeMapData.duration) {
+      let infoText = '';
+      if (data.routeMapData.distance) {
+        infoText += data.routeMapData.distance;
+      }
+      if (data.routeMapData.distance && data.routeMapData.duration) {
+        infoText += '  |  ';
+      }
+      if (data.routeMapData.duration) {
+        infoText += data.routeMapData.duration;
+      }
+      html += '<span style="font-size:24pt;">' + esc(infoText) + '</span><br>';
+    }
+    
+    // Map image - clickable
+    html += '<a href="' + esc(mapsDirectionsUrl) + '" target="_blank">';
+    html += '<img src="' + esc(data.routeMapData.mapUrl) + '" alt="Route Map" style="max-width:100%; border:1px solid #ccc; border-radius:8px;">';
+    html += '</a><br><br>';
+  }
 
   html += data.qbUrl
     ? '<a href="' + esc(data.qbUrl) + '" target="_blank" style="font-size:24pt;">' + esc(L.QUICKBOOKS) + '</a>'
@@ -1575,6 +1645,131 @@ function d_safeLogErrorToSheet_(sh, row, err) {
     logCell.setValue('Error: ' + d_shortErr_(err));
   } catch (logErr) {
     console.error('Failed to log to sheet:', logErr, 'Original error:', err);
+  }
+}
+/**
+ * Generate Google Maps Static API URL for route image with distance/time data
+ * Returns object: { mapUrl, distance, duration } or null on failure
+ */
+function d_generateRouteMapUrl_(destinationAddress) {
+  const M = DRAFTS_V2.MAPS_CONFIG;
+  
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY');
+  if (!apiKey) {
+    console.error('GOOGLE_MAPS_API_KEY not found in Script Properties');
+    return null;
+  }
+  
+  if (!destinationAddress) {
+    console.error('No destination address provided for route map');
+    return null;
+  }
+  
+  try {
+    const directionsUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
+      'origin=' + encodeURIComponent(M.SHOP_ADDRESS) +
+      '&destination=' + encodeURIComponent(destinationAddress) +
+      '&key=' + apiKey;
+    
+    const response = UrlFetchApp.fetch(directionsUrl, { muteHttpExceptions: true });
+    const directionsData = JSON.parse(response.getContentText());
+    
+    if (directionsData.status !== 'OK' || !directionsData.routes || directionsData.routes.length === 0) {
+      console.error('Directions API error:', directionsData.status);
+      // Return simple map without distance/time
+      return { 
+        mapUrl: d_generateSimpleMapUrl_(destinationAddress, apiKey),
+        distance: null,
+        duration: null
+      };
+    }
+    
+    const route = directionsData.routes[0];
+    const leg = route.legs[0];
+    const encodedPolyline = route.overview_polyline.points;
+    
+    // Extract distance and duration
+    const distance = leg.distance ? leg.distance.text : null;
+    const duration = leg.duration ? leg.duration.text : null;
+    
+    const staticMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?' +
+      'size=' + M.MAP_WIDTH + 'x' + M.MAP_HEIGHT +
+      '&maptype=' + M.MAP_TYPE +
+      '&markers=color:' + M.MARKER_ORIGIN_COLOR + '|label:A|' + encodeURIComponent(M.SHOP_ADDRESS) +
+      '&markers=color:' + M.MARKER_DEST_COLOR + '|label:B|' + encodeURIComponent(destinationAddress) +
+      '&path=color:' + M.ROUTE_COLOR + '|weight:' + M.ROUTE_WEIGHT + '|enc:' + encodedPolyline +
+      '&key=' + apiKey;
+    
+    return { 
+      mapUrl: staticMapUrl, 
+      distance: distance,
+      duration: duration
+    };
+    
+  } catch (err) {
+    console.error('Error generating route map URL:', err);
+    return { 
+      mapUrl: d_generateSimpleMapUrl_(destinationAddress, apiKey),
+      distance: null,
+      duration: null
+    };
+  }
+}
+
+/**
+ * Fallback: Generate simple map URL with just markers (no route line)
+ */
+function d_generateSimpleMapUrl_(destinationAddress, apiKey) {
+  const M = DRAFTS_V2.MAPS_CONFIG;
+  
+  return 'https://maps.googleapis.com/maps/api/staticmap?' +
+    'size=' + M.MAP_WIDTH + 'x' + M.MAP_HEIGHT +
+    '&maptype=' + M.MAP_TYPE +
+    '&markers=color:' + M.MARKER_ORIGIN_COLOR + '|label:A|' + encodeURIComponent(M.SHOP_ADDRESS) +
+    '&markers=color:' + M.MARKER_DEST_COLOR + '|label:B|' + encodeURIComponent(destinationAddress) +
+    '&key=' + apiKey;
+}
+
+/**
+ * Test function - run this to verify Maps API works
+ */
+function testMapsApiConnection() {
+  const testAddress = '1600 Amphitheatre Parkway, Mountain View, CA';
+  const mapUrl = d_generateRouteMapUrl_(testAddress);
+  
+  if (mapUrl) {
+    Logger.log('SUCCESS! Map URL generated:');
+    Logger.log(mapUrl);
+    SpreadsheetApp.getActive().toast('Maps API working! Check logs for URL.', 'Test Success', 5);
+  } else {
+    Logger.log('FAILED: Could not generate map URL. Check API key in Script Properties.');
+    SpreadsheetApp.getActive().toast('Maps API failed. Check logs.', 'Test Failed', 5);
+  }
+}
+/**
+ * Generate Google Maps Static API satellite view URL for a location
+ * Returns the satellite image URL or null on failure
+ */
+function d_generateSatelliteMapUrl_(address) {
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY');
+  if (!apiKey || !address) {
+    return null;
+  }
+  
+  try {
+    // Satellite view centered on the address, zoomed in for property detail
+    const satelliteUrl = 'https://maps.googleapis.com/maps/api/staticmap?' +
+      'center=' + encodeURIComponent(address) +
+      '&zoom=19' +  // High zoom for property detail
+      '&size=640x400' +
+      '&maptype=satellite' +
+      '&markers=color:red|' + encodeURIComponent(address) +
+      '&key=' + apiKey;
+    
+    return satelliteUrl;
+  } catch (err) {
+    console.error('Error generating satellite map URL:', err);
+    return null;
   }
 }
 /** end-of-file */
