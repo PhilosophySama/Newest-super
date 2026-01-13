@@ -1,20 +1,20 @@
 {
   "metadata": {
-    "lastUpdated": "2025-12-27T01:53:23.589Z",
+    "lastUpdated": "2026-01-13T03:50:34.453Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
     "totalTriggers": 20
   },
   "stats": {
-    "totalFiles": 10,
-    "totalFunctions": 153,
+    "totalFiles": 11,
+    "totalFunctions": 159,
     "totalTriggers": 20,
-    "totalLines": 7338,
-    "publicFunctions": 53,
-    "helperFunctions": 141,
-    "avgFunctionsPerFile": 15,
-    "avgLinesPerFile": 734
+    "totalLines": 7502,
+    "publicFunctions": 56,
+    "helperFunctions": 144,
+    "avgFunctionsPerFile": 14,
+    "avgLinesPerFile": 682
   },
   "files": [
     {
@@ -25,225 +25,253 @@
       "functions": [
         {
           "name": "findCustomerInfoAttachmentFileIds",
-          "line": 175,
+          "line": 186,
           "description": "Helper function to find Google Drive file IDs by exact file names Run this ONCE to get the file IDs for CUSTOMER_INFO_ATTACHMENTS",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "installTriggerDrafts_V2",
-          "line": 212,
+          "line": 223,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "handleEditDraft_V2",
-          "line": 231,
+          "line": 242,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_searchAndLinkEmail_",
-          "line": 313,
+          "line": 324,
           "description": "Search Gmail for existing emails/drafts and link in column B",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCustomerDraft_",
-          "line": 403,
+          "line": 414,
           "description": "Create customer follow-up draft when \"Email customer\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createHandoffDraft_",
-          "line": 508,
+          "line": 519,
           "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCustomerInfoDraft_",
-          "line": 584,
+          "line": 595,
           "description": "Create customer info request draft when \"Customer Info\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCOIDraft_",
-          "line": 801,
+          "line": 812,
           "description": "Create COI request draft when \"COI Req\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createRoughQuote_",
-          "line": 948,
+          "line": 959,
           "description": "Create rough quote draft/message when \"Rough quote\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createDraftsForAllRows_V2",
-          "line": 1061,
+          "line": 1072,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_createDraftForRow_",
-          "line": 1108,
+          "line": 1119,
           "description": "Row → Draft creation ========================= */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_exportRecoverRangeAsHtml_",
-          "line": 1207,
+          "line": 1245,
           "description": "HTML export of Re-cover range (FIXED VERSION) Uses proper A1 notation in the API call",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_sheetsDataToHtml_",
-          "line": 1249,
+          "line": 1287,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildHtmlBody_",
-          "line": 1383,
+          "line": 1421,
           "description": "Email body builders ================ */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildPlainBody_",
-          "line": 1410,
+          "line": 1480,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_extractUrlFromCell_",
-          "line": 1422,
+          "line": 1492,
           "description": "Helpers ===================== */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_looksLikeUrl_",
-          "line": 1472,
+          "line": 1542,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeString_",
-          "line": 1473,
+          "line": 1543,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_htmlEscape_",
-          "line": 1474,
+          "line": 1544,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_colLetterToIndex_",
-          "line": 1476,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "v2_getSpreadsheet_",
-          "line": 1482,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_writeB_",
-          "line": 1489,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_withRetry_",
-          "line": 1500,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_specificErrorMessage_",
-          "line": 1516,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_shortErr_",
-          "line": 1523,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "v2_validateConfig_",
-          "line": 1525,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_isValidEmail_",
-          "line": 1532,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_firstLinkInRichText_",
-          "line": 1534,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_isGmailDraftUrl_",
           "line": 1546,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
+          "name": "v2_getSpreadsheet_",
+          "line": 1552,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_writeB_",
+          "line": 1559,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_withRetry_",
+          "line": 1570,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_specificErrorMessage_",
+          "line": 1586,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_shortErr_",
+          "line": 1593,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_validateConfig_",
+          "line": 1595,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_isValidEmail_",
+          "line": 1602,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_firstLinkInRichText_",
+          "line": 1604,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_isGmailDraftUrl_",
+          "line": 1616,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "d_templateSafe_",
-          "line": 1550,
+          "line": 1620,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_timestamp_",
-          "line": 1562,
+          "line": 1632,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeLogErrorToSheet_",
-          "line": 1568,
+          "line": 1638,
           "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_generateRouteMapUrl_",
+          "line": 1654,
+          "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_generateSimpleMapUrl_",
+          "line": 1722,
+          "description": "Fallback: Generate simple map URL with just markers (no route line)",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "testMapsApiConnection",
+          "line": 1736,
+          "description": "Test function - run this to verify Maps API works",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "d_generateSatelliteMapUrl_",
+          "line": 1753,
+          "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
           "isPublic": false,
           "isHelper": true
         }
@@ -319,6 +347,8 @@
         "d_specificErrorMessage_",
         "d_firstLinkInRichText_",
         "d_isGmailDraftUrl_",
+        "d_generateRouteMapUrl_",
+        "d_generateSatelliteMapUrl_",
         "v2_exportRecoverRangeAsHtml_",
         "v2_buildHtmlBody_",
         "v2_buildPlainBody_",
@@ -327,98 +357,99 @@
         "d_looksLikeUrl_",
         "d_timestamp_",
         "d_safeLogErrorToSheet_",
+        "d_generateSimpleMapUrl_",
         "DRAFTS_V2"
       ],
-      "lines": 1581,
-      "size": 63775
+      "lines": 1775,
+      "size": 70837
     },
     {
       "path": "Email Reader.gs",
       "filename": "Email Reader.gs",
-      "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION (VERSION 3.0.1) Version: 01/20-Enhanced with separate stricter AI for manual leads FEATURES:",
-      "version": "01/20-Enhanced with separate stricter AI for manual leads",
+      "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version# [12/31-07:45PM EST] by Claude Opus 4.1 FEATURES:",
+      "version": "[12/31-07:45PM EST] by Claude Opus 4.1",
       "functions": [
         {
           "name": "er_diagnosticCheck",
-          "line": 111,
-          "description": "DIAGNOSTIC FUNCTION - Run this first to check setup",
+          "line": 110,
+          "description": "DIAGNOSTIC FUNCTION - Quick check, no popup",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_isRubyEmail_",
-          "line": 182,
+          "line": 136,
           "description": "Determine if email is from Ruby",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_processEmail_",
-          "line": 190,
-          "description": "Process a single email with source awareness",
+          "line": 145,
+          "description": "Process a single email - SAME PROCESS for Ruby and \"Add lead\" ALWAYS adds \"LeadProcessed\" label after processing",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_tryAIParsing_",
-          "line": 313,
-          "description": "Try AI parsing with format awareness",
+          "line": 264,
+          "description": "Try AI parsing - Same formula for all emails",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_tryPatternParsing_",
-          "line": 411,
-          "description": "Pattern parsing with source awareness",
+          "line": 345,
+          "description": "Pattern parsing - fallback for both Ruby and Add lead",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_tryStructuredExtraction_",
-          "line": 560,
-          "description": "Structured extraction (generic)",
+          "line": 476,
+          "description": "Structured extraction (generic fallback)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_saveForManualReview_",
-          "line": 632,
-          "description": "Save for manual review",
+          "line": 538,
+          "description": "Save for manual review when all parsing fails",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_log_",
-          "line": 666,
+          "line": 572,
           "description": "Logging function",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_installTrigger",
-          "line": 679,
-          "description": "Install trigger",
+          "line": 585,
+          "description": "Install trigger - runs every 15 minutes for BOTH Ruby and \"Add lead\"",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_removeTrigger",
-          "line": 693,
+          "line": 603,
           "description": "Remove trigger",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_processNewEmails",
-          "line": 705,
-          "description": "Main processing function - handles both Ruby and Manual leads",
+          "line": 616,
+          "description": "MAIN: Process ALL pending emails (Ruby + Add lead) - runs automatically",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_testProcessing",
-          "line": 794,
-          "description": "Test processing with detailed output",
+          "line": 689,
+          "description": "Test processing - no popup, just runs and shows toast",
           "isPublic": true,
           "isHelper": true
         }
@@ -434,110 +465,12 @@
         "er_saveForManualReview_",
         "Defines: EMAIL_READER_CONFIG"
       ],
-      "lines": 872,
-      "size": 27284
+      "lines": 741,
+      "size": 22444
     },
     {
-      "path": "F/U and Send proposal.gs",
-      "filename": "U and Send proposal.gs",
-      "purpose": "Lead_Followup_Draft_V2.gs version# 09/23-05:05PM EST by Chatgpt5 PURPOSE",
-      "version": "09/23-05:05PM EST by Chatgpt5",
-      "functions": [
-        {
-          "name": "installTriggerDrafts_FU",
-          "line": 35,
-          "description": null,
-          "isPublic": true,
-          "isHelper": true
-        },
-        {
-          "name": "handleEditDraft_FU",
-          "line": 48,
-          "description": null,
-          "isPublic": true,
-          "isHelper": true
-        },
-        {
-          "name": "createDraftsForAllRows_FU",
-          "line": 80,
-          "description": null,
-          "isPublic": true,
-          "isHelper": true
-        },
-        {
-          "name": "fu_createDraftForRow_",
-          "line": 127,
-          "description": "Row → Draft creation ========================= */",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "fu_safeString_",
-          "line": 173,
-          "description": "Helpers ===================== */",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "fu_colLetterToIndex_",
-          "line": 174,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "fu_getSpreadsheet_",
-          "line": 179,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "fu_writeB_",
-          "line": 185,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "fu_firstLinkInRichText_",
-          "line": 195,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "fu_isGmailDraftUrl_",
-          "line": 206,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "fu_shortErr_",
-          "line": 210,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        }
-      ],
-      "triggers": [],
-      "dependencies": [
-        "fu_getSpreadsheet_",
-        "fu_colLetterToIndex_",
-        "fu_firstLinkInRichText_",
-        "fu_isGmailDraftUrl_",
-        "fu_createDraftForRow_",
-        "fu_shortErr_",
-        "fu_safeString_",
-        "fu_writeB_"
-      ],
-      "lines": 212,
-      "size": 7745
-    },
-    {
-      "path": "Gemini Lead proccessor.gs",
-      "filename": "Gemini Lead proccessor.gs",
+      "path": "Gemini Lead processor.gs",
+      "filename": "Gemini Lead processor.gs",
       "purpose": "GEMINI LEAD PROCESSOR Version: 1.0 - 11/05/2025 Watches for emails labeled \"Add lead\" and processes them through Gemini API",
       "version": "1.0 - 11/05/2025",
       "functions": [
@@ -644,8 +577,106 @@
         "gl_callGeminiAPI_",
         "Defines: GEMINI_LEAD_CONFIG"
       ],
-      "lines": 713,
-      "size": 20611
+      "lines": 712,
+      "size": 20610
+    },
+    {
+      "path": "Lead follow up.gs.gs",
+      "filename": "Lead follow up.gs.gs",
+      "purpose": "Lead Follow up.gs version# 09/23-05:05PM EST by Chatgpt5 PURPOSE",
+      "version": "09/23-05:05PM EST by Chatgpt5",
+      "functions": [
+        {
+          "name": "installTriggerDrafts_FU",
+          "line": 35,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "handleEditDraft_FU",
+          "line": 48,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "createDraftsForAllRows_FU",
+          "line": 80,
+          "description": null,
+          "isPublic": true,
+          "isHelper": true
+        },
+        {
+          "name": "fu_createDraftForRow_",
+          "line": 127,
+          "description": "Row → Draft creation ========================= */",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_safeString_",
+          "line": 173,
+          "description": "Helpers ===================== */",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_colLetterToIndex_",
+          "line": 174,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_getSpreadsheet_",
+          "line": 179,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_writeB_",
+          "line": 185,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_firstLinkInRichText_",
+          "line": 195,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_isGmailDraftUrl_",
+          "line": 206,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fu_shortErr_",
+          "line": 210,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "fu_getSpreadsheet_",
+        "fu_colLetterToIndex_",
+        "fu_firstLinkInRichText_",
+        "fu_isGmailDraftUrl_",
+        "fu_createDraftForRow_",
+        "fu_shortErr_",
+        "fu_safeString_",
+        "fu_writeB_"
+      ],
+      "lines": 212,
+      "size": 7737
     },
     {
       "path": "Lean-to generator.gs",
@@ -729,6 +760,20 @@
           "description": null,
           "isPublic": true,
           "isHelper": true
+        },
+        {
+          "name": "copyRubyForSelectedRow_",
+          "line": 758,
+          "description": "Copy Ruby code for the selected row to clipboard via dialog Version# [12/29-10:45AM EST] by Claude Opus 4.1",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "copyCode",
+          "line": 885,
+          "description": null,
+          "isPublic": true,
+          "isHelper": false
         }
       ],
       "triggers": [],
@@ -742,48 +787,63 @@
         "r_getRubyExportFolder_",
         "installTriggerAwningRuby_",
         "handleEditLeanToRuby_",
-        "installTriggerLeanToRuby_"
+        "installTriggerLeanToRuby_",
+        "copyRubyForSelectedRow_"
       ],
-      "lines": 754,
-      "size": 24931
+      "lines": 921,
+      "size": 30250
+    },
+    {
+      "path": "Macros.gs",
+      "filename": "Macros.gs",
+      "purpose": "Macro wrapper for Copy Ruby function Keyboard shortcut: Ctrl+Alt+Shift+1 (or assigned number)",
+      "version": null,
+      "functions": [
+        {
+          "name": "CopyRuby",
+          "line": 5,
+          "description": "Macro wrapper for Copy Ruby function Keyboard shortcut: Ctrl+Alt+Shift+1 (or assigned number)",
+          "isPublic": true,
+          "isHelper": false
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "copyRubyForSelectedRow_"
+      ],
+      "lines": 7,
+      "size": 166
     },
     {
       "path": "Menus.gs",
       "filename": "Menus.gs",
-      "purpose": "Menus.gs Version# [12/05-04:15PM EST] - Added Empty Folder Check menu items by Claude Opus 4.1",
-      "version": "[12/05-04:15PM EST] - Added Empty Folder Check menu items",
+      "purpose": "Menus.gs Version# [12/31-06:45PM EST] by Claude Opus 4.1 CHANGES:",
+      "version": "[12/31-06:45PM EST] by Claude Opus 4.1",
       "functions": [
         {
           "name": "onOpen",
-          "line": 17,
-          "description": "- System utilities  IMPORTANT: Do not define any other onOpen() anywhere else.",
+          "line": 9,
+          "description": "CHANGES: - Updated Email Reader menu with separate options for Ruby vs Add lead - Removed Gemini Leads menu (consolidated into Email Reader)",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 120,
+          "line": 94,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "debugMenuError_",
-          "line": 188,
-          "description": "Debug function to help identify menu issues",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
           "name": "listAllTriggers_",
-          "line": 231,
+          "line": 162,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 250,
+          "line": 181,
           "description": "System utility: Remove all triggers",
           "isPublic": false,
           "isHelper": true
@@ -792,12 +852,11 @@
       "triggers": [],
       "dependencies": [
         "showQuickBooksSetup_",
-        "debugMenuError_",
         "listAllTriggers_",
         "removeAllTriggers_"
       ],
-      "lines": 262,
-      "size": 8517
+      "lines": 192,
+      "size": 6434
     },
     {
       "path": "Miles Log.gs",
@@ -988,8 +1047,8 @@
         "MILEAGE_CONFIG",
         "Defines: MILEAGE_CONFIG"
       ],
-      "lines": 475,
-      "size": 16350
+      "lines": 474,
+      "size": 16349
     },
     {
       "path": "QBO Estimates.gs",
@@ -1496,8 +1555,8 @@
         "MOVE_CONFIG",
         "Defines: MOVE_CONFIG"
       ],
-      "lines": 1482,
-      "size": 53759
+      "lines": 1481,
+      "size": 53758
     }
   ],
   "categories": {
@@ -1510,225 +1569,253 @@
         "functions": [
           {
             "name": "findCustomerInfoAttachmentFileIds",
-            "line": 175,
+            "line": 186,
             "description": "Helper function to find Google Drive file IDs by exact file names Run this ONCE to get the file IDs for CUSTOMER_INFO_ATTACHMENTS",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "installTriggerDrafts_V2",
-            "line": 212,
+            "line": 223,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "handleEditDraft_V2",
-            "line": 231,
+            "line": 242,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_searchAndLinkEmail_",
-            "line": 313,
+            "line": 324,
             "description": "Search Gmail for existing emails/drafts and link in column B",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCustomerDraft_",
-            "line": 403,
+            "line": 414,
             "description": "Create customer follow-up draft when \"Email customer\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createHandoffDraft_",
-            "line": 508,
+            "line": 519,
             "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCustomerInfoDraft_",
-            "line": 584,
+            "line": 595,
             "description": "Create customer info request draft when \"Customer Info\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCOIDraft_",
-            "line": 801,
+            "line": 812,
             "description": "Create COI request draft when \"COI Req\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createRoughQuote_",
-            "line": 948,
+            "line": 959,
             "description": "Create rough quote draft/message when \"Rough quote\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createDraftsForAllRows_V2",
-            "line": 1061,
+            "line": 1072,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_createDraftForRow_",
-            "line": 1108,
+            "line": 1119,
             "description": "Row → Draft creation ========================= */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_exportRecoverRangeAsHtml_",
-            "line": 1207,
+            "line": 1245,
             "description": "HTML export of Re-cover range (FIXED VERSION) Uses proper A1 notation in the API call",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_sheetsDataToHtml_",
-            "line": 1249,
+            "line": 1287,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildHtmlBody_",
-            "line": 1383,
+            "line": 1421,
             "description": "Email body builders ================ */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildPlainBody_",
-            "line": 1410,
+            "line": 1480,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_extractUrlFromCell_",
-            "line": 1422,
+            "line": 1492,
             "description": "Helpers ===================== */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_looksLikeUrl_",
-            "line": 1472,
+            "line": 1542,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeString_",
-            "line": 1473,
+            "line": 1543,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_htmlEscape_",
-            "line": 1474,
+            "line": 1544,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_colLetterToIndex_",
-            "line": 1476,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "v2_getSpreadsheet_",
-            "line": 1482,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_writeB_",
-            "line": 1489,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_withRetry_",
-            "line": 1500,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_specificErrorMessage_",
-            "line": 1516,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_shortErr_",
-            "line": 1523,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "v2_validateConfig_",
-            "line": 1525,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_isValidEmail_",
-            "line": 1532,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_firstLinkInRichText_",
-            "line": 1534,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_isGmailDraftUrl_",
             "line": 1546,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
+            "name": "v2_getSpreadsheet_",
+            "line": 1552,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_writeB_",
+            "line": 1559,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_withRetry_",
+            "line": 1570,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_specificErrorMessage_",
+            "line": 1586,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_shortErr_",
+            "line": 1593,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_validateConfig_",
+            "line": 1595,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_isValidEmail_",
+            "line": 1602,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_firstLinkInRichText_",
+            "line": 1604,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_isGmailDraftUrl_",
+            "line": 1616,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "d_templateSafe_",
-            "line": 1550,
+            "line": 1620,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_timestamp_",
-            "line": 1562,
+            "line": 1632,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeLogErrorToSheet_",
-            "line": 1568,
+            "line": 1638,
             "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_generateRouteMapUrl_",
+            "line": 1654,
+            "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_generateSimpleMapUrl_",
+            "line": 1722,
+            "description": "Fallback: Generate simple map URL with just markers (no route line)",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "testMapsApiConnection",
+            "line": 1736,
+            "description": "Test function - run this to verify Maps API works",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "d_generateSatelliteMapUrl_",
+            "line": 1753,
+            "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
             "isPublic": false,
             "isHelper": true
           }
@@ -1804,6 +1891,8 @@
           "d_specificErrorMessage_",
           "d_firstLinkInRichText_",
           "d_isGmailDraftUrl_",
+          "d_generateRouteMapUrl_",
+          "d_generateSatelliteMapUrl_",
           "v2_exportRecoverRangeAsHtml_",
           "v2_buildHtmlBody_",
           "v2_buildPlainBody_",
@@ -1812,10 +1901,11 @@
           "d_looksLikeUrl_",
           "d_timestamp_",
           "d_safeLogErrorToSheet_",
+          "d_generateSimpleMapUrl_",
           "DRAFTS_V2"
         ],
-        "lines": 1581,
-        "size": 63775
+        "lines": 1775,
+        "size": 70837
       },
       {
         "path": "Stage Automation.gs",
@@ -2186,8 +2276,8 @@
           "MOVE_CONFIG",
           "Defines: MOVE_CONFIG"
         ],
-        "lines": 1482,
-        "size": 53759
+        "lines": 1481,
+        "size": 53758
       }
     ],
     "automation": [
@@ -2273,6 +2363,20 @@
             "description": null,
             "isPublic": true,
             "isHelper": true
+          },
+          {
+            "name": "copyRubyForSelectedRow_",
+            "line": 758,
+            "description": "Copy Ruby code for the selected row to clipboard via dialog Version# [12/29-10:45AM EST] by Claude Opus 4.1",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "copyCode",
+            "line": 885,
+            "description": null,
+            "isPublic": true,
+            "isHelper": false
           }
         ],
         "triggers": [],
@@ -2286,10 +2390,11 @@
           "r_getRubyExportFolder_",
           "installTriggerAwningRuby_",
           "handleEditLeanToRuby_",
-          "installTriggerLeanToRuby_"
+          "installTriggerLeanToRuby_",
+          "copyRubyForSelectedRow_"
         ],
-        "lines": 754,
-        "size": 24931
+        "lines": 921,
+        "size": 30250
       }
     ],
     "integration": [
@@ -2434,40 +2539,33 @@
       {
         "path": "Menus.gs",
         "filename": "Menus.gs",
-        "purpose": "Menus.gs Version# [12/05-04:15PM EST] - Added Empty Folder Check menu items by Claude Opus 4.1",
-        "version": "[12/05-04:15PM EST] - Added Empty Folder Check menu items",
+        "purpose": "Menus.gs Version# [12/31-06:45PM EST] by Claude Opus 4.1 CHANGES:",
+        "version": "[12/31-06:45PM EST] by Claude Opus 4.1",
         "functions": [
           {
             "name": "onOpen",
-            "line": 17,
-            "description": "- System utilities  IMPORTANT: Do not define any other onOpen() anywhere else.",
+            "line": 9,
+            "description": "CHANGES: - Updated Email Reader menu with separate options for Ruby vs Add lead - Removed Gemini Leads menu (consolidated into Email Reader)",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 120,
+            "line": 94,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "debugMenuError_",
-            "line": 188,
-            "description": "Debug function to help identify menu issues",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
             "name": "listAllTriggers_",
-            "line": 231,
+            "line": 162,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 250,
+            "line": 181,
             "description": "System utility: Remove all triggers",
             "isPublic": false,
             "isHelper": true
@@ -2476,102 +2574,101 @@
         "triggers": [],
         "dependencies": [
           "showQuickBooksSetup_",
-          "debugMenuError_",
           "listAllTriggers_",
           "removeAllTriggers_"
         ],
-        "lines": 262,
-        "size": 8517
+        "lines": 192,
+        "size": 6434
       }
     ],
     "other": [
       {
         "path": "Email Reader.gs",
         "filename": "Email Reader.gs",
-        "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION (VERSION 3.0.1) Version: 01/20-Enhanced with separate stricter AI for manual leads FEATURES:",
-        "version": "01/20-Enhanced with separate stricter AI for manual leads",
+        "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version# [12/31-07:45PM EST] by Claude Opus 4.1 FEATURES:",
+        "version": "[12/31-07:45PM EST] by Claude Opus 4.1",
         "functions": [
           {
             "name": "er_diagnosticCheck",
-            "line": 111,
-            "description": "DIAGNOSTIC FUNCTION - Run this first to check setup",
+            "line": 110,
+            "description": "DIAGNOSTIC FUNCTION - Quick check, no popup",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_isRubyEmail_",
-            "line": 182,
+            "line": 136,
             "description": "Determine if email is from Ruby",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_processEmail_",
-            "line": 190,
-            "description": "Process a single email with source awareness",
+            "line": 145,
+            "description": "Process a single email - SAME PROCESS for Ruby and \"Add lead\" ALWAYS adds \"LeadProcessed\" label after processing",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_tryAIParsing_",
-            "line": 313,
-            "description": "Try AI parsing with format awareness",
+            "line": 264,
+            "description": "Try AI parsing - Same formula for all emails",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_tryPatternParsing_",
-            "line": 411,
-            "description": "Pattern parsing with source awareness",
+            "line": 345,
+            "description": "Pattern parsing - fallback for both Ruby and Add lead",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_tryStructuredExtraction_",
-            "line": 560,
-            "description": "Structured extraction (generic)",
+            "line": 476,
+            "description": "Structured extraction (generic fallback)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_saveForManualReview_",
-            "line": 632,
-            "description": "Save for manual review",
+            "line": 538,
+            "description": "Save for manual review when all parsing fails",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_log_",
-            "line": 666,
+            "line": 572,
             "description": "Logging function",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_installTrigger",
-            "line": 679,
-            "description": "Install trigger",
+            "line": 585,
+            "description": "Install trigger - runs every 15 minutes for BOTH Ruby and \"Add lead\"",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_removeTrigger",
-            "line": 693,
+            "line": 603,
             "description": "Remove trigger",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_processNewEmails",
-            "line": 705,
-            "description": "Main processing function - handles both Ruby and Manual leads",
+            "line": 616,
+            "description": "MAIN: Process ALL pending emails (Ruby + Add lead) - runs automatically",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_testProcessing",
-            "line": 794,
-            "description": "Test processing with detailed output",
+            "line": 689,
+            "description": "Test processing - no popup, just runs and shows toast",
             "isPublic": true,
             "isHelper": true
           }
@@ -2587,110 +2684,12 @@
           "er_saveForManualReview_",
           "Defines: EMAIL_READER_CONFIG"
         ],
-        "lines": 872,
-        "size": 27284
+        "lines": 741,
+        "size": 22444
       },
       {
-        "path": "F/U and Send proposal.gs",
-        "filename": "U and Send proposal.gs",
-        "purpose": "Lead_Followup_Draft_V2.gs version# 09/23-05:05PM EST by Chatgpt5 PURPOSE",
-        "version": "09/23-05:05PM EST by Chatgpt5",
-        "functions": [
-          {
-            "name": "installTriggerDrafts_FU",
-            "line": 35,
-            "description": null,
-            "isPublic": true,
-            "isHelper": true
-          },
-          {
-            "name": "handleEditDraft_FU",
-            "line": 48,
-            "description": null,
-            "isPublic": true,
-            "isHelper": true
-          },
-          {
-            "name": "createDraftsForAllRows_FU",
-            "line": 80,
-            "description": null,
-            "isPublic": true,
-            "isHelper": true
-          },
-          {
-            "name": "fu_createDraftForRow_",
-            "line": 127,
-            "description": "Row → Draft creation ========================= */",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "fu_safeString_",
-            "line": 173,
-            "description": "Helpers ===================== */",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "fu_colLetterToIndex_",
-            "line": 174,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "fu_getSpreadsheet_",
-            "line": 179,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "fu_writeB_",
-            "line": 185,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "fu_firstLinkInRichText_",
-            "line": 195,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "fu_isGmailDraftUrl_",
-            "line": 206,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "fu_shortErr_",
-            "line": 210,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          }
-        ],
-        "triggers": [],
-        "dependencies": [
-          "fu_getSpreadsheet_",
-          "fu_colLetterToIndex_",
-          "fu_firstLinkInRichText_",
-          "fu_isGmailDraftUrl_",
-          "fu_createDraftForRow_",
-          "fu_shortErr_",
-          "fu_safeString_",
-          "fu_writeB_"
-        ],
-        "lines": 212,
-        "size": 7745
-      },
-      {
-        "path": "Gemini Lead proccessor.gs",
-        "filename": "Gemini Lead proccessor.gs",
+        "path": "Gemini Lead processor.gs",
+        "filename": "Gemini Lead processor.gs",
         "purpose": "GEMINI LEAD PROCESSOR Version: 1.0 - 11/05/2025 Watches for emails labeled \"Add lead\" and processes them through Gemini API",
         "version": "1.0 - 11/05/2025",
         "functions": [
@@ -2797,8 +2796,127 @@
           "gl_callGeminiAPI_",
           "Defines: GEMINI_LEAD_CONFIG"
         ],
-        "lines": 713,
-        "size": 20611
+        "lines": 712,
+        "size": 20610
+      },
+      {
+        "path": "Lead follow up.gs.gs",
+        "filename": "Lead follow up.gs.gs",
+        "purpose": "Lead Follow up.gs version# 09/23-05:05PM EST by Chatgpt5 PURPOSE",
+        "version": "09/23-05:05PM EST by Chatgpt5",
+        "functions": [
+          {
+            "name": "installTriggerDrafts_FU",
+            "line": 35,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "handleEditDraft_FU",
+            "line": 48,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "createDraftsForAllRows_FU",
+            "line": 80,
+            "description": null,
+            "isPublic": true,
+            "isHelper": true
+          },
+          {
+            "name": "fu_createDraftForRow_",
+            "line": 127,
+            "description": "Row → Draft creation ========================= */",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_safeString_",
+            "line": 173,
+            "description": "Helpers ===================== */",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_colLetterToIndex_",
+            "line": 174,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_getSpreadsheet_",
+            "line": 179,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_writeB_",
+            "line": 185,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_firstLinkInRichText_",
+            "line": 195,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_isGmailDraftUrl_",
+            "line": 206,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fu_shortErr_",
+            "line": 210,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "fu_getSpreadsheet_",
+          "fu_colLetterToIndex_",
+          "fu_firstLinkInRichText_",
+          "fu_isGmailDraftUrl_",
+          "fu_createDraftForRow_",
+          "fu_shortErr_",
+          "fu_safeString_",
+          "fu_writeB_"
+        ],
+        "lines": 212,
+        "size": 7737
+      },
+      {
+        "path": "Macros.gs",
+        "filename": "Macros.gs",
+        "purpose": "Macro wrapper for Copy Ruby function Keyboard shortcut: Ctrl+Alt+Shift+1 (or assigned number)",
+        "version": null,
+        "functions": [
+          {
+            "name": "CopyRuby",
+            "line": 5,
+            "description": "Macro wrapper for Copy Ruby function Keyboard shortcut: Ctrl+Alt+Shift+1 (or assigned number)",
+            "isPublic": true,
+            "isHelper": false
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "copyRubyForSelectedRow_"
+        ],
+        "lines": 7,
+        "size": 166
       },
       {
         "path": "Miles Log.gs",
@@ -2989,8 +3107,8 @@
           "MILEAGE_CONFIG",
           "Defines: MILEAGE_CONFIG"
         ],
-        "lines": 475,
-        "size": 16350
+        "lines": 474,
+        "size": 16349
       }
     ]
   },
