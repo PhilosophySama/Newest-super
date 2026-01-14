@@ -1,6 +1,6 @@
 /**
  * Draft Creator.gs
- * version# 01/05-10:15PM EST by Claude Opus 4.1
+ * version# 01/14-11:45AM EST by Claude Opus 4.5
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
@@ -73,10 +73,10 @@ const DRAFTS_V2 = {
 
   // Google Drive File IDs for Customer Info attachments
   CUSTOMER_INFO_ATTACHMENTS: {
-    SUNBRELLA_FILE_ID: '1_SUNBRELLA_PLACEHOLDER_',
-    VINYL_FERRARI_FILE_ID: '1_FERRARI_PLACEHOLDER_',
-    VINYL_PATIO500_FILE_ID: '1_PATIO500_PLACEHOLDER_',
-    VINYL_COASTLINE_FILE_ID: '1_COASTLINE_PLACEHOLDER_'
+    SUNBRELLA_FILE_ID: '12kDBFtqNrQ63hd6-dPgVPq6qVbHFa7LK',  // Sunbrella-Shade-Product-Booklet-2024.pdf
+    VINYL_FERRARI_FILE_ID: '1EiJ4RLm7bdKpvZbEVTeP7lbHPBJSQBOH',
+    VINYL_PATIO500_FILE_ID: '1_odDLtBk5KsuxruyrWDNv3j7Bn79_lZ4',
+    VINYL_COASTLINE_FILE_ID: '1LbZSbOMowIb5ChQYov6fOUzI4u67dTCr'
   },
 
   RECOVER: {
@@ -155,7 +155,7 @@ Thanks,`,
   },
 
   COI_REQUEST: {
-    ATTACHMENT_FILE_ID: '1G1yVE4Ys7JI03h8QA20ONHM6Y3nDPhgY',  // W9 2025.pdf from Google Drive
+    ATTACHMENT_FILE_ID: '1xP7P3MMRBMV0FP-3Aljf7uPV6z-2VHgQ',  // W9 2026 Walker Awning.pdf from Google Drive
     RECIPIENTS: [
       'ccardozo@keyescoverage.com',
       'ealvarado@keyescoverage.com',
@@ -183,41 +183,6 @@ Thanks,`,
  * Helper function to find Google Drive file IDs by exact file names
  * Run this ONCE to get the file IDs for CUSTOMER_INFO_ATTACHMENTS
  */
-function findCustomerInfoAttachmentFileIds() {
-  const fileNames = {
-    SUNBRELLA: '2025 Sunbrella Colors.pdf',
-    VINYL_FERRARI: '2025 - Vinyl - Ferrari.jpg',
-    VINYL_PATIO500: '2025 - Vinyl - Patio 500.jpg',
-    VINYL_COASTLINE: '2025 - Vinyl - Coastline Plus.jpg'
-  };
-  
-  const results = {};
-  
-  for (const [key, fileName] of Object.entries(fileNames)) {
-    try {
-      const files = DriveApp.getFilesByName(fileName);
-      if (files.hasNext()) {
-        const file = files.next();
-        results[key] = file.getId();
-        Logger.log(`${key}: ${file.getId()} (${fileName})`);
-      } else {
-        Logger.log(`${key}: FILE NOT FOUND - ${fileName}`);
-        results[key] = 'FILE_NOT_FOUND';
-      }
-    } catch (err) {
-      Logger.log(`${key}: ERROR - ${err.message}`);
-      results[key] = 'ERROR';
-    }
-  }
-  
-  Logger.log('\n\n=== COPY THIS INTO YOUR DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS CONFIG ===');
-  Logger.log(`  SUNBRELLA_FILE_ID: '${results.SUNBRELLA}',`);
-  Logger.log(`  VINYL_FERRARI_FILE_ID: '${results.VINYL_FERRARI}',`);
-  Logger.log(`  VINYL_PATIO500_FILE_ID: '${results.VINYL_PATIO500}',`);
-  Logger.log(`  VINYL_COASTLINE_FILE_ID: '${results.VINYL_COASTLINE}'`);
-  
-  return results;
-}
 
 /** Install onEdit trigger (clean re-install). */
 function installTriggerDrafts_V2() {
@@ -868,7 +833,8 @@ function v2_createCOIDraft_(sh, row) {
 ${displayName}
 ${address}
 
-Please forward (with attached W9) to ${customerName} at ${customerEmail} and CC Gino@WalkerAwning.com.
+Please reply to this email as our W9 is attached and 
+${customerName} is already CC'd on here.
 
 So they get all the docs in one thread.
 
@@ -885,7 +851,8 @@ Gino Carneiro`;
 <strong>${d_htmlEscape_(displayName)}</strong><br>
 <strong>${d_htmlEscape_(address)}</strong></p>
 
-<p>Please forward (with attached W9) to <strong>${d_htmlEscape_(customerName)}</strong> at <strong>${d_htmlEscape_(customerEmail)}</strong> and CC Gino@WalkerAwning.com.</p>
+<p>Please reply to this email as our W9 is attached and<br>
+<strong>${d_htmlEscape_(customerName)}</strong> is already CC'd on here.</p>
 
 <p>So they get all the docs in one thread.</p>
 
@@ -914,7 +881,9 @@ Gino Carneiro</p>
       }
     }
     
-    // Create draft
+    // Create draft with customer CC'd
+    options.cc = customerEmail;
+    
     try {
       const draft = d_withRetry_(() => GmailApp.createDraft(
         DRAFTS_V2.COI_REQUEST.RECIPIENTS.join(','), 
