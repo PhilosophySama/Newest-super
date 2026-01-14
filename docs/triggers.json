@@ -1,276 +1,269 @@
 {
   "metadata": {
-    "lastUpdated": "2026-01-14T21:18:28.781Z",
+    "lastUpdated": "2026-01-14T22:32:45.916Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
     "totalTriggers": 20
   },
   "stats": {
-    "totalFiles": 11,
-    "totalFunctions": 159,
+    "totalFiles": 10,
+    "totalFunctions": 145,
     "totalTriggers": 20,
-    "totalLines": 7480,
-    "publicFunctions": 57,
-    "helperFunctions": 144,
-    "avgFunctionsPerFile": 14,
-    "avgLinesPerFile": 680
+    "totalLines": 6737,
+    "publicFunctions": 50,
+    "helperFunctions": 131,
+    "avgFunctionsPerFile": 15,
+    "avgLinesPerFile": 674
   },
   "files": [
     {
       "path": "Draft Creator.gs",
       "filename": "Draft Creator.gs",
-      "purpose": "Draft Creator.gs version# 01/05-10:15PM EST by Claude Opus 4.1 PURPOSE",
-      "version": "01/05-10:15PM EST by Claude Opus 4.1",
+      "purpose": "Draft Creator.gs version# 01/14-11:45AM EST by Claude Opus 4.5 PURPOSE",
+      "version": "01/14-11:45AM EST by Claude Opus 4.5",
       "functions": [
         {
-          "name": "findCustomerInfoAttachmentFileIds",
-          "line": 186,
-          "description": "Helper function to find Google Drive file IDs by exact file names Run this ONCE to get the file IDs for CUSTOMER_INFO_ATTACHMENTS",
-          "isPublic": true,
-          "isHelper": false
-        },
-        {
           "name": "installTriggerDrafts_V2",
-          "line": 223,
+          "line": 188,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "handleEditDraft_V2",
-          "line": 242,
+          "line": 207,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_searchAndLinkEmail_",
-          "line": 324,
+          "line": 289,
           "description": "Search Gmail for existing emails/drafts and link in column B",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCustomerDraft_",
-          "line": 414,
+          "line": 379,
           "description": "Create customer follow-up draft when \"Email customer\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createHandoffDraft_",
-          "line": 519,
+          "line": 484,
           "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCustomerInfoDraft_",
-          "line": 595,
+          "line": 560,
           "description": "Create customer info request draft when \"Customer Info\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCOIDraft_",
-          "line": 812,
+          "line": 777,
           "description": "Create COI request draft when \"COI Req\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createRoughQuote_",
-          "line": 959,
+          "line": 928,
           "description": "Create rough quote draft/message when \"Rough quote\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createDraftsForAllRows_V2",
-          "line": 1072,
+          "line": 1041,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_createDraftForRow_",
-          "line": 1119,
+          "line": 1088,
           "description": "Row → Draft creation ========================= */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_exportRecoverRangeAsHtml_",
-          "line": 1245,
+          "line": 1214,
           "description": "HTML export of Re-cover range (FIXED VERSION) Uses proper A1 notation in the API call",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_sheetsDataToHtml_",
-          "line": 1287,
+          "line": 1256,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildHtmlBody_",
-          "line": 1421,
+          "line": 1390,
           "description": "Email body builders ================ */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildPlainBody_",
-          "line": 1480,
+          "line": 1449,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_extractUrlFromCell_",
-          "line": 1492,
+          "line": 1461,
           "description": "Helpers ===================== */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_looksLikeUrl_",
-          "line": 1542,
+          "line": 1511,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeString_",
-          "line": 1543,
+          "line": 1512,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_htmlEscape_",
-          "line": 1544,
+          "line": 1513,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_colLetterToIndex_",
-          "line": 1546,
+          "line": 1515,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_getSpreadsheet_",
-          "line": 1552,
+          "line": 1521,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_writeB_",
-          "line": 1559,
+          "line": 1528,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_withRetry_",
-          "line": 1570,
+          "line": 1539,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_specificErrorMessage_",
-          "line": 1586,
+          "line": 1555,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_shortErr_",
-          "line": 1593,
+          "line": 1562,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_validateConfig_",
-          "line": 1595,
+          "line": 1564,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isValidEmail_",
-          "line": 1602,
+          "line": 1571,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_firstLinkInRichText_",
-          "line": 1604,
+          "line": 1573,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isGmailDraftUrl_",
-          "line": 1616,
+          "line": 1585,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_templateSafe_",
-          "line": 1620,
+          "line": 1589,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_timestamp_",
-          "line": 1632,
+          "line": 1601,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeLogErrorToSheet_",
-          "line": 1638,
+          "line": 1607,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateRouteMapUrl_",
-          "line": 1654,
+          "line": 1623,
           "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateSimpleMapUrl_",
-          "line": 1722,
+          "line": 1691,
           "description": "Fallback: Generate simple map URL with just markers (no route line)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testMapsApiConnection",
-          "line": 1736,
+          "line": 1705,
           "description": "Test function - run this to verify Maps API works",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "d_generateSatelliteMapUrl_",
-          "line": 1753,
+          "line": 1722,
           "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
           "isPublic": false,
           "isHelper": true
@@ -360,8 +353,8 @@
         "d_generateSimpleMapUrl_",
         "DRAFTS_V2"
       ],
-      "lines": 1775,
-      "size": 70916
+      "lines": 1744,
+      "size": 69802
     },
     {
       "path": "Email Reader.gs",
@@ -466,118 +459,6 @@
       ],
       "lines": 719,
       "size": 21964
-    },
-    {
-      "path": "Gemini Lead processor.gs",
-      "filename": "Gemini Lead processor.gs",
-      "purpose": "GEMINI LEAD PROCESSOR Version: 1.0 - 11/05/2025 Watches for emails labeled \"Add lead\" and processes them through Gemini API",
-      "version": "1.0 - 11/05/2025",
-      "functions": [
-        {
-          "name": "gl_processAddLeadEmails",
-          "line": 88,
-          "description": "Main function to process emails labeled \"Add lead\" Called every 15 minutes by time-based trigger",
-          "isPublic": true,
-          "isHelper": true
-        },
-        {
-          "name": "gl_processThread_",
-          "line": 167,
-          "description": "Process a single thread",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "gl_extractEmailContent_",
-          "line": 235,
-          "description": "Extract content from email message Handles both plain text and HTML emails",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "gl_processWithGemini_",
-          "line": 291,
-          "description": "Process email content with Gemini API Returns CSV string with 21 comma-separated values",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "gl_callGeminiAPI_",
-          "line": 362,
-          "description": "Make actual API call to Gemini",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "gl_writeToSheet_",
-          "line": 421,
-          "description": "Write CSV string to column A of Leads sheet Stage Automation will auto-split it across columns",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "gl_getOrCreateLabel_",
-          "line": 466,
-          "description": "Get existing label or create it if it doesn't exist",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "gl_log_",
-          "line": 493,
-          "description": "Log operation with timestamp",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "gl_installTrigger",
-          "line": 515,
-          "description": "Install time-based trigger to check for \"Add lead\" emails every 15 minutes",
-          "isPublic": true,
-          "isHelper": true
-        },
-        {
-          "name": "gl_removeTrigger",
-          "line": 539,
-          "description": "Remove existing trigger",
-          "isPublic": true,
-          "isHelper": true
-        },
-        {
-          "name": "gl_diagnosticCheck",
-          "line": 557,
-          "description": "Run diagnostics to check setup",
-          "isPublic": true,
-          "isHelper": true
-        },
-        {
-          "name": "gl_testProcessOneEmail",
-          "line": 605,
-          "description": "Process one email immediately for testing",
-          "isPublic": true,
-          "isHelper": true
-        },
-        {
-          "name": "gl_showConfiguration",
-          "line": 674,
-          "description": "Show configuration info",
-          "isPublic": true,
-          "isHelper": true
-        }
-      ],
-      "triggers": [],
-      "dependencies": [
-        "gl_log_",
-        "gl_getOrCreateLabel_",
-        "gl_processThread_",
-        "gl_extractEmailContent_",
-        "gl_processWithGemini_",
-        "gl_writeToSheet_",
-        "gl_callGeminiAPI_",
-        "Defines: GEMINI_LEAD_CONFIG"
-      ],
-      "lines": 712,
-      "size": 20610
     },
     {
       "path": "Lead follow up.gs.gs",
@@ -1563,257 +1444,250 @@
       {
         "path": "Draft Creator.gs",
         "filename": "Draft Creator.gs",
-        "purpose": "Draft Creator.gs version# 01/05-10:15PM EST by Claude Opus 4.1 PURPOSE",
-        "version": "01/05-10:15PM EST by Claude Opus 4.1",
+        "purpose": "Draft Creator.gs version# 01/14-11:45AM EST by Claude Opus 4.5 PURPOSE",
+        "version": "01/14-11:45AM EST by Claude Opus 4.5",
         "functions": [
           {
-            "name": "findCustomerInfoAttachmentFileIds",
-            "line": 186,
-            "description": "Helper function to find Google Drive file IDs by exact file names Run this ONCE to get the file IDs for CUSTOMER_INFO_ATTACHMENTS",
-            "isPublic": true,
-            "isHelper": false
-          },
-          {
             "name": "installTriggerDrafts_V2",
-            "line": 223,
+            "line": 188,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "handleEditDraft_V2",
-            "line": 242,
+            "line": 207,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_searchAndLinkEmail_",
-            "line": 324,
+            "line": 289,
             "description": "Search Gmail for existing emails/drafts and link in column B",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCustomerDraft_",
-            "line": 414,
+            "line": 379,
             "description": "Create customer follow-up draft when \"Email customer\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createHandoffDraft_",
-            "line": 519,
+            "line": 484,
             "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCustomerInfoDraft_",
-            "line": 595,
+            "line": 560,
             "description": "Create customer info request draft when \"Customer Info\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCOIDraft_",
-            "line": 812,
+            "line": 777,
             "description": "Create COI request draft when \"COI Req\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createRoughQuote_",
-            "line": 959,
+            "line": 928,
             "description": "Create rough quote draft/message when \"Rough quote\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createDraftsForAllRows_V2",
-            "line": 1072,
+            "line": 1041,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_createDraftForRow_",
-            "line": 1119,
+            "line": 1088,
             "description": "Row → Draft creation ========================= */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_exportRecoverRangeAsHtml_",
-            "line": 1245,
+            "line": 1214,
             "description": "HTML export of Re-cover range (FIXED VERSION) Uses proper A1 notation in the API call",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_sheetsDataToHtml_",
-            "line": 1287,
+            "line": 1256,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildHtmlBody_",
-            "line": 1421,
+            "line": 1390,
             "description": "Email body builders ================ */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildPlainBody_",
-            "line": 1480,
+            "line": 1449,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_extractUrlFromCell_",
-            "line": 1492,
+            "line": 1461,
             "description": "Helpers ===================== */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_looksLikeUrl_",
-            "line": 1542,
+            "line": 1511,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeString_",
-            "line": 1543,
+            "line": 1512,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_htmlEscape_",
-            "line": 1544,
+            "line": 1513,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_colLetterToIndex_",
-            "line": 1546,
+            "line": 1515,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_getSpreadsheet_",
-            "line": 1552,
+            "line": 1521,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_writeB_",
-            "line": 1559,
+            "line": 1528,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_withRetry_",
-            "line": 1570,
+            "line": 1539,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_specificErrorMessage_",
-            "line": 1586,
+            "line": 1555,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_shortErr_",
-            "line": 1593,
+            "line": 1562,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_validateConfig_",
-            "line": 1595,
+            "line": 1564,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isValidEmail_",
-            "line": 1602,
+            "line": 1571,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_firstLinkInRichText_",
-            "line": 1604,
+            "line": 1573,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isGmailDraftUrl_",
-            "line": 1616,
+            "line": 1585,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_templateSafe_",
-            "line": 1620,
+            "line": 1589,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_timestamp_",
-            "line": 1632,
+            "line": 1601,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeLogErrorToSheet_",
-            "line": 1638,
+            "line": 1607,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateRouteMapUrl_",
-            "line": 1654,
+            "line": 1623,
             "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateSimpleMapUrl_",
-            "line": 1722,
+            "line": 1691,
             "description": "Fallback: Generate simple map URL with just markers (no route line)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testMapsApiConnection",
-            "line": 1736,
+            "line": 1705,
             "description": "Test function - run this to verify Maps API works",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "d_generateSatelliteMapUrl_",
-            "line": 1753,
+            "line": 1722,
             "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
             "isPublic": false,
             "isHelper": true
@@ -1903,8 +1777,8 @@
           "d_generateSimpleMapUrl_",
           "DRAFTS_V2"
         ],
-        "lines": 1775,
-        "size": 70916
+        "lines": 1744,
+        "size": 69802
       },
       {
         "path": "Stage Automation.gs",
@@ -2684,118 +2558,6 @@
         ],
         "lines": 719,
         "size": 21964
-      },
-      {
-        "path": "Gemini Lead processor.gs",
-        "filename": "Gemini Lead processor.gs",
-        "purpose": "GEMINI LEAD PROCESSOR Version: 1.0 - 11/05/2025 Watches for emails labeled \"Add lead\" and processes them through Gemini API",
-        "version": "1.0 - 11/05/2025",
-        "functions": [
-          {
-            "name": "gl_processAddLeadEmails",
-            "line": 88,
-            "description": "Main function to process emails labeled \"Add lead\" Called every 15 minutes by time-based trigger",
-            "isPublic": true,
-            "isHelper": true
-          },
-          {
-            "name": "gl_processThread_",
-            "line": 167,
-            "description": "Process a single thread",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "gl_extractEmailContent_",
-            "line": 235,
-            "description": "Extract content from email message Handles both plain text and HTML emails",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "gl_processWithGemini_",
-            "line": 291,
-            "description": "Process email content with Gemini API Returns CSV string with 21 comma-separated values",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "gl_callGeminiAPI_",
-            "line": 362,
-            "description": "Make actual API call to Gemini",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "gl_writeToSheet_",
-            "line": 421,
-            "description": "Write CSV string to column A of Leads sheet Stage Automation will auto-split it across columns",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "gl_getOrCreateLabel_",
-            "line": 466,
-            "description": "Get existing label or create it if it doesn't exist",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "gl_log_",
-            "line": 493,
-            "description": "Log operation with timestamp",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "gl_installTrigger",
-            "line": 515,
-            "description": "Install time-based trigger to check for \"Add lead\" emails every 15 minutes",
-            "isPublic": true,
-            "isHelper": true
-          },
-          {
-            "name": "gl_removeTrigger",
-            "line": 539,
-            "description": "Remove existing trigger",
-            "isPublic": true,
-            "isHelper": true
-          },
-          {
-            "name": "gl_diagnosticCheck",
-            "line": 557,
-            "description": "Run diagnostics to check setup",
-            "isPublic": true,
-            "isHelper": true
-          },
-          {
-            "name": "gl_testProcessOneEmail",
-            "line": 605,
-            "description": "Process one email immediately for testing",
-            "isPublic": true,
-            "isHelper": true
-          },
-          {
-            "name": "gl_showConfiguration",
-            "line": 674,
-            "description": "Show configuration info",
-            "isPublic": true,
-            "isHelper": true
-          }
-        ],
-        "triggers": [],
-        "dependencies": [
-          "gl_log_",
-          "gl_getOrCreateLabel_",
-          "gl_processThread_",
-          "gl_extractEmailContent_",
-          "gl_processWithGemini_",
-          "gl_writeToSheet_",
-          "gl_callGeminiAPI_",
-          "Defines: GEMINI_LEAD_CONFIG"
-        ],
-        "lines": 712,
-        "size": 20610
       },
       {
         "path": "Lead follow up.gs.gs",
