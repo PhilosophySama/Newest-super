@@ -112,7 +112,7 @@ Project Details:
 - Location: \${address}
 - Description: \${jobType}
 
-If you have any questions or would like to proceed with this project, please reach out via text or call.`,
+If you have any questions or would like to proceed with this project, please reach out via text or call. When you open the link below, please click "View estimate" for specifications.`,
     HTML_BODY_TEMPLATE: `<div style="font-family: Arial, sans-serif; color: #333;">
 <p>Hello \${firstName},</p>
 
