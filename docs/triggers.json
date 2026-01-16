@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-01-14T22:32:45.916Z",
+    "lastUpdated": "2026-01-16T13:43:33.167Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,20 +8,20 @@
   },
   "stats": {
     "totalFiles": 10,
-    "totalFunctions": 145,
+    "totalFunctions": 144,
     "totalTriggers": 20,
-    "totalLines": 6737,
-    "publicFunctions": 50,
+    "totalLines": 6762,
+    "publicFunctions": 49,
     "helperFunctions": 131,
-    "avgFunctionsPerFile": 15,
-    "avgLinesPerFile": 674
+    "avgFunctionsPerFile": 14,
+    "avgLinesPerFile": 676
   },
   "files": [
     {
       "path": "Draft Creator.gs",
       "filename": "Draft Creator.gs",
-      "purpose": "Draft Creator.gs version# 01/14-11:45AM EST by Claude Opus 4.5 PURPOSE",
-      "version": "01/14-11:45AM EST by Claude Opus 4.5",
+      "purpose": "Draft Creator.gs Version: 1/16 9am EST by Claude Sonnet 4.5 PURPOSE",
+      "version": "1/16 9am EST by Claude Sonnet 4.5",
       "functions": [
         {
           "name": "installTriggerDrafts_V2",
@@ -354,13 +354,13 @@
         "DRAFTS_V2"
       ],
       "lines": 1744,
-      "size": 69802
+      "size": 69799
     },
     {
       "path": "Email Reader.gs",
       "filename": "Email Reader.gs",
-      "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version# [01/12-06:45PM EST] by Claude Opus 4.1 FEATURES:",
-      "version": "[01/12-06:45PM EST] by Claude Opus 4.1",
+      "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version: 1/16 9am EST by Claude Sonnet 4.5 FEATURES:",
+      "version": "1/16 9am EST by Claude Sonnet 4.5",
       "functions": [
         {
           "name": "er_buildCSV_",
@@ -458,13 +458,13 @@
         "Defines: EMAIL_READER_CONFIG"
       ],
       "lines": 719,
-      "size": 21964
+      "size": 21959
     },
     {
       "path": "Lead follow up.gs.gs",
       "filename": "Lead follow up.gs.gs",
-      "purpose": "Lead Follow up.gs version# 09/23-05:05PM EST by Chatgpt5 PURPOSE",
-      "version": "09/23-05:05PM EST by Chatgpt5",
+      "purpose": "Lead Follow up.gs Version: 1/16 9am EST by Claude Sonnet 4.5 PURPOSE",
+      "version": "1/16 9am EST by Claude Sonnet 4.5",
       "functions": [
         {
           "name": "installTriggerDrafts_FU",
@@ -556,13 +556,13 @@
         "fu_writeB_"
       ],
       "lines": 212,
-      "size": 7737
+      "size": 7741
     },
     {
       "path": "Lean-to generator.gs",
       "filename": "Lean-to generator.gs",
-      "purpose": "LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export Version# [INTEGRATED] by Gino + ChatGPT Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:",
-      "version": "[INTEGRATED] by Gino + ChatGPT",
+      "purpose": "LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export Version: 1/16 9am EST by Claude Sonnet 4.5 Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:",
+      "version": "1/16 9am EST by Claude Sonnet 4.5",
       "functions": [
         {
           "name": "handleEditAwningRuby_",
@@ -671,7 +671,7 @@
         "copyRubyForSelectedRow_"
       ],
       "lines": 921,
-      "size": 30250
+      "size": 30253
     },
     {
       "path": "Macros.gs",
@@ -697,8 +697,8 @@
     {
       "path": "Menus.gs",
       "filename": "Menus.gs",
-      "purpose": "Menus.gs Version# [12/31-06:45PM EST] by Claude Opus 4.1 CHANGES:",
-      "version": "[12/31-06:45PM EST] by Claude Opus 4.1",
+      "purpose": "Menus.gs Version: 1/16 9am EST by Claude Sonnet 4.5 CHANGES:",
+      "version": "1/16 9am EST by Claude Sonnet 4.5",
       "functions": [
         {
           "name": "onOpen",
@@ -709,21 +709,21 @@
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 94,
+          "line": 93,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "listAllTriggers_",
-          "line": 162,
+          "line": 161,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 181,
+          "line": 180,
           "description": "System utility: Remove all triggers",
           "isPublic": false,
           "isHelper": true
@@ -735,8 +735,8 @@
         "listAllTriggers_",
         "removeAllTriggers_"
       ],
-      "lines": 192,
-      "size": 6434
+      "lines": 191,
+      "size": 6371
     },
     {
       "path": "Miles Log.gs",
@@ -933,54 +933,47 @@
     {
       "path": "QBO Estimates.gs",
       "filename": "QBO Estimates.gs",
-      "purpose": "QBO ESTIMATES - QuickBooks Online Integration Version# [01/06-10:30AM EST] - Complete estimate and invoice management by Claude Opus 4.1",
-      "version": "[01/06-10:30AM EST] - Complete estimate and invoice management",
+      "purpose": "QBO ESTIMATES - QuickBooks Online Integration Version: 1/16 9am EST by Claude Sonnet 4.5 by Claude Opus 4.1",
+      "version": "1/16 9am EST by Claude Sonnet 4.5",
       "functions": [
         {
           "name": "convertEstimateToInvoice",
-          "line": 17,
+          "line": 16,
           "description": "Convert estimate to invoice for awarded jobs Run this from Awarded sheet with active cell on the row to convert",
           "isPublic": true,
           "isHelper": false
         },
         {
-          "name": "processAllAwardedEstimates",
-          "line": 180,
-          "description": "Process all rows in Awarded sheet that have estimates but no invoices",
-          "isPublic": true,
-          "isHelper": false
-        },
-        {
           "name": "sendEstimateCurrentRow_",
-          "line": 230,
-          "description": "Send estimate for current row in Leads sheet to QuickBooks",
+          "line": 180,
+          "description": "Send estimate for current row in Leads sheet to QuickBooks Shows approval dialog with customer info before creating",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "findOrCreateCustomer_",
-          "line": 353,
+          "line": 376,
           "description": "Helper: Find existing customer or create new one in QuickBooks",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "parseAddress_",
-          "line": 402,
+          "line": 425,
           "description": "Helper: Parse address string into QuickBooks address object",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "configureEnvironment",
-          "line": 420,
+          "line": 443,
           "description": "Configure QuickBooks environment (production vs sandbox)",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "listQuickBooksItems",
-          "line": 442,
+          "line": 465,
           "description": "Debug: List all QuickBooks items (for line item configuration)",
           "isPublic": true,
           "isHelper": false
@@ -992,14 +985,14 @@
         "findOrCreateCustomer_",
         "parseAddress_"
       ],
-      "lines": 486,
-      "size": 15590
+      "lines": 509,
+      "size": 17215
     },
     {
       "path": "QuickBooksAuth.gs",
       "filename": "QuickBooksAuth.gs",
-      "purpose": "QUICKBOOKS AUTH (OAuth2 setup) Version# [01/06-10:30AM EST] - Fixed OAuth flow with proper redirect URI handling by Claude Opus 4.1",
-      "version": "[01/06-10:30AM EST] - Fixed OAuth flow with proper redirect URI handling",
+      "purpose": "QUICKBOOKS AUTH (OAuth2 setup) Version: 1/16 9am EST by Claude Sonnet 4.5 by Claude Opus 4.1",
+      "version": "1/16 9am EST by Claude Sonnet 4.5",
       "functions": [
         {
           "name": "getScriptUrl",
@@ -1064,13 +1057,13 @@
         "showRedirectUri_"
       ],
       "lines": 501,
-      "size": 16715
+      "size": 16676
     },
     {
       "path": "Stage Automation.gs",
       "filename": "Stage Automation.gs",
-      "purpose": "STAGE AUTOMATION (standalone) Version: 11/04-11:45PM EST by Claude Sonnet 4.5 Moves rows between sheets, creates Drive folders, writes Google Earth links,",
-      "version": "11/04-11:45PM EST by Claude Sonnet 4.5",
+      "purpose": "STAGE AUTOMATION (standalone) Moves rows between sheets, creates Drive folders, writes Google Earth links, formats hyperlink cells, PRESERVES rich links/notes on row moves,",
+      "version": null,
       "functions": [
         {
           "name": "handleEditMove_",
@@ -1081,196 +1074,196 @@
         },
         {
           "name": "m_autoSortByStage_",
-          "line": 190,
+          "line": 193,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "updateJobDescription_",
-          "line": 236,
+          "line": 239,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleDisplayNameChange_",
-          "line": 311,
+          "line": 314,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleEmailChange_",
-          "line": 350,
+          "line": 353,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleAddressChange_",
-          "line": 384,
+          "line": 387,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createEarthLink_",
-          "line": 414,
+          "line": 417,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleQbUrlChange_",
-          "line": 447,
+          "line": 450,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleStageChange_",
-          "line": 464,
+          "line": 467,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "moveRow_",
-          "line": 595,
+          "line": 598,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_searchAndLinkSentEmail_",
-          "line": 656,
+          "line": 659,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_linkQuoteSentEmail_",
-          "line": 738,
+          "line": 741,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_createPrintPacket_",
-          "line": 845,
+          "line": 848,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createNextDayGinoEvent_",
-          "line": 1052,
+          "line": 1055,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testCalendarAccess_",
-          "line": 1131,
+          "line": 1134,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_stageMatches_",
-          "line": 1142,
+          "line": 1145,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_looksLikeUrl_",
-          "line": 1146,
+          "line": 1149,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_getUrlFromCell_",
-          "line": 1150,
+          "line": 1153,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_cleanAddressForGoogleEarth_",
-          "line": 1180,
+          "line": 1183,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_geocodeAddress_",
-          "line": 1197,
+          "line": 1200,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_extractCoordinates_",
-          "line": 1220,
+          "line": 1223,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_logOperation_",
-          "line": 1230,
+          "line": 1233,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testDriveAccess_",
-          "line": 1237,
+          "line": 1240,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "validateSheetStructure_",
-          "line": 1248,
+          "line": 1251,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerMove_",
-          "line": 1293,
+          "line": 1296,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersDaily_",
-          "line": 1308,
+          "line": 1311,
           "description": "Check empty folders daily at 7am (time-driven trigger)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersNow_",
-          "line": 1343,
+          "line": 1346,
           "description": "Check empty folders immediately (manual trigger from menu)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_checkEmptyFoldersInSheet_",
-          "line": 1372,
+          "line": 1375,
           "description": "Check all folders in a single sheet and highlight empty ones",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installDailyFolderCheckTrigger_",
-          "line": 1457,
+          "line": 1460,
           "description": "Install daily folder check trigger (7am)",
           "isPublic": false,
           "isHelper": true
@@ -1435,8 +1428,8 @@
         "MOVE_CONFIG",
         "Defines: MOVE_CONFIG"
       ],
-      "lines": 1481,
-      "size": 53758
+      "lines": 1484,
+      "size": 53923
     }
   ],
   "categories": {
@@ -1444,8 +1437,8 @@
       {
         "path": "Draft Creator.gs",
         "filename": "Draft Creator.gs",
-        "purpose": "Draft Creator.gs version# 01/14-11:45AM EST by Claude Opus 4.5 PURPOSE",
-        "version": "01/14-11:45AM EST by Claude Opus 4.5",
+        "purpose": "Draft Creator.gs Version: 1/16 9am EST by Claude Sonnet 4.5 PURPOSE",
+        "version": "1/16 9am EST by Claude Sonnet 4.5",
         "functions": [
           {
             "name": "installTriggerDrafts_V2",
@@ -1778,13 +1771,13 @@
           "DRAFTS_V2"
         ],
         "lines": 1744,
-        "size": 69802
+        "size": 69799
       },
       {
         "path": "Stage Automation.gs",
         "filename": "Stage Automation.gs",
-        "purpose": "STAGE AUTOMATION (standalone) Version: 11/04-11:45PM EST by Claude Sonnet 4.5 Moves rows between sheets, creates Drive folders, writes Google Earth links,",
-        "version": "11/04-11:45PM EST by Claude Sonnet 4.5",
+        "purpose": "STAGE AUTOMATION (standalone) Moves rows between sheets, creates Drive folders, writes Google Earth links, formats hyperlink cells, PRESERVES rich links/notes on row moves,",
+        "version": null,
         "functions": [
           {
             "name": "handleEditMove_",
@@ -1795,196 +1788,196 @@
           },
           {
             "name": "m_autoSortByStage_",
-            "line": 190,
+            "line": 193,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "updateJobDescription_",
-            "line": 236,
+            "line": 239,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleDisplayNameChange_",
-            "line": 311,
+            "line": 314,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleEmailChange_",
-            "line": 350,
+            "line": 353,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleAddressChange_",
-            "line": 384,
+            "line": 387,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createEarthLink_",
-            "line": 414,
+            "line": 417,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleQbUrlChange_",
-            "line": 447,
+            "line": 450,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleStageChange_",
-            "line": 464,
+            "line": 467,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "moveRow_",
-            "line": 595,
+            "line": 598,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_searchAndLinkSentEmail_",
-            "line": 656,
+            "line": 659,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_linkQuoteSentEmail_",
-            "line": 738,
+            "line": 741,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_createPrintPacket_",
-            "line": 845,
+            "line": 848,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createNextDayGinoEvent_",
-            "line": 1052,
+            "line": 1055,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testCalendarAccess_",
-            "line": 1131,
+            "line": 1134,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_stageMatches_",
-            "line": 1142,
+            "line": 1145,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_looksLikeUrl_",
-            "line": 1146,
+            "line": 1149,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_getUrlFromCell_",
-            "line": 1150,
+            "line": 1153,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_cleanAddressForGoogleEarth_",
-            "line": 1180,
+            "line": 1183,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_geocodeAddress_",
-            "line": 1197,
+            "line": 1200,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_extractCoordinates_",
-            "line": 1220,
+            "line": 1223,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_logOperation_",
-            "line": 1230,
+            "line": 1233,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testDriveAccess_",
-            "line": 1237,
+            "line": 1240,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "validateSheetStructure_",
-            "line": 1248,
+            "line": 1251,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerMove_",
-            "line": 1293,
+            "line": 1296,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersDaily_",
-            "line": 1308,
+            "line": 1311,
             "description": "Check empty folders daily at 7am (time-driven trigger)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersNow_",
-            "line": 1343,
+            "line": 1346,
             "description": "Check empty folders immediately (manual trigger from menu)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_checkEmptyFoldersInSheet_",
-            "line": 1372,
+            "line": 1375,
             "description": "Check all folders in a single sheet and highlight empty ones",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installDailyFolderCheckTrigger_",
-            "line": 1457,
+            "line": 1460,
             "description": "Install daily folder check trigger (7am)",
             "isPublic": false,
             "isHelper": true
@@ -2149,16 +2142,16 @@
           "MOVE_CONFIG",
           "Defines: MOVE_CONFIG"
         ],
-        "lines": 1481,
-        "size": 53758
+        "lines": 1484,
+        "size": 53923
       }
     ],
     "automation": [
       {
         "path": "Lean-to generator.gs",
         "filename": "Lean-to generator.gs",
-        "purpose": "LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export Version# [INTEGRATED] by Gino + ChatGPT Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:",
-        "version": "[INTEGRATED] by Gino + ChatGPT",
+        "purpose": "LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export Version: 1/16 9am EST by Claude Sonnet 4.5 Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:",
+        "version": "1/16 9am EST by Claude Sonnet 4.5",
         "functions": [
           {
             "name": "handleEditAwningRuby_",
@@ -2267,61 +2260,54 @@
           "copyRubyForSelectedRow_"
         ],
         "lines": 921,
-        "size": 30250
+        "size": 30253
       }
     ],
     "integration": [
       {
         "path": "QBO Estimates.gs",
         "filename": "QBO Estimates.gs",
-        "purpose": "QBO ESTIMATES - QuickBooks Online Integration Version# [01/06-10:30AM EST] - Complete estimate and invoice management by Claude Opus 4.1",
-        "version": "[01/06-10:30AM EST] - Complete estimate and invoice management",
+        "purpose": "QBO ESTIMATES - QuickBooks Online Integration Version: 1/16 9am EST by Claude Sonnet 4.5 by Claude Opus 4.1",
+        "version": "1/16 9am EST by Claude Sonnet 4.5",
         "functions": [
           {
             "name": "convertEstimateToInvoice",
-            "line": 17,
+            "line": 16,
             "description": "Convert estimate to invoice for awarded jobs Run this from Awarded sheet with active cell on the row to convert",
             "isPublic": true,
             "isHelper": false
           },
           {
-            "name": "processAllAwardedEstimates",
-            "line": 180,
-            "description": "Process all rows in Awarded sheet that have estimates but no invoices",
-            "isPublic": true,
-            "isHelper": false
-          },
-          {
             "name": "sendEstimateCurrentRow_",
-            "line": 230,
-            "description": "Send estimate for current row in Leads sheet to QuickBooks",
+            "line": 180,
+            "description": "Send estimate for current row in Leads sheet to QuickBooks Shows approval dialog with customer info before creating",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "findOrCreateCustomer_",
-            "line": 353,
+            "line": 376,
             "description": "Helper: Find existing customer or create new one in QuickBooks",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "parseAddress_",
-            "line": 402,
+            "line": 425,
             "description": "Helper: Parse address string into QuickBooks address object",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "configureEnvironment",
-            "line": 420,
+            "line": 443,
             "description": "Configure QuickBooks environment (production vs sandbox)",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "listQuickBooksItems",
-            "line": 442,
+            "line": 465,
             "description": "Debug: List all QuickBooks items (for line item configuration)",
             "isPublic": true,
             "isHelper": false
@@ -2333,14 +2319,14 @@
           "findOrCreateCustomer_",
           "parseAddress_"
         ],
-        "lines": 486,
-        "size": 15590
+        "lines": 509,
+        "size": 17215
       },
       {
         "path": "QuickBooksAuth.gs",
         "filename": "QuickBooksAuth.gs",
-        "purpose": "QUICKBOOKS AUTH (OAuth2 setup) Version# [01/06-10:30AM EST] - Fixed OAuth flow with proper redirect URI handling by Claude Opus 4.1",
-        "version": "[01/06-10:30AM EST] - Fixed OAuth flow with proper redirect URI handling",
+        "purpose": "QUICKBOOKS AUTH (OAuth2 setup) Version: 1/16 9am EST by Claude Sonnet 4.5 by Claude Opus 4.1",
+        "version": "1/16 9am EST by Claude Sonnet 4.5",
         "functions": [
           {
             "name": "getScriptUrl",
@@ -2405,15 +2391,15 @@
           "showRedirectUri_"
         ],
         "lines": 501,
-        "size": 16715
+        "size": 16676
       }
     ],
     "utilities": [
       {
         "path": "Menus.gs",
         "filename": "Menus.gs",
-        "purpose": "Menus.gs Version# [12/31-06:45PM EST] by Claude Opus 4.1 CHANGES:",
-        "version": "[12/31-06:45PM EST] by Claude Opus 4.1",
+        "purpose": "Menus.gs Version: 1/16 9am EST by Claude Sonnet 4.5 CHANGES:",
+        "version": "1/16 9am EST by Claude Sonnet 4.5",
         "functions": [
           {
             "name": "onOpen",
@@ -2424,21 +2410,21 @@
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 94,
+            "line": 93,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "listAllTriggers_",
-            "line": 162,
+            "line": 161,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 181,
+            "line": 180,
             "description": "System utility: Remove all triggers",
             "isPublic": false,
             "isHelper": true
@@ -2450,16 +2436,16 @@
           "listAllTriggers_",
           "removeAllTriggers_"
         ],
-        "lines": 192,
-        "size": 6434
+        "lines": 191,
+        "size": 6371
       }
     ],
     "other": [
       {
         "path": "Email Reader.gs",
         "filename": "Email Reader.gs",
-        "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version# [01/12-06:45PM EST] by Claude Opus 4.1 FEATURES:",
-        "version": "[01/12-06:45PM EST] by Claude Opus 4.1",
+        "purpose": "EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION Version: 1/16 9am EST by Claude Sonnet 4.5 FEATURES:",
+        "version": "1/16 9am EST by Claude Sonnet 4.5",
         "functions": [
           {
             "name": "er_buildCSV_",
@@ -2557,13 +2543,13 @@
           "Defines: EMAIL_READER_CONFIG"
         ],
         "lines": 719,
-        "size": 21964
+        "size": 21959
       },
       {
         "path": "Lead follow up.gs.gs",
         "filename": "Lead follow up.gs.gs",
-        "purpose": "Lead Follow up.gs version# 09/23-05:05PM EST by Chatgpt5 PURPOSE",
-        "version": "09/23-05:05PM EST by Chatgpt5",
+        "purpose": "Lead Follow up.gs Version: 1/16 9am EST by Claude Sonnet 4.5 PURPOSE",
+        "version": "1/16 9am EST by Claude Sonnet 4.5",
         "functions": [
           {
             "name": "installTriggerDrafts_FU",
@@ -2655,7 +2641,7 @@
           "fu_writeB_"
         ],
         "lines": 212,
-        "size": 7737
+        "size": 7741
       },
       {
         "path": "Macros.gs",
