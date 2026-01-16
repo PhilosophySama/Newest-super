@@ -1,6 +1,6 @@
 /**
  * QUICKBOOKS AUTH (OAuth2 setup)
- * Version# [01/06-10:30AM EST] - Fixed OAuth flow with proper redirect URI handling
+ * Version: 1/16 9am EST by Claude Sonnet 4.5
  * by Claude Opus 4.1
  *
  * Handles authentication between Google Apps Script and QuickBooks Online.

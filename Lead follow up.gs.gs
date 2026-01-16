@@ -1,6 +1,6 @@
 /**
  * Lead Follow up.gs
- * version# 09/23-05:05PM EST by Chatgpt5
+ * Version: 1/16 9am EST by Claude Sonnet 4.5
  *
  * PURPOSE
  * - Create Gmail follow-up drafts when Stage (col D) becomes "F/U" on the Leads sheet.

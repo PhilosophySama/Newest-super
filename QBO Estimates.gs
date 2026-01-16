@@ -1,12 +1,11 @@
 /**
  * QBO ESTIMATES - QuickBooks Online Integration
- * Version# [01/06-10:30AM EST] - Complete estimate and invoice management
+ * Version: 1/16 9am EST by Claude Sonnet 4.5
  * by Claude Opus 4.1
  *
  * Functions:
- * - Send estimates from Leads sheet to QuickBooks
+ * - Send estimates from Leads sheet to QuickBooks (with approval dialog)
  * - Convert estimates to invoices when awarded
- * - Batch process all awarded estimates
  * - Debug and configuration helpers
  */
 
@@ -175,97 +174,114 @@ function convertEstimateToInvoice() {
 }
 
 /**
- * Process all rows in Awarded sheet that have estimates but no invoices
- */
-function processAllAwardedEstimates() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Awarded");
-  if (!sheet) {
-    SpreadsheetApp.getUi().alert("No 'Awarded' sheet found");
-    return;
-  }
-  
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) {
-    SpreadsheetApp.getActive().toast("No data rows found", "Info", 3);
-    return;
-  }
-  
-  let processed = 0;
-  let errors = 0;
-  let skipped = 0;
-  
-  for (let row = 2; row <= lastRow; row++) {
-    const estimateCell = sheet.getRange(row, 16); // Column P
-    const invoiceCell = sheet.getRange(row, 14); // Column N
-    
-    // Check if there's an estimate link but no invoice
-    const hasEstimate = estimateCell.getRichTextValue()?.getLinkUrl();
-    const hasInvoice = invoiceCell.getRichTextValue()?.getLinkUrl();
-    
-    if (hasEstimate && !hasInvoice) {
-      sheet.setActiveCell(sheet.getRange(row, 1));
-      try {
-        convertEstimateToInvoice();
-        processed++;
-        Utilities.sleep(1000); // Wait 1 second between API calls
-      } catch (e) {
-        errors++;
-        Logger.log(`Error on row ${row}: ${e}`);
-      }
-    } else {
-      skipped++;
-    }
-  }
-  
-  SpreadsheetApp.getActive().toast(
-    `Processed ${processed} estimates\nSkipped: ${skipped}\nErrors: ${errors}`,
-    "Batch Complete",
-    5
-  );
-}
-
-/**
  * Send estimate for current row in Leads sheet to QuickBooks
+ * Shows approval dialog with customer info before creating
  */
 function sendEstimateCurrentRow_() {
+  const ui = SpreadsheetApp.getUi();
   const sheet = SpreadsheetApp.getActiveSheet();
   const sheetName = sheet.getName();
   
   if (sheetName !== 'Leads') {
-    SpreadsheetApp.getUi().alert('Please run this from the Leads sheet');
+    ui.alert('Please run this from the Leads sheet');
     return;
   }
   
   const row = sheet.getActiveCell().getRow();
   
   if (row === 1) {
-    SpreadsheetApp.getUi().alert('Please select a data row, not the header');
+    ui.alert('Please select a data row, not the header');
     return;
   }
   
-  // Check OAuth
+  // Check OAuth first
   const service = getOAuthService();
   if (!service.hasAccess()) {
-    SpreadsheetApp.getUi().alert('QuickBooks not authorized. Run "Authorize QuickBooks" first.');
+    ui.alert('QuickBooks not authorized. Run "Authorize QuickBooks" first.');
     return;
   }
   
+  // Get customer data from row for approval display
+  const customerName = sheet.getRange(row, 5).getDisplayValue(); // Column E
+  const displayName = sheet.getRange(row, 6).getDisplayValue(); // Column F
+  const customerEmail = sheet.getRange(row, 9).getValue(); // Column I
+  const address = sheet.getRange(row, 10).getValue(); // Column J
+  const jobDescription = sheet.getRange(row, 11).getValue(); // Column K
+  const quotePrice = parseFloat(sheet.getRange(row, 14).getValue()) || 0; // Column N
+  const jobType = sheet.getRange(row, 18).getDisplayValue(); // Column R
+  
+  // Validate required fields before showing approval
+  if (!customerName) {
+    ui.alert('❌ Missing Data', 'Customer name (Column E) is required.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  if (quotePrice <= 0) {
+    ui.alert('❌ Missing Data', 'Quote price (Column N) must be greater than 0.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Check if estimate already exists in column P
+  const existingEstimate = sheet.getRange(row, 16).getRichTextValue();
+  const existingUrl = existingEstimate ? existingEstimate.getLinkUrl() : '';
+  if (existingUrl && existingUrl.includes('qbo.intuit.com')) {
+    const overwriteResponse = ui.alert(
+      '⚠️ Estimate Already Exists',
+      'This row already has a QuickBooks estimate link in column P.\n\n' +
+      'Do you want to create a NEW estimate anyway?\n' +
+      '(This will overwrite the link in column P)',
+      ui.ButtonSet.YES_NO
+    );
+    if (overwriteResponse !== ui.Button.YES) {
+      SpreadsheetApp.getActive().toast('Estimate creation cancelled.', 'Cancelled', 3);
+      return;
+    }
+  }
+  
+  // Format price for display
+  const formattedPrice = '$' + quotePrice.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  
+  // Build approval message with all customer info
+  const approvalMessage = 
+    '═══════════════════════════════════\n' +
+    '       QUICKBOOKS ESTIMATE PREVIEW\n' +
+    '═══════════════════════════════════\n\n' +
+    '📋 CUSTOMER INFORMATION:\n' +
+    '─────────────────────────────────────\n' +
+    '  Name:          ' + (customerName || '(not provided)') + '\n' +
+    '  Display Name:  ' + (displayName || '(not provided)') + '\n' +
+    '  Email:         ' + (customerEmail || '(not provided)') + '\n' +
+    '  Address:       ' + (address || '(not provided)') + '\n\n' +
+    '📝 JOB DETAILS:\n' +
+    '─────────────────────────────────────\n' +
+    '  Job Type:      ' + (jobType || '(not provided)') + '\n' +
+    '  Description:   ' + (jobDescription || '(not provided)') + '\n\n' +
+    '💰 QUOTE AMOUNT:\n' +
+    '─────────────────────────────────────\n' +
+    '  Price:         ' + formattedPrice + '\n\n' +
+    '═══════════════════════════════════\n' +
+    'Row: ' + row + ' | Sheet: ' + sheetName + '\n' +
+    '═══════════════════════════════════\n\n' +
+    'Do you want to CREATE this estimate in QuickBooks?';
+  
+  // Show approval dialog
+  const response = ui.alert(
+    '🔍 Confirm Estimate Creation',
+    approvalMessage,
+    ui.ButtonSet.YES_NO
+  );
+  
+  // Only proceed if user clicks YES
+  if (response !== ui.Button.YES) {
+    SpreadsheetApp.getActive().toast('Estimate creation cancelled by user.', 'Cancelled', 3);
+    return;
+  }
+  
+  // User approved - proceed with estimate creation
   try {
-    // Get customer data from row
-    const customerName = sheet.getRange(row, 5).getDisplayValue(); // Column E
-    const customerEmail = sheet.getRange(row, 9).getValue(); // Column I
-    const address = sheet.getRange(row, 10).getValue(); // Column J
-    const jobDescription = sheet.getRange(row, 11).getValue(); // Column K
-    const quotePrice = parseFloat(sheet.getRange(row, 14).getValue()) || 0; // Column N
-    
-    if (!customerName) {
-      throw new Error('Customer name (Column E) is required');
-    }
-    
-    if (quotePrice <= 0) {
-      throw new Error('Quote price (Column N) must be greater than 0');
-    }
-    
     // Get QuickBooks configuration
     const props = PropertiesService.getScriptProperties();
     const realmId = props.getProperty('QBO_REALM_ID');
@@ -273,6 +289,9 @@ function sendEstimateCurrentRow_() {
     const baseUrl = environment === 'production'
       ? `https://quickbooks.api.intuit.com/v3/company/${realmId}`
       : `https://sandbox-quickbooks.api.intuit.com/v3/company/${realmId}`;
+    
+    // Show progress
+    SpreadsheetApp.getActive().toast('Creating estimate in QuickBooks...', '⏳ Please wait', 30);
     
     // First, find or create customer in QuickBooks
     const customerId = findOrCreateCustomer_(service, baseUrl, customerName, customerEmail, address);
@@ -335,15 +354,19 @@ function sendEstimateCurrentRow_() {
         .build()
     );
     
-    SpreadsheetApp.getActive().toast(
-      `✅ Estimate #${estimateNumber} created successfully`,
-      'Success',
-      5
+    // Show success with estimate details
+    ui.alert(
+      '✅ Estimate Created Successfully',
+      'Estimate #' + estimateNumber + ' has been created in QuickBooks!\n\n' +
+      'Customer: ' + customerName + '\n' +
+      'Amount: ' + formattedPrice + '\n\n' +
+      'The QB link has been added to column P (row ' + row + ').',
+      ui.ButtonSet.OK
     );
     
   } catch (err) {
     Logger.log('Error sending estimate: ' + err.toString());
-    SpreadsheetApp.getActive().toast('❌ Error: ' + err.message, 'Error', 10);
+    ui.alert('❌ Error Creating Estimate', 'Error: ' + err.message, ui.ButtonSet.OK);
   }
 }
 

@@ -1,6 +1,6 @@
 /**
  * STAGE AUTOMATION (standalone)
- * Version: 11/04-11:45PM EST by Claude Sonnet 4.5
+ w
  * Moves rows between sheets, creates Drive folders, writes Google Earth links,
  * formats hyperlink cells, PRESERVES rich links/notes on row moves,
  * includes column M formula automation, expanded link generation, email linking,
@@ -162,27 +162,30 @@ function handleEditMove_(e) {
   if (col === S.COLS.QB_URL) { handleQbUrlChange_(sheet, row, r.getValue()); return; }
 
   // Stage moves: allowed on Leads, F/U, and Awarded only
-  // **CRITICAL FIX**: Store the original row number BEFORE processing
   if ((isLeads || isFU || isAwarded) && col === S.COLS.STAGE) {
+    // List of stages handled by Draft Creator - DO NOT auto-sort these
+    const DRAFT_CREATOR_STAGES = [
+      'qdraft', 'liz', 'revise', 'email customer', 'cust handoff', 
+      'rough quote', 'customer info', 'coi req'
+    ];
+    const stageValueLower = String(r.getValue() || '').trim().toLowerCase();
+    const isDraftCreatorStage = DRAFT_CREATOR_STAGES.includes(stageValueLower);
+    
     const handled = handleStageChange_(e, sheet, row, r.getValue());
     
-    // Auto-sort after stage change if this handler processed it
-    // Only sort if the row still exists (wasn't moved)
-    if (shouldAutoSort && !handled) {
-      // Small delay to ensure all operations complete
+    // Auto-sort after stage change ONLY if:
+    // 1. This handler processed it (handled = true), OR
+    // 2. It's NOT a Draft Creator stage (let Draft Creator finish first)
+    if (shouldAutoSort && handled && !isDraftCreatorStage) {
       Utilities.sleep(2000);
       m_autoSortByStage_(sheet);
     }
     
-    // **CRITICAL**: Return true to signal this edit was fully handled
-    // This prevents Draft Creator from processing the same edit
+    // If this handler processed it, we're done
     if (handled) return;
-  }
-  
-  // Auto-sort if Stage column was edited but no move occurred
-  if (shouldAutoSort && col === S.COLS.STAGE) {
-    Utilities.sleep(2000);
-    m_autoSortByStage_(sheet);
+    
+    // If it's a Draft Creator stage, return now - don't sort, let Draft Creator handle it
+    if (isDraftCreatorStage) return;
   }
 }
 

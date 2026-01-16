@@ -1,6 +1,6 @@
 /**
  * Draft Creator.gs
- * version# 01/14-11:45AM EST by Claude Opus 4.5
+ * Version: 1/16 9am EST by Claude Sonnet 4.5
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.

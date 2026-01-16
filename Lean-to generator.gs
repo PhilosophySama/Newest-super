@@ -1,6 +1,6 @@
 /**
  * LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export
- * Version# [INTEGRATED] by Gino + ChatGPT
+ * Version: 1/16 9am EST by Claude Sonnet 4.5
  *
  * Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:
  *   - "Lean-to" or "Sloped L" → generates Lean-to Ruby

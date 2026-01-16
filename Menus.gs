@@ -1,6 +1,6 @@
 /**
  * Menus.gs
- * Version# [12/31-06:45PM EST] by Claude Opus 4.1
+ * Version: 1/16 9am EST by Claude Sonnet 4.5
  *
  * CHANGES:
  * - Updated Email Reader menu with separate options for Ruby vs Add lead
@@ -47,20 +47,19 @@ function onOpen() {
 
     // QuickBooks menu
     ui.createMenu('Setup (QuickBooks)')
+      // === SETUP (Run these first, in order) ===
       .addItem('📋 Setup Instructions', 'showQuickBooksSetup_')
-      .addSeparator()
       .addItem('🔧 Get Web App URL (Run First!)', 'getScriptUrl')
+      .addItem('⚙️ Configure Environment', 'configureEnvironment')
       .addItem('🔗 Authorize QuickBooks', 'authorize')
-      .addItem('✅ Test Connection', 'testQuickBooksConnection_')
       .addSeparator()
+      // === DAILY USE (After authorization) ===
       .addItem('📊 Send Estimate (Current Row)', 'sendEstimateCurrentRow_')
       .addItem('💰 Convert Estimate to Invoice', 'convertEstimateToInvoice')
-      .addItem('🔄 Process All Awarded Estimates', 'processAllAwardedEstimates')
       .addSeparator()
+      // === TROUBLESHOOTING ===
+      .addItem('✅ Test Connection', 'testQuickBooksConnection_')
       .addItem('🔍 Show Configuration', 'showRedirectUri_')
-      .addItem('⚙️ Configure Environment', 'configureEnvironment')
-      .addItem('🐛 List QB Items (Debug)', 'listQuickBooksItems')
-      .addSeparator()
       .addItem('🔄 Reset Authorization', 'resetAuth')
       .addToUi();
 

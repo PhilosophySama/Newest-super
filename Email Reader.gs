@@ -1,6 +1,6 @@
 /**
  * EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION
- * Version# [01/12-06:45PM EST] by Claude Opus 4.1
+ * Version: 1/16 9am EST by Claude Sonnet 4.5
  * 
  * FEATURES:
  * - Ruby emails: Automatically detected and processed
