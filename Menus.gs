@@ -1,10 +1,10 @@
 /**
  * Menus.gs
- * Version: 1/16 9am EST by Claude Sonnet 4.5
+ * Version: 01/20-12:05PM EST by Claude Opus 4.1
  *
  * CHANGES:
- * - Updated Email Reader menu with separate options for Ruby vs Add lead
- * - Removed Gemini Leads menu (consolidated into Email Reader)
+ * - Added "Go to Re-cover Calculations" menu item under Setup (Drafts)
+ * - Added "Copy Ruby Code (Selected Row)" to Setup (Ruby) menu
  */
 function onOpen() {
   try {
@@ -26,6 +26,8 @@ function onOpen() {
     ui.createMenu('Setup (Drafts)')
       .addItem('Install On-Edit Trigger (Drafts V2)', 'installTriggerDrafts_V2')
       .addItem('Create Drafts For All Rows (V2)', 'createDraftsForAllRows_V2')
+      .addSeparator()
+      .addItem('📊 Go to Re-cover Calculations', 'goToRecoverCalculations_')
       .addToUi();
 
     // Mileage Log menu
@@ -43,6 +45,8 @@ function onOpen() {
       .addItem('Install On-Edit Trigger (Lean-to Ruby)', 'installTriggerLeanToRuby_')
       .addItem('Generate Ruby for Current Row', 'testGenerateRubyCurrentRow_')
       .addItem('Generate Ruby for All Lean-to Rows', 'generateRubyForAllLeantoRows_')
+      .addSeparator()
+      .addItem('📋 Copy Ruby Code (Selected Row)', 'copyRubyForSelectedRow_')
       .addToUi();
 
     // QuickBooks menu
@@ -63,7 +67,7 @@ function onOpen() {
       .addItem('🔄 Reset Authorization', 'resetAuth')
       .addToUi();
 
-    // Email Reader Menu - UPDATED
+    // Email Reader Menu
     ui.createMenu('Email Reader')
       .addItem('🔍 Run Diagnostic Check', 'er_diagnosticCheck')
       .addSeparator()
@@ -73,6 +77,10 @@ function onOpen() {
       .addSeparator()
       .addItem('⚙️ Setup Auto-Check (Ruby Only)', 'er_installTrigger')
       .addItem('🛑 Remove Auto-Check', 'er_removeTrigger')
+      .addSeparator()
+      .addItem('🏥 Install Daily Health Check', 'installTriggerHealthCheck_')
+      .addItem('🧪 Test Health Check Now', 'testTriggerHealthCheck_')
+      .addItem('🛑 Remove Health Check', 'removeTriggerHealthCheck_')
       .addToUi();
 
     // System utilities menu
@@ -85,6 +93,73 @@ function onOpen() {
   } catch (error) {
     console.error('Error creating menus:', error);
   }
+}
+
+/**
+ * Navigate to Re-cover sheet with the selected customer populated in K2
+ * Works from Leads, F/U, or Awarded sheets
+ * Version: 01/20-12:05PM EST by Claude Opus 4.1
+ */
+function goToRecoverCalculations_() {
+  const ui = SpreadsheetApp.getUi();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const activeSheet = ss.getActiveSheet();
+  const sheetName = activeSheet.getName();
+  
+  // Only allow from Leads, F/U, or Awarded
+  const allowedSheets = ['Leads', 'F/U', 'Awarded'];
+  if (!allowedSheets.includes(sheetName)) {
+    ui.alert('Wrong Sheet', 
+      'Please select a row in Leads, F/U, or Awarded sheet first.', 
+      ui.ButtonSet.OK);
+    return;
+  }
+  
+  const row = activeSheet.getActiveCell().getRow();
+  
+  if (row === 1) {
+    ui.alert('Header Row', 
+      'Please select a data row, not the header.', 
+      ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Get the Display Name from column F (index 6)
+  const displayName = activeSheet.getRange(row, 6).getDisplayValue();
+  
+  if (!displayName) {
+    ui.alert('No Display Name', 
+      'This row has no Display Name in column F.\n\nPlease enter a Display Name first.', 
+      ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Get the Re-cover sheet
+  const recoverSheet = ss.getSheetByName('Re-cover');
+  
+  if (!recoverSheet) {
+    ui.alert('Sheet Not Found', 
+      'Could not find the "Re-cover" sheet.', 
+      ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Set the Display Name in K2 (the selector cell)
+  recoverSheet.getRange('K2').setValue(displayName);
+  
+  // Activate the Re-cover sheet and select K2 so user sees the selection
+  ss.setActiveSheet(recoverSheet);
+  recoverSheet.setActiveRange(recoverSheet.getRange('K2'));
+  
+  // Brief pause to let formulas recalculate
+  SpreadsheetApp.flush();
+  
+  // Toast confirmation
+  SpreadsheetApp.getActive().toast(
+    `Loaded: ${displayName}\n\nRe-cover calculations now showing for this customer.`,
+    '📊 Re-cover Sheet',
+    5
+  );
 }
 
 /**

@@ -1,6 +1,6 @@
 /**
  * EMAIL READER AUTOMATION - UNIFIED LEAD INGESTION
- * Version: 1/16 9am EST by Claude Sonnet 4.5
+ * Version: 01/20-09:20AM EST by Claude Opus 4.1
  * 
  * FEATURES:
  * - Ruby emails: Automatically detected and processed
@@ -289,18 +289,24 @@ function er_processEmail_(message, searchConfig, processedLabel) {
     thread.addLabel(processedLabel);
     er_log_('Added LeadProcessed label', { messageId: emailData.messageId });
     
-    // Remove "Add lead" label if present
-    try {
-      const addLeadLabel = GmailApp.getUserLabelByName(C.ADD_LEAD_LABEL);
-      if (addLeadLabel && thread.hasLabel(addLeadLabel)) {
-        thread.removeLabel(addLeadLabel);
-        er_log_('Removed "Add lead" label', { messageId: emailData.messageId });
+    // Remove "Add lead" label if present (only for non-Ruby emails)
+    if (!emailData.isRuby) {
+      try {
+        const addLeadLabel = GmailApp.getUserLabelByName(C.ADD_LEAD_LABEL);
+        if (addLeadLabel) {
+          const labels = thread.getLabels();
+          const hasAddLeadLabel = labels.some(l => l.getName() === C.ADD_LEAD_LABEL);
+          if (hasAddLeadLabel) {
+            thread.removeLabel(addLeadLabel);
+            er_log_('Removed "Add lead" label', { messageId: emailData.messageId });
+          }
+        }
+      } catch (err) {
+        er_log_('Could not remove "Add lead" label', { 
+          error: err.toString(),
+          messageId: emailData.messageId 
+        });
       }
-    } catch (err) {
-      er_log_('Could not remove "Add lead" label', { 
-        error: err.toString(),
-        messageId: emailData.messageId 
-      });
     }
     
     if (C.ENABLE_LOGGING) {
@@ -716,4 +722,121 @@ function er_testProcessing() {
   } catch (err) {
     SpreadsheetApp.getActive().toast(`Error: ${err.message}`, 'Test Failed', 5);
   }
+}
+/**
+ * TRIGGER HEALTH CHECK - Emails you if triggers are missing
+ * Version: 01/20-09:20AM EST by Claude Opus 4.1
+ */
+
+const HEALTH_CHECK_CONFIG = {
+  EXPECTED_TRIGGERS: [
+    'handleEditDraft_V2',      // Draft Creator (on-edit)
+    'handleEditMove_',         // Stage Automation (on-edit)
+    'handleEditAwningRuby_',   // Ruby Generator (on-edit)
+    'er_processNewEmails',     // Email Reader (every 15 min)
+    'checkEmptyFoldersDaily_', // Empty Folder Check (daily 7am)
+    'runMileageSync_',         // Mileage Sync (daily 6am)
+    'checkTriggerHealth_'      // This health check itself (daily 7am)
+  ],
+  ALERT_EMAIL: Session.getActiveUser().getEmail(),
+  SUBJECT: '⚠️ Walker Awning: Trigger Alert'
+};
+
+/**
+ * Check if all expected triggers are installed - runs daily
+ * Only sends email if something is WRONG
+ */
+function checkTriggerHealth_() {
+  const installed = ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction());
+  const missing = HEALTH_CHECK_CONFIG.EXPECTED_TRIGGERS.filter(t => !installed.includes(t));
+  
+  if (missing.length === 0) {
+    // All good - no email needed
+    er_log_('Trigger health check passed', { installed: installed.length });
+    return;
+  }
+  
+  // Something is missing - send alert email
+  const body = `
+One or more automation triggers are missing from your Walker Awning spreadsheet.
+
+MISSING TRIGGERS:
+${missing.map(t => '  ❌ ' + t).join('\n')}
+
+CURRENTLY INSTALLED:
+${installed.map(t => '  ✅ ' + t).join('\n')}
+
+HOW TO FIX:
+1. Open your Google Sheet
+2. Go to the appropriate Setup menu and reinstall the trigger:
+   - handleEditDraft_V2 → Setup (Drafts) → Install On-Edit Trigger
+   - handleEditMove_ → Setup (Move) → Install On-Edit Trigger
+   - handleEditAwningRuby_ → Setup (Ruby) → Install On-Edit Trigger
+   - er_processNewEmails → Email Reader → Setup Auto-Check
+   - checkEmptyFoldersDaily_ → Setup (Move) → Install Daily Folder Check
+
+This is an automated alert from your Walker Awning automation system.
+  `.trim();
+  
+  MailApp.sendEmail({
+    to: HEALTH_CHECK_CONFIG.ALERT_EMAIL,
+    subject: HEALTH_CHECK_CONFIG.SUBJECT,
+    body: body
+  });
+  
+  er_log_('Trigger health alert sent', { missing, to: HEALTH_CHECK_CONFIG.ALERT_EMAIL });
+}
+
+/**
+ * Install the daily health check trigger (runs at 7 AM)
+ */
+function installTriggerHealthCheck_() {
+  // Remove existing health check triggers
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (t.getHandlerFunction() === 'checkTriggerHealth_') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+  
+  // Install new trigger at 7 AM daily
+  ScriptApp.newTrigger('checkTriggerHealth_')
+    .timeBased()
+    .atHour(7)
+    .everyDays(1)
+    .create();
+  
+  SpreadsheetApp.getActive().toast(
+    'Daily trigger health check installed (7 AM)',
+    '✅ Health Check',
+    5
+  );
+}
+
+/**
+ * Remove the health check trigger
+ */
+function removeTriggerHealthCheck_() {
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (t.getHandlerFunction() === 'checkTriggerHealth_') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+  
+  SpreadsheetApp.getActive().toast(
+    'Health check trigger removed',
+    'Removed',
+    3
+  );
+}
+
+/**
+ * Test the health check (runs immediately, will email if triggers missing)
+ */
+function testTriggerHealthCheck_() {
+  checkTriggerHealth_();
+  SpreadsheetApp.getActive().toast(
+    'Health check complete - email sent only if triggers missing',
+    'Test Complete',
+    5
+  );
 }

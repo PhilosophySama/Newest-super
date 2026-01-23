@@ -1,6 +1,6 @@
 /**
  * STAGE AUTOMATION (standalone)
- w
+ * Version: 1/16 9am EST by Claude Sonnet 4.5
  * Moves rows between sheets, creates Drive folders, writes Google Earth links,
  * formats hyperlink cells, PRESERVES rich links/notes on row moves,
  * includes column M formula automation, expanded link generation, email linking,

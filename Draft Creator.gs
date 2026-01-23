@@ -1149,7 +1149,29 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
     const ss = sh.getParent();
     console.log('Starting Re-cover HTML export for spreadsheet: ' + ss.getId());
     
-    // Just wait for calculations, don't try to change active range (fails in triggers)
+    // Set the Customer Name (column E) in K2 to load the correct customer calculations
+    // Note: K2 is a data validation dropdown that pulls from column E (Leads sheet)
+    const recoverSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
+    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]) || '';  // Column E
+    if (recoverSheet && customerName) {
+      const k2Cell = recoverSheet.getRange(DRAFTS_V2.RECOVER.SELECT_CELL_A1);
+      
+      // Build validation rule that matches column E from Leads
+      const leadsSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.LEADS);
+      const lastRow = leadsSheet.getLastRow();
+      const validationRange = leadsSheet.getRange('E2:E' + lastRow);
+      const validationRule = SpreadsheetApp.newDataValidation()
+        .requireValueInRange(validationRange, true)
+        .setAllowInvalid(false)
+        .build();
+      
+      k2Cell.setDataValidation(null);  // Remove validation temporarily
+      k2Cell.setValue(customerName);
+      SpreadsheetApp.flush();
+      k2Cell.setDataValidation(validationRule);  // Restore dropdown from Leads!E
+    }
+    
+    // Wait for calculations to settle
     Utilities.sleep(DRAFTS_V2.RECOVER.WAIT_MS || 2000);
     
     recoverHtml = v2_exportRecoverRangeAsHtml_(ss);
