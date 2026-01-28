@@ -1,14 +1,382 @@
 /**
  * Menus.gs
- * Version: 01/20-12:05PM EST by Claude Opus 4.1
+ * Version: 01/26-11:52AM EST by Claude Opus 4.1
  *
  * CHANGES:
- * - Added "Go to Re-cover Calculations" menu item under Setup (Drafts)
- * - Added "Copy Ruby Code (Selected Row)" to Setup (Ruby) menu
+ * - Added robust trigger management system to prevent trigger loss
+ * - Added master trigger handler that routes to all sub-handlers safely
+ * - Added trigger health check and auto-repair functionality
+ * - Added error logging to diagnose trigger issues
+ * - All onEdit handlers now wrapped in try-catch for stability
+ * - Preserved all existing menu items and functions
  */
+
+// ============================================
+// MASTER TRIGGER HANDLER - SINGLE POINT OF ENTRY
+// ============================================
+
+/**
+ * MASTER onEdit trigger handler
+ * This is the ONLY onEdit trigger that should be installed.
+ * It safely routes to all sub-handlers with error protection.
+ */
+function masterOnEditHandler_(e) {
+  // Validate event object
+  if (!e || !e.source || !e.range) {
+    console.log('[MasterHandler] Invalid event object - skipping');
+    return;
+  }
+  
+  const handlerResults = [];
+  
+  // 1. Stage Automation (move rows, create folders, format links)
+  try {
+    if (typeof handleEditMove_ === 'function') {
+      handleEditMove_(e);
+      handlerResults.push({ handler: 'Stage Automation', status: 'OK' });
+    }
+  } catch (err) {
+    handlerResults.push({ handler: 'Stage Automation', status: 'ERROR', error: err.message });
+    logTriggerError_('handleEditMove_', err, e);
+  }
+  
+  // 2. Draft Creator (create Gmail drafts)
+  try {
+    if (typeof handleEditDraft_V2 === 'function') {
+      handleEditDraft_V2(e);
+      handlerResults.push({ handler: 'Draft Creator', status: 'OK' });
+    }
+  } catch (err) {
+    handlerResults.push({ handler: 'Draft Creator', status: 'ERROR', error: err.message });
+    logTriggerError_('handleEditDraft_V2', err, e);
+  }
+  
+  // 3. Awning Ruby Generator (lean-to and A-frame)
+  try {
+    if (typeof handleEditAwningRuby_ === 'function') {
+      handleEditAwningRuby_(e);
+      handlerResults.push({ handler: 'Awning Ruby', status: 'OK' });
+    }
+  } catch (err) {
+    handlerResults.push({ handler: 'Awning Ruby', status: 'ERROR', error: err.message });
+    logTriggerError_('handleEditAwningRuby_', err, e);
+  }
+  
+  // 4. Follow-up Draft Creator (if still needed - may be redundant with V2)
+  try {
+    if (typeof handleEditDraft_FU === 'function') {
+      handleEditDraft_FU(e);
+      handlerResults.push({ handler: 'Follow-up Draft', status: 'OK' });
+    }
+  } catch (err) {
+    handlerResults.push({ handler: 'Follow-up Draft', status: 'ERROR', error: err.message });
+    logTriggerError_('handleEditDraft_FU', err, e);
+  }
+  
+  // Log summary if any errors occurred
+  const errors = handlerResults.filter(r => r.status === 'ERROR');
+  if (errors.length > 0) {
+    console.error('[MasterHandler] Errors in handlers:', JSON.stringify(errors));
+  }
+}
+
+/**
+ * Log trigger errors to a hidden sheet for diagnosis
+ */
+function logTriggerError_(handlerName, error, event) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let logSheet = ss.getSheetByName('_TriggerErrors');
+    
+    // Create log sheet if it doesn't exist
+    if (!logSheet) {
+      logSheet = ss.insertSheet('_TriggerErrors');
+      logSheet.appendRow(['Timestamp', 'Handler', 'Error', 'Sheet', 'Cell', 'Value']);
+      logSheet.hideSheet(); // Keep it hidden from normal view
+    }
+    
+    // Add error entry
+    const timestamp = new Date().toISOString();
+    const sheetName = event && event.range ? event.range.getSheet().getName() : 'Unknown';
+    const cell = event && event.range ? event.range.getA1Notation() : 'Unknown';
+    const value = event && event.value !== undefined ? String(event.value).substring(0, 100) : 'N/A';
+    
+    logSheet.appendRow([timestamp, handlerName, error.message || String(error), sheetName, cell, value]);
+    
+    // Keep only last 500 errors to prevent sheet bloat
+    const lastRow = logSheet.getLastRow();
+    if (lastRow > 501) {
+      logSheet.deleteRows(2, lastRow - 501);
+    }
+    
+  } catch (logErr) {
+    // If logging fails, at least output to console
+    console.error('[TriggerErrorLog] Failed to log error:', logErr.message);
+  }
+}
+
+// ============================================
+// TRIGGER MANAGEMENT FUNCTIONS
+// ============================================
+
+/**
+ * Install the MASTER onEdit trigger (replaces all individual triggers)
+ * This is the RECOMMENDED way to set up triggers
+ */
+function installMasterTrigger_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ssId = ss.getId();
+  
+  // Remove ALL existing onEdit triggers (clean slate)
+  const triggers = ScriptApp.getProjectTriggers();
+  let removed = 0;
+  
+  triggers.forEach(trigger => {
+    if (trigger.getEventType() === ScriptApp.EventType.ON_EDIT) {
+      ScriptApp.deleteTrigger(trigger);
+      removed++;
+    }
+  });
+  
+  // Install the single master handler
+  ScriptApp.newTrigger('masterOnEditHandler_')
+    .forSpreadsheet(ssId)
+    .onEdit()
+    .create();
+  
+  // Verify installation
+  const newTriggers = ScriptApp.getProjectTriggers();
+  const masterTrigger = newTriggers.find(t => t.getHandlerFunction() === 'masterOnEditHandler_');
+  
+  if (masterTrigger) {
+    ss.toast(
+      `✅ Master trigger installed!\nRemoved ${removed} old triggers.\nAll automations now run through one handler.`,
+      'Trigger Setup Complete',
+      5
+    );
+    console.log('[TriggerSetup] Master trigger installed successfully');
+  } else {
+    ss.toast('❌ Failed to install master trigger!', 'Error', 5);
+    console.error('[TriggerSetup] Master trigger installation failed');
+  }
+}
+
+/**
+ * Check trigger health and report status
+ */
+function checkTriggerHealthMenu_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const triggers = ScriptApp.getProjectTriggers();
+  
+  let report = '=== TRIGGER HEALTH REPORT ===\n\n';
+  report += `Total triggers: ${triggers.length}\n\n`;
+  
+  // Categorize triggers
+  const onEditTriggers = [];
+  const timeBasedTriggers = [];
+  const otherTriggers = [];
+  
+  triggers.forEach(trigger => {
+    const info = {
+      handler: trigger.getHandlerFunction(),
+      type: trigger.getEventType().toString(),
+      id: trigger.getUniqueId()
+    };
+    
+    if (trigger.getEventType() === ScriptApp.EventType.ON_EDIT) {
+      onEditTriggers.push(info);
+    } else if (trigger.getEventType() === ScriptApp.EventType.CLOCK) {
+      timeBasedTriggers.push(info);
+    } else {
+      otherTriggers.push(info);
+    }
+  });
+  
+  report += `ON_EDIT Triggers (${onEditTriggers.length}):\n`;
+  if (onEditTriggers.length === 0) {
+    report += '  ❌ NONE - Automations will NOT work!\n';
+  } else {
+    onEditTriggers.forEach(t => {
+      const isMaster = t.handler === 'masterOnEditHandler_';
+      report += `  ${isMaster ? '✅' : '⚠️'} ${t.handler}\n`;
+    });
+    
+    if (onEditTriggers.length > 1) {
+      report += '\n  ⚠️ WARNING: Multiple onEdit triggers may cause conflicts!\n';
+      report += '     Run "Install Master Trigger" to consolidate.\n';
+    }
+  }
+  
+  report += `\nTime-Based Triggers (${timeBasedTriggers.length}):\n`;
+  if (timeBasedTriggers.length === 0) {
+    report += '  (none)\n';
+  } else {
+    timeBasedTriggers.forEach(t => {
+      report += `  • ${t.handler}\n`;
+    });
+  }
+  
+  // Check for expected time-based triggers
+  const expectedTimeBased = ['er_processNewEmails', 'runMileageSync_', 'checkEmptyFoldersDaily_'];
+  const missingTimeBased = expectedTimeBased.filter(
+    expected => !timeBasedTriggers.some(t => t.handler === expected)
+  );
+  
+  if (missingTimeBased.length > 0) {
+    report += '\n  ℹ️ Optional time-based triggers not installed:\n';
+    missingTimeBased.forEach(m => {
+      report += `     • ${m}\n`;
+    });
+  }
+  
+  // Check error log
+  const logSheet = ss.getSheetByName('_TriggerErrors');
+  if (logSheet) {
+    const lastRow = logSheet.getLastRow();
+    const recentErrors = lastRow > 1 ? lastRow - 1 : 0;
+    report += `\nError Log: ${recentErrors} recorded errors\n`;
+    
+    if (recentErrors > 0) {
+      // Get last 5 errors
+      const startRow = Math.max(2, lastRow - 4);
+      const numRows = Math.min(5, lastRow - 1);
+      const errors = logSheet.getRange(startRow, 1, numRows, 4).getValues();
+      
+      report += 'Recent errors:\n';
+      errors.reverse().forEach(row => {
+        report += `  • ${row[0]}: ${row[1]} - ${row[2]}\n`;
+      });
+    }
+  } else {
+    report += '\nError Log: No errors recorded yet\n';
+  }
+  
+  // Show report
+  const ui = SpreadsheetApp.getUi();
+  ui.alert('Trigger Health Check', report, ui.ButtonSet.OK);
+  
+  console.log(report);
+}
+
+/**
+ * Auto-repair triggers if master trigger is missing
+ * Can be run manually or scheduled
+ */
+function autoRepairTriggers_() {
+  const triggers = ScriptApp.getProjectTriggers();
+  const hasMasterTrigger = triggers.some(
+    t => t.getHandlerFunction() === 'masterOnEditHandler_' && 
+         t.getEventType() === ScriptApp.EventType.ON_EDIT
+  );
+  
+  if (!hasMasterTrigger) {
+    console.log('[AutoRepair] Master trigger missing - reinstalling...');
+    installMasterTrigger_();
+    return true;
+  }
+  
+  console.log('[AutoRepair] Master trigger is healthy');
+  return false;
+}
+
+/**
+ * Install a daily trigger health check (runs at 5 AM)
+ */
+function installDailyTriggerRepair_() {
+  // Remove existing auto-repair triggers
+  ScriptApp.getProjectTriggers().forEach(trigger => {
+    if (trigger.getHandlerFunction() === 'autoRepairTriggers_') {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+  
+  // Install daily health check at 5 AM
+  ScriptApp.newTrigger('autoRepairTriggers_')
+    .timeBased()
+    .atHour(5)
+    .everyDays(1)
+    .create();
+  
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    'Daily trigger auto-repair installed (5 AM)',
+    'Auto-Repair Enabled',
+    5
+  );
+}
+
+/**
+ * View the error log sheet
+ */
+function viewTriggerErrorLog_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let logSheet = ss.getSheetByName('_TriggerErrors');
+  
+  if (!logSheet) {
+    SpreadsheetApp.getUi().alert('No error log exists yet. This is good - no errors have been recorded!');
+    return;
+  }
+  
+  // Unhide and activate the sheet
+  logSheet.showSheet();
+  ss.setActiveSheet(logSheet);
+  
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    'Error log is now visible. You can hide it again from the sheet menu.',
+    'Error Log',
+    5
+  );
+}
+
+/**
+ * Clear the error log
+ */
+function clearTriggerErrorLog_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const logSheet = ss.getSheetByName('_TriggerErrors');
+  
+  if (!logSheet) {
+    SpreadsheetApp.getUi().alert('No error log exists.');
+    return;
+  }
+  
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.alert(
+    'Clear Error Log',
+    'Are you sure you want to clear all recorded trigger errors?',
+    ui.ButtonSet.YES_NO
+  );
+  
+  if (response === ui.Button.YES) {
+    const lastRow = logSheet.getLastRow();
+    if (lastRow > 1) {
+      logSheet.deleteRows(2, lastRow - 1);
+    }
+    ui.alert('Error log cleared.');
+  }
+}
+
+// ============================================
+// MENU CREATION
+// ============================================
+
 function onOpen() {
   try {
     const ui = SpreadsheetApp.getUi();
+
+    // ====== MAIN TRIGGER MENU (Most Important!) ======
+    ui.createMenu('🔧 Triggers')
+      .addItem('✅ Install Master Trigger (RECOMMENDED)', 'installMasterTrigger_')
+      .addItem('🔍 Check Trigger Health', 'checkTriggerHealthMenu_')
+      .addItem('🔄 Auto-Repair Triggers Now', 'autoRepairTriggers_')
+      .addSeparator()
+      .addItem('⏰ Install Daily Auto-Repair (5 AM)', 'installDailyTriggerRepair_')
+      .addSeparator()
+      .addItem('📋 View Error Log', 'viewTriggerErrorLog_')
+      .addItem('🗑️ Clear Error Log', 'clearTriggerErrorLog_')
+      .addSeparator()
+      .addItem('📊 View All Triggers', 'listAllTriggers_')
+      .addItem('⚠️ Remove All Triggers', 'removeAllTriggers_')
+      .addToUi();
 
     // Stage Automation menu
     ui.createMenu('Setup (Move)')
@@ -90,15 +458,34 @@ function onOpen() {
       .addToUi();
 
     console.log('Menus created successfully');
+    
+    // Auto-check trigger health on open (silent)
+    try {
+      const triggers = ScriptApp.getProjectTriggers();
+      const hasOnEdit = triggers.some(t => t.getEventType() === ScriptApp.EventType.ON_EDIT);
+      if (!hasOnEdit) {
+        SpreadsheetApp.getActiveSpreadsheet().toast(
+          '⚠️ No onEdit triggers installed!\nGo to 🔧 Triggers → Install Master Trigger',
+          'Warning',
+          10
+        );
+      }
+    } catch (checkErr) {
+      // Silently ignore check errors
+    }
+    
   } catch (error) {
     console.error('Error creating menus:', error);
   }
 }
 
+// ============================================
+// EXISTING UTILITY FUNCTIONS (preserved)
+// ============================================
+
 /**
  * Navigate to Re-cover sheet with the selected customer populated in K2
  * Works from Leads, F/U, or Awarded sheets
- * Version: 01/20-12:05PM EST by Claude Opus 4.1
  */
 function goToRecoverCalculations_() {
   const ui = SpreadsheetApp.getUi();
@@ -238,13 +625,15 @@ function listAllTriggers_() {
   const ui = SpreadsheetApp.getUi();
   
   if (triggers.length === 0) {
-    ui.alert('No triggers found');
+    ui.alert('No triggers found.\n\nGo to 🔧 Triggers → Install Master Trigger to set up automations.');
     return;
   }
   
   const triggerInfo = triggers.map((trigger, index) => {
-    return `${index + 1}. ${trigger.getHandlerFunction()} - ${trigger.getEventType()}`;
-  }).join('\n');
+    const eventType = trigger.getEventType().toString();
+    const handler = trigger.getHandlerFunction();
+    return `${index + 1}. ${handler}\n   Type: ${eventType}`;
+  }).join('\n\n');
   
   ui.alert('Active Triggers', triggerInfo, ui.ButtonSet.OK);
 }
@@ -255,12 +644,12 @@ function listAllTriggers_() {
 function removeAllTriggers_() {
   const ui = SpreadsheetApp.getUi();
   const response = ui.alert('Remove All Triggers', 
-    'Are you sure you want to remove ALL triggers? This cannot be undone.', 
+    '⚠️ WARNING: This will remove ALL triggers!\n\nAll automations will STOP working until you reinstall triggers.\n\nAre you sure?', 
     ui.ButtonSet.YES_NO);
   
   if (response === ui.Button.YES) {
     const triggers = ScriptApp.getProjectTriggers();
     triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
-    ui.alert('Success', `Removed ${triggers.length} triggers.`, ui.ButtonSet.OK);
+    ui.alert('Success', `Removed ${triggers.length} triggers.\n\nRemember to reinstall triggers when ready:\n🔧 Triggers → Install Master Trigger`, ui.ButtonSet.OK);
   }
 }

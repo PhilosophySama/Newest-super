@@ -1,6 +1,6 @@
 /**
  * Draft Creator.gs
- * Version: 1/16 9am EST by Claude Sonnet 4.5
+ * Version: 01/28-12:30AM EST by Claude Opus 4.5
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
@@ -112,7 +112,7 @@ Project Details:
 - Location: \${address}
 - Description: \${jobType}
 
-If you have any questions or would like to proceed with this project, please reach out via text or call. When you open the link below, please click "View estimate" for specifications.`,
+Free payment options are: Check and Zelle to "walker-awning-fl" If you have any questions or would like to proceed with this project, please reach out via text or call. When you open the link below, please click "View estimate" for specifications.`,
     HTML_BODY_TEMPLATE: `<div style="font-family: Arial, sans-serif; color: #333;">
 <p>Hello \${firstName},</p>
 
@@ -124,7 +124,7 @@ If you have any questions or would like to proceed with this project, please rea
   <li><strong>Description:</strong> \${jobType}</li>
 </ul>
 
-<p>If you have any questions or would like to proceed with this project, please reach out via text or call.</p>
+<p>Free payment options are: Check and Zelle to "walker-awning-fl" If you have any questions or would like to proceed with this project, please reach out via text or call.</p>
 </div>`
   },
 
@@ -1143,44 +1143,67 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
     }
   }
 
-  // Re-cover HTML snapshot
+  // Re-cover HTML snapshot - CONDITIONAL based on Job Type (column R)
   let recoverHtml = null;
   try {
     const ss = sh.getParent();
     console.log('Starting Re-cover HTML export for spreadsheet: ' + ss.getId());
     
-    // Set the Customer Name (column E) in K2 to load the correct customer calculations
-    // Note: K2 is a data validation dropdown that pulls from column E (Leads sheet)
-    const recoverSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
-    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]) || '';  // Column E
-    if (recoverSheet && customerName) {
-      const k2Cell = recoverSheet.getRange(DRAFTS_V2.RECOVER.SELECT_CELL_A1);
-      
-      // Build validation rule that matches column E from Leads
-      const leadsSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.LEADS);
-      const lastRow = leadsSheet.getLastRow();
-      const validationRange = leadsSheet.getRange('E2:E' + lastRow);
-      const validationRule = SpreadsheetApp.newDataValidation()
-        .requireValueInRange(validationRange, true)
-        .setAllowInvalid(false)
-        .build();
-      
-      k2Cell.setDataValidation(null);  // Remove validation temporarily
-      k2Cell.setValue(customerName);
-      SpreadsheetApp.flush();
-      k2Cell.setDataValidation(validationRule);  // Restore dropdown from Leads!E
-    }
+    // Check Job Type (column R) to determine which range to export
+    const jobTypeLower = jobType.toLowerCase().trim();
     
-    // Wait for calculations to settle
-    Utilities.sleep(DRAFTS_V2.RECOVER.WAIT_MS || 2000);
-    
-    recoverHtml = v2_exportRecoverRangeAsHtml_(ss);
-    if (!recoverHtml) {
-      notes.push('Re-cover HTML empty');
-      console.log('recoverHtml is NULL or empty');
+    // Only export if Job Type is "Re-Cover" or "Complete"
+    if (jobTypeLower === 're-cover' || jobTypeLower === 'complete') {
+      
+      const recoverSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
+      const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]) || '';  // Column E
+      
+      if (recoverSheet && customerName) {
+        const k2Cell = recoverSheet.getRange(DRAFTS_V2.RECOVER.SELECT_CELL_A1);
+        
+        // Build validation rule that matches column E from Leads
+        const leadsSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.LEADS);
+        const lastRowLeads = leadsSheet.getLastRow();
+        const validationRange = leadsSheet.getRange('E2:E' + lastRowLeads);
+        const validationRule = SpreadsheetApp.newDataValidation()
+          .requireValueInRange(validationRange, true)
+          .setAllowInvalid(false)
+          .build();
+        
+        k2Cell.setDataValidation(null);  // Remove validation temporarily
+        k2Cell.setValue(customerName);
+        SpreadsheetApp.flush();
+        k2Cell.setDataValidation(validationRule);  // Restore dropdown from Leads!E
+      }
+      
+      // Wait for calculations to settle
+      Utilities.sleep(DRAFTS_V2.RECOVER.WAIT_MS || 2000);
+      
+      // Determine which range to export based on Job Type
+      let exportRange;
+      if (jobTypeLower === 're-cover') {
+        exportRange = 'A1:K14';  // Re-Cover calculations
+        console.log('Job Type is Re-Cover - exporting range A1:K14');
+      } else if (jobTypeLower === 'complete') {
+        exportRange = 'M1:S30';  // Complete calculations
+        console.log('Job Type is Complete - exporting range M1:S30');
+      }
+      
+      recoverHtml = v2_exportRecoverRangeAsHtml_(ss, exportRange);
+      
+      if (!recoverHtml) {
+        notes.push('Re-cover HTML empty');
+        console.log('recoverHtml is NULL or empty');
+      } else {
+        console.log('recoverHtml generated, length: ' + recoverHtml.length);
+      }
+      
     } else {
-      console.log('recoverHtml generated, length: ' + recoverHtml.length);
+      // Job Type is not Re-Cover or Complete - skip HTML export
+      console.log('Job Type "' + jobType + '" does not require Re-cover HTML export - skipping');
+      notes.push('Skipped HTML (Job Type: ' + jobType + ')');
     }
+    
   } catch (htmlErr) {
     if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
       console.error('HTML export failed:', htmlErr);
@@ -1230,52 +1253,73 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
 }
 
 /**
- * HTML export of Re-cover range (FIXED VERSION)
- * Uses proper A1 notation in the API call
+ * HTML export of Re-cover range (CONDITIONAL VERSION)
+ * Exports A1:K14 for Re-Cover jobs, M1:S30 for Complete jobs
+ * Version: 01/27-04:30PM EST by Claude Opus 4.1
+ * @param {Spreadsheet} ss - The spreadsheet object
+ * @param {string} rangeOverride - Optional range to export (e.g., "A1:K14" or "M1:S30")
+ * @returns {string|null} HTML table string or null on failure
  */
-function v2_exportRecoverRangeAsHtml_(ss) {
+function v2_exportRecoverRangeAsHtml_(ss, rangeOverride) {
   try {
+    console.log('v2_exportRecoverRangeAsHtml_ called with rangeOverride:', rangeOverride);
+    
     const spreadsheetId = ss.getId();
+    console.log('Spreadsheet ID:', spreadsheetId);
+    
     const sheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
-    if (!sheet) return null;
+    if (!sheet) {
+      console.log('Re-cover sheet not found');
+      return null;
+    }
 
-    const rangeA1 = DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1; // e.g., "A1:K14"
+    // Use provided range or fall back to config default
+    const rangeA1 = rangeOverride || DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1;
     const sheetName = sheet.getName();
     
     // Use proper A1 notation: SheetName!A1:K14
     const fullRange = `${sheetName}!${rangeA1}`;
+    console.log('Full range for API call:', fullRange);
     
     const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}` +
       `?ranges=${encodeURIComponent(fullRange)}` +
       `&includeGridData=true` +
       `&fields=sheets(data(rowData(values(effectiveValue,formattedValue,hyperlink,effectiveFormat)),rowMetadata,columnMetadata),merges)`;
 
+    console.log('Making Sheets API request...');
+    
     const resp = UrlFetchApp.fetch(endpoint, {
       headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
       muteHttpExceptions: true
     });
 
-    if (resp.getResponseCode() !== 200) {
-      if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
-        console.error('API call failed:', resp.getResponseCode(), resp.getContentText());
-      }
+    const respCode = resp.getResponseCode();
+    console.log('Sheets API response code:', respCode);
+
+    if (respCode !== 200) {
+      console.error('API call failed:', respCode, resp.getContentText().substring(0, 500));
       return null;
     }
 
     const json = JSON.parse(resp.getContentText());
     const sheetData = (json && json.sheets && json.sheets[0]) ? json.sheets[0] : null;
-    if (!sheetData || !sheetData.data || !sheetData.data[0]) return null;
-
-    return v2_sheetsDataToHtml_(sheetData, sheet);
-  } catch (err) {
-    if (DRAFTS_V2.RECOVER && DRAFTS_V2.RECOVER.DEBUG) {
-      console.error('HTML export error:', err);
+    if (!sheetData || !sheetData.data || !sheetData.data[0]) {
+      console.log('No sheet data returned from API');
+      return null;
     }
+
+    console.log('Generating HTML from sheet data...');
+    const html = v2_sheetsDataToHtml_(sheetData, sheet, rangeA1);
+    console.log('HTML generated, length:', html ? html.length : 0);
+    
+    return html;
+  } catch (err) {
+    console.error('HTML export error:', err.message, err.stack);
     return null;
   }
 }
 
-function v2_sheetsDataToHtml_(sheetData, sheet) {
+function v2_sheetsDataToHtml_(sheetData, sheet, rangeA1) {
   const data = sheetData.data[0];
   const rowData = data.rowData || [];
 
@@ -1289,13 +1333,24 @@ function v2_sheetsDataToHtml_(sheetData, sheet) {
   const skipCell = Array.from({length: numRows}, ()=> Array(numCols).fill(false));
   const mergedTopLeft = Array.from({length: numRows}, ()=> Array(numCols).fill(null));
 
-  merges.forEach(m => {
-    const c0 = m.startColumnIndex || 0;
-    const c1 = (m.endColumnIndex || 0) - 1;
-    const r0 = m.startRowIndex || 0;
-    const r1 = (m.endRowIndex || 0) - 1;
+  // Parse the range to get starting column offset (for M1:S30, startCol = 12)
+  const rangeMatch = (rangeA1 || DRAFTS_V2.RECOVER.SNAPSHOT_RANGE_A1).match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/i);
+  let startColOffset = 0;
+  let startRowOffset = 0;
+  if (rangeMatch) {
+    startColOffset = d_colLetterToIndex_(rangeMatch[1]) - 1;  // Convert to 0-based
+    startRowOffset = parseInt(rangeMatch[2], 10) - 1;  // Convert to 0-based
+  }
 
-    if (c0 < 0 || c1 >= numCols || r0 < 0 || r1 >= numRows) return;
+  merges.forEach(m => {
+    // Adjust merge coordinates relative to the requested range
+    const c0 = (m.startColumnIndex || 0) - startColOffset;
+    const c1 = ((m.endColumnIndex || 0) - 1) - startColOffset;
+    const r0 = (m.startRowIndex || 0) - startRowOffset;
+    const r1 = ((m.endRowIndex || 0) - 1) - startRowOffset;
+
+    // Skip merges that are outside our requested range
+    if (c0 < 0 || c1 >= numCols || r0 < 0 || r1 >= numRows || c0 >= numCols || r0 >= numRows) return;
 
     const colspan = c1 - c0 + 1;
     const rowspan = r1 - r0 + 1;

@@ -730,13 +730,11 @@ function er_testProcessing() {
 
 const HEALTH_CHECK_CONFIG = {
   EXPECTED_TRIGGERS: [
-    'handleEditDraft_V2',      // Draft Creator (on-edit)
-    'handleEditMove_',         // Stage Automation (on-edit)
-    'handleEditAwningRuby_',   // Ruby Generator (on-edit)
-    'er_processNewEmails',     // Email Reader (every 15 min)
-    'checkEmptyFoldersDaily_', // Empty Folder Check (daily 7am)
-    'runMileageSync_',         // Mileage Sync (daily 6am)
-    'checkTriggerHealth_'      // This health check itself (daily 7am)
+    'masterOnEditHandler_',    // Master trigger handles all onEdit events
+    'er_processNewEmails',
+    'checkEmptyFoldersDaily_',
+    'runMileageSync_',
+    'checkTriggerHealth_'
   ],
   ALERT_EMAIL: Session.getActiveUser().getEmail(),
   SUBJECT: '⚠️ Walker Awning: Trigger Alert'
