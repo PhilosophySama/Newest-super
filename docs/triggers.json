@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-01-23T14:18:16.456Z",
+    "lastUpdated": "2026-01-28T05:18:12.384Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,20 +8,20 @@
   },
   "stats": {
     "totalFiles": 10,
-    "totalFunctions": 149,
+    "totalFunctions": 157,
     "totalTriggers": 20,
-    "totalLines": 6982,
+    "totalLines": 7424,
     "publicFunctions": 49,
-    "helperFunctions": 136,
-    "avgFunctionsPerFile": 15,
-    "avgLinesPerFile": 698
+    "helperFunctions": 144,
+    "avgFunctionsPerFile": 16,
+    "avgLinesPerFile": 742
   },
   "files": [
     {
       "path": "Draft Creator.gs",
       "filename": "Draft Creator.gs",
-      "purpose": "Draft Creator.gs Version: 1/16 9am EST by Claude Sonnet 4.5 PURPOSE",
-      "version": "1/16 9am EST by Claude Sonnet 4.5",
+      "purpose": "Draft Creator.gs Version: 01/28-12:30AM EST by Claude Opus 4.5 PURPOSE",
+      "version": "01/28-12:30AM EST by Claude Opus 4.5",
       "functions": [
         {
           "name": "installTriggerDrafts_V2",
@@ -95,175 +95,175 @@
         },
         {
           "name": "v2_exportRecoverRangeAsHtml_",
-          "line": 1236,
-          "description": "HTML export of Re-cover range (FIXED VERSION) Uses proper A1 notation in the API call",
+          "line": 1263,
+          "description": "@param {Spreadsheet} ss - The spreadsheet object @param {string} rangeOverride - Optional range to export (e.g., \"A1:K14\" or \"M1:S30\") @returns {string|null} HTML table string or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_sheetsDataToHtml_",
-          "line": 1278,
+          "line": 1322,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildHtmlBody_",
-          "line": 1412,
+          "line": 1467,
           "description": "Email body builders ================ */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildPlainBody_",
-          "line": 1471,
+          "line": 1526,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_extractUrlFromCell_",
-          "line": 1483,
+          "line": 1538,
           "description": "Helpers ===================== */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_looksLikeUrl_",
-          "line": 1533,
+          "line": 1588,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeString_",
-          "line": 1534,
+          "line": 1589,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_htmlEscape_",
-          "line": 1535,
+          "line": 1590,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_colLetterToIndex_",
-          "line": 1537,
+          "line": 1592,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_getSpreadsheet_",
-          "line": 1543,
+          "line": 1598,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_writeB_",
-          "line": 1550,
+          "line": 1605,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_withRetry_",
-          "line": 1561,
+          "line": 1616,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_specificErrorMessage_",
-          "line": 1577,
+          "line": 1632,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_shortErr_",
-          "line": 1584,
+          "line": 1639,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_validateConfig_",
-          "line": 1586,
+          "line": 1641,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isValidEmail_",
-          "line": 1593,
+          "line": 1648,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_firstLinkInRichText_",
-          "line": 1595,
+          "line": 1650,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isGmailDraftUrl_",
-          "line": 1607,
+          "line": 1662,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_templateSafe_",
-          "line": 1611,
+          "line": 1666,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_timestamp_",
-          "line": 1623,
+          "line": 1678,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeLogErrorToSheet_",
-          "line": 1629,
+          "line": 1684,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateRouteMapUrl_",
-          "line": 1645,
+          "line": 1700,
           "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateSimpleMapUrl_",
-          "line": 1713,
+          "line": 1768,
           "description": "Fallback: Generate simple map URL with just markers (no route line)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testMapsApiConnection",
-          "line": 1727,
+          "line": 1782,
           "description": "Test function - run this to verify Maps API works",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "d_generateSatelliteMapUrl_",
-          "line": 1744,
+          "line": 1799,
           "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
           "isPublic": false,
           "isHelper": true
@@ -353,8 +353,8 @@
         "d_generateSimpleMapUrl_",
         "DRAFTS_V2"
       ],
-      "lines": 1766,
-      "size": 70871
+      "lines": 1821,
+      "size": 73475
     },
     {
       "path": "Email Reader.gs",
@@ -448,28 +448,28 @@
         },
         {
           "name": "checkTriggerHealth_",
-          "line": 749,
+          "line": 747,
           "description": "Check if all expected triggers are installed - runs daily Only sends email if something is WRONG",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerHealthCheck_",
-          "line": 793,
+          "line": 791,
           "description": "Install the daily health check trigger (runs at 7 AM)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeTriggerHealthCheck_",
-          "line": 818,
+          "line": 816,
           "description": "Remove the health check trigger",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testTriggerHealthCheck_",
-          "line": 835,
+          "line": 833,
           "description": "Test the health check (runs immediately, will email if triggers missing)",
           "isPublic": false,
           "isHelper": true
@@ -489,8 +489,8 @@
         "testTriggerHealthCheck_",
         "Defines: EMAIL_READER_CONFIG"
       ],
-      "lines": 842,
-      "size": 25607
+      "lines": 840,
+      "size": 25354
     },
     {
       "path": "Lead follow up.gs.gs",
@@ -729,40 +729,96 @@
     {
       "path": "Menus.gs",
       "filename": "Menus.gs",
-      "purpose": "Menus.gs Version: 01/20-12:05PM EST by Claude Opus 4.1 CHANGES:",
-      "version": "01/20-12:05PM EST by Claude Opus 4.1",
+      "purpose": "Menus.gs Version: 01/26-11:52AM EST by Claude Opus 4.1 CHANGES:",
+      "version": "01/26-11:52AM EST by Claude Opus 4.1",
       "functions": [
         {
+          "name": "masterOnEditHandler_",
+          "line": 23,
+          "description": "MASTER onEdit trigger handler This is the ONLY onEdit trigger that should be installed. It safely routes to all sub-handlers with error protection.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "logTriggerError_",
+          "line": 86,
+          "description": "Log trigger errors to a hidden sheet for diagnosis",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installMasterTrigger_",
+          "line": 126,
+          "description": "Install the MASTER onEdit trigger (replaces all individual triggers) This is the RECOMMENDED way to set up triggers",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "checkTriggerHealthMenu_",
+          "line": 167,
+          "description": "Check trigger health and report status",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "autoRepairTriggers_",
+          "line": 265,
+          "description": "Auto-repair triggers if master trigger is missing Can be run manually or scheduled",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installDailyTriggerRepair_",
+          "line": 285,
+          "description": "Install a daily trigger health check (runs at 5 AM)",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "viewTriggerErrorLog_",
+          "line": 310,
+          "description": "View the error log sheet",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "clearTriggerErrorLog_",
+          "line": 333,
+          "description": "Clear the error log",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "onOpen",
-          "line": 9,
-          "description": "CHANGES: - Added \"Go to Re-cover Calculations\" menu item under Setup (Drafts) - Added \"Copy Ruby Code (Selected Row)\" to Setup (Ruby) menu",
+          "line": 362,
+          "description": "============================================ MENU CREATION ============================================",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "goToRecoverCalculations_",
-          "line": 103,
-          "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets Version: 01/20-12:05PM EST by Claude Opus 4.1",
+          "line": 490,
+          "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 168,
+          "line": 555,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "listAllTriggers_",
-          "line": 236,
+          "line": 623,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 255,
+          "line": 644,
           "description": "System utility: Remove all triggers",
           "isPublic": false,
           "isHelper": true
@@ -770,13 +826,23 @@
       ],
       "triggers": [],
       "dependencies": [
+        "masterOnEditHandler_",
+        "handleEditMove_",
+        "logTriggerError_",
+        "handleEditAwningRuby_",
+        "installMasterTrigger_",
+        "checkTriggerHealthMenu_",
+        "autoRepairTriggers_",
+        "installDailyTriggerRepair_",
+        "viewTriggerErrorLog_",
+        "clearTriggerErrorLog_",
         "goToRecoverCalculations_",
         "showQuickBooksSetup_",
         "listAllTriggers_",
         "removeAllTriggers_"
       ],
-      "lines": 266,
-      "size": 8751
+      "lines": 655,
+      "size": 21202
     },
     {
       "path": "Miles Log.gs",
@@ -1477,8 +1543,8 @@
       {
         "path": "Draft Creator.gs",
         "filename": "Draft Creator.gs",
-        "purpose": "Draft Creator.gs Version: 1/16 9am EST by Claude Sonnet 4.5 PURPOSE",
-        "version": "1/16 9am EST by Claude Sonnet 4.5",
+        "purpose": "Draft Creator.gs Version: 01/28-12:30AM EST by Claude Opus 4.5 PURPOSE",
+        "version": "01/28-12:30AM EST by Claude Opus 4.5",
         "functions": [
           {
             "name": "installTriggerDrafts_V2",
@@ -1552,175 +1618,175 @@
           },
           {
             "name": "v2_exportRecoverRangeAsHtml_",
-            "line": 1236,
-            "description": "HTML export of Re-cover range (FIXED VERSION) Uses proper A1 notation in the API call",
+            "line": 1263,
+            "description": "@param {Spreadsheet} ss - The spreadsheet object @param {string} rangeOverride - Optional range to export (e.g., \"A1:K14\" or \"M1:S30\") @returns {string|null} HTML table string or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_sheetsDataToHtml_",
-            "line": 1278,
+            "line": 1322,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildHtmlBody_",
-            "line": 1412,
+            "line": 1467,
             "description": "Email body builders ================ */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildPlainBody_",
-            "line": 1471,
+            "line": 1526,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_extractUrlFromCell_",
-            "line": 1483,
+            "line": 1538,
             "description": "Helpers ===================== */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_looksLikeUrl_",
-            "line": 1533,
+            "line": 1588,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeString_",
-            "line": 1534,
+            "line": 1589,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_htmlEscape_",
-            "line": 1535,
+            "line": 1590,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_colLetterToIndex_",
-            "line": 1537,
+            "line": 1592,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_getSpreadsheet_",
-            "line": 1543,
+            "line": 1598,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_writeB_",
-            "line": 1550,
+            "line": 1605,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_withRetry_",
-            "line": 1561,
+            "line": 1616,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_specificErrorMessage_",
-            "line": 1577,
+            "line": 1632,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_shortErr_",
-            "line": 1584,
+            "line": 1639,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_validateConfig_",
-            "line": 1586,
+            "line": 1641,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isValidEmail_",
-            "line": 1593,
+            "line": 1648,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_firstLinkInRichText_",
-            "line": 1595,
+            "line": 1650,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isGmailDraftUrl_",
-            "line": 1607,
+            "line": 1662,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_templateSafe_",
-            "line": 1611,
+            "line": 1666,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_timestamp_",
-            "line": 1623,
+            "line": 1678,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeLogErrorToSheet_",
-            "line": 1629,
+            "line": 1684,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateRouteMapUrl_",
-            "line": 1645,
+            "line": 1700,
             "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateSimpleMapUrl_",
-            "line": 1713,
+            "line": 1768,
             "description": "Fallback: Generate simple map URL with just markers (no route line)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testMapsApiConnection",
-            "line": 1727,
+            "line": 1782,
             "description": "Test function - run this to verify Maps API works",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "d_generateSatelliteMapUrl_",
-            "line": 1744,
+            "line": 1799,
             "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
             "isPublic": false,
             "isHelper": true
@@ -1810,8 +1876,8 @@
           "d_generateSimpleMapUrl_",
           "DRAFTS_V2"
         ],
-        "lines": 1766,
-        "size": 70871
+        "lines": 1821,
+        "size": 73475
       },
       {
         "path": "Stage Automation.gs",
@@ -2438,40 +2504,96 @@
       {
         "path": "Menus.gs",
         "filename": "Menus.gs",
-        "purpose": "Menus.gs Version: 01/20-12:05PM EST by Claude Opus 4.1 CHANGES:",
-        "version": "01/20-12:05PM EST by Claude Opus 4.1",
+        "purpose": "Menus.gs Version: 01/26-11:52AM EST by Claude Opus 4.1 CHANGES:",
+        "version": "01/26-11:52AM EST by Claude Opus 4.1",
         "functions": [
           {
+            "name": "masterOnEditHandler_",
+            "line": 23,
+            "description": "MASTER onEdit trigger handler This is the ONLY onEdit trigger that should be installed. It safely routes to all sub-handlers with error protection.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "logTriggerError_",
+            "line": 86,
+            "description": "Log trigger errors to a hidden sheet for diagnosis",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installMasterTrigger_",
+            "line": 126,
+            "description": "Install the MASTER onEdit trigger (replaces all individual triggers) This is the RECOMMENDED way to set up triggers",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "checkTriggerHealthMenu_",
+            "line": 167,
+            "description": "Check trigger health and report status",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "autoRepairTriggers_",
+            "line": 265,
+            "description": "Auto-repair triggers if master trigger is missing Can be run manually or scheduled",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installDailyTriggerRepair_",
+            "line": 285,
+            "description": "Install a daily trigger health check (runs at 5 AM)",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "viewTriggerErrorLog_",
+            "line": 310,
+            "description": "View the error log sheet",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "clearTriggerErrorLog_",
+            "line": 333,
+            "description": "Clear the error log",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "onOpen",
-            "line": 9,
-            "description": "CHANGES: - Added \"Go to Re-cover Calculations\" menu item under Setup (Drafts) - Added \"Copy Ruby Code (Selected Row)\" to Setup (Ruby) menu",
+            "line": 362,
+            "description": "============================================ MENU CREATION ============================================",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "goToRecoverCalculations_",
-            "line": 103,
-            "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets Version: 01/20-12:05PM EST by Claude Opus 4.1",
+            "line": 490,
+            "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 168,
+            "line": 555,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "listAllTriggers_",
-            "line": 236,
+            "line": 623,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 255,
+            "line": 644,
             "description": "System utility: Remove all triggers",
             "isPublic": false,
             "isHelper": true
@@ -2479,13 +2601,23 @@
         ],
         "triggers": [],
         "dependencies": [
+          "masterOnEditHandler_",
+          "handleEditMove_",
+          "logTriggerError_",
+          "handleEditAwningRuby_",
+          "installMasterTrigger_",
+          "checkTriggerHealthMenu_",
+          "autoRepairTriggers_",
+          "installDailyTriggerRepair_",
+          "viewTriggerErrorLog_",
+          "clearTriggerErrorLog_",
           "goToRecoverCalculations_",
           "showQuickBooksSetup_",
           "listAllTriggers_",
           "removeAllTriggers_"
         ],
-        "lines": 266,
-        "size": 8751
+        "lines": 655,
+        "size": 21202
       }
     ],
     "other": [
@@ -2581,28 +2713,28 @@
           },
           {
             "name": "checkTriggerHealth_",
-            "line": 749,
+            "line": 747,
             "description": "Check if all expected triggers are installed - runs daily Only sends email if something is WRONG",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerHealthCheck_",
-            "line": 793,
+            "line": 791,
             "description": "Install the daily health check trigger (runs at 7 AM)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeTriggerHealthCheck_",
-            "line": 818,
+            "line": 816,
             "description": "Remove the health check trigger",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testTriggerHealthCheck_",
-            "line": 835,
+            "line": 833,
             "description": "Test the health check (runs immediately, will email if triggers missing)",
             "isPublic": false,
             "isHelper": true
@@ -2622,8 +2754,8 @@
           "testTriggerHealthCheck_",
           "Defines: EMAIL_READER_CONFIG"
         ],
-        "lines": 842,
-        "size": 25607
+        "lines": 840,
+        "size": 25354
       },
       {
         "path": "Lead follow up.gs.gs",
