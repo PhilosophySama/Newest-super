@@ -988,7 +988,7 @@ function v2_createRoughQuote_(sh, row) {
     
     const htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">
 <p>Hello ${d_htmlEscape_(firstName)},</p>
-<p>For the ${d_htmlEscape_(dimensionText)}${d_htmlEscape_(fabricText)} awning ${d_htmlEscape_(jobType)}, it will be around <strong>${d_htmlEscape_(priceText)}</strong>. Sound good?</p>
+<p>For the ${d_htmlEscape_(dimensionText)}${d_htmlEscape_(fabricText)} awning ${d_htmlEscape_(jobType)}, it will be around <strong>${d_htmlEscape_(priceText)}</strong>. If this is within your budget I can provide you with a formal proposal.</p>
 <p style="white-space: pre-line;">${d_htmlEscape_(DRAFTS_V2.ROUGH_QUOTE_EMAIL.SIGNATURE)}</p>
 </div>`;
     
