@@ -1,20 +1,20 @@
 {
   "metadata": {
-    "lastUpdated": "2026-01-30T20:14:56.789Z",
+    "lastUpdated": "2026-02-13T18:46:12.848Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
     "totalTriggers": 20
   },
   "stats": {
-    "totalFiles": 10,
-    "totalFunctions": 157,
+    "totalFiles": 11,
+    "totalFunctions": 169,
     "totalTriggers": 20,
-    "totalLines": 7424,
+    "totalLines": 8460,
     "publicFunctions": 49,
-    "helperFunctions": 144,
-    "avgFunctionsPerFile": 16,
-    "avgLinesPerFile": 742
+    "helperFunctions": 156,
+    "avgFunctionsPerFile": 15,
+    "avgLinesPerFile": 769
   },
   "files": [
     {
@@ -364,112 +364,126 @@
       "functions": [
         {
           "name": "er_buildCSV_",
-          "line": 117,
+          "line": 135,
           "description": "Build a 29-column CSV string from extracted data Columns: A-AC (Date through Awning Type)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_diagnosticCheck",
-          "line": 151,
+          "line": 169,
           "description": "DIAGNOSTIC FUNCTION - Quick check, no popup",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_isRubyEmail_",
-          "line": 177,
+          "line": 195,
           "description": "Determine if email is from Ruby",
           "isPublic": false,
           "isHelper": true
         },
         {
+          "name": "er_processApprovedEmail_",
+          "line": 204,
+          "description": "Process Liz's reply to Proposal Review emails Detects approval language and updates customer stage Version: 02/06-05:30PM EST by Claude Opus 4.5",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "er_processQuoteSentEmail_",
+          "line": 360,
+          "description": "Process sent quote emails - updates customer stage to \"Quote sent\" Detects when you send customer quote emails Version: 02/06-06:50PM EST by Claude Opus 4.5",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "er_processEmail_",
-          "line": 186,
+          "line": 460,
           "description": "Process a single email - writes CSV to column A Stage Automation will split it across columns",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_extractWithPatterns_",
-          "line": 335,
+          "line": 609,
           "description": "Extract data using pattern matching",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_extractStructured_",
-          "line": 440,
+          "line": 714,
           "description": "Extract data using structured key:value parsing",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_log_",
-          "line": 514,
+          "line": 788,
           "description": "Logging function",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_installTrigger",
-          "line": 527,
+          "line": 801,
           "description": "Install trigger - runs every 15 minutes for BOTH Ruby and \"Add lead\"",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_removeTrigger",
-          "line": 545,
+          "line": 819,
           "description": "Remove trigger",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_processNewEmails",
-          "line": 558,
+          "line": 832,
           "description": "MAIN: Process ALL pending emails (Ruby + Add lead) - runs automatically",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_processAddLeadEmails",
-          "line": 631,
+          "line": 952,
           "description": "Process only \"Add lead\" emails manually",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_testProcessing",
-          "line": 673,
+          "line": 994,
           "description": "Test processing - no popup, just runs and shows toast",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "checkTriggerHealth_",
-          "line": 747,
+          "line": 1068,
           "description": "Check if all expected triggers are installed - runs daily Only sends email if something is WRONG",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerHealthCheck_",
-          "line": 791,
+          "line": 1112,
           "description": "Install the daily health check trigger (runs at 7 AM)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeTriggerHealthCheck_",
-          "line": 816,
+          "line": 1137,
           "description": "Remove the health check trigger",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testTriggerHealthCheck_",
-          "line": 833,
+          "line": 1154,
           "description": "Test the health check (runs immediately, will email if triggers missing)",
           "isPublic": false,
           "isHelper": true
@@ -480,6 +494,8 @@
         "er_buildCSV_",
         "er_log_",
         "er_isRubyEmail_",
+        "er_processApprovedEmail_",
+        "er_processQuoteSentEmail_",
         "er_processEmail_",
         "er_extractWithPatterns_",
         "er_extractStructured_",
@@ -489,8 +505,102 @@
         "testTriggerHealthCheck_",
         "Defines: EMAIL_READER_CONFIG"
       ],
-      "lines": 840,
-      "size": 25354
+      "lines": 1161,
+      "size": 34907
+    },
+    {
+      "path": "Formula restoration.gs.gs",
+      "filename": "Formula restoration.gs.gs",
+      "purpose": "FORMULA RESTORATION SYSTEM Version# 01/28-10:45AM by Claude Opus 4.5 PURPOSE:",
+      "version": "01/28-10:45AM by Claude Opus 4.5",
+      "functions": [
+        {
+          "name": "handleEditFormula_",
+          "line": 151,
+          "description": "Main edit handler - detects when protected formulas are changed Called automatically on every edit via installable trigger",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fr_restoreScheduled_",
+          "line": 224,
+          "description": "Scheduled restoration handler - runs after delay to restore formulas Called automatically by time-based trigger",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fr_restoreAllFormulasNow_",
+          "line": 312,
+          "description": "Immediately restore all protected formulas across all sheets Use this to quickly reset all formulas without waiting for the 5-minute delay",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fr_viewProtectedFormulas_",
+          "line": 394,
+          "description": "Display all protected formulas organized by sheet and category Useful for reviewing what formulas are being monitored",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fr_viewPendingRestorations_",
+          "line": 433,
+          "description": "Check status of any pending formula restorations Shows which formulas are scheduled to be restored and when",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fr_deleteRestoreTrigger_",
+          "line": 478,
+          "description": "Delete restoration trigger for specific cell (placeholder for future enhancement)",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fr_cleanupTriggers_",
+          "line": 487,
+          "description": "Clean up restoration triggers when no more pending restorations exist",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "fr_logOperation_",
+          "line": 514,
+          "description": "Logging helper - writes to console log with timestamp",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installTriggerFormula_",
+          "line": 535,
+          "description": "Install the formula protection edit trigger Call this from the menu after adding new formulas or on initial setup",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "uninstallTriggerFormula_",
+          "line": 578,
+          "description": "Remove the formula protection trigger Use this if you need to temporarily disable formula protection",
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "handleEditFormula_",
+        "fr_logOperation_",
+        "fr_deleteRestoreTrigger_",
+        "fr_restoreScheduled_",
+        "fr_cleanupTriggers_",
+        "fr_restoreAllFormulasNow_",
+        "fr_viewProtectedFormulas_",
+        "fr_viewPendingRestorations_",
+        "installTriggerFormula_",
+        "uninstallTriggerFormula_",
+        "Defines: FORMULA_CONFIG"
+      ],
+      "lines": 607,
+      "size": 21097
     },
     {
       "path": "Lead follow up.gs.gs",
@@ -633,56 +743,56 @@
         },
         {
           "name": "r_writeRubyToDrive_",
-          "line": 698,
+          "line": 707,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "r_getRubyExportFolder_",
-          "line": 716,
+          "line": 725,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerAwningRuby_",
-          "line": 731,
+          "line": 740,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleEditLeanToRuby_",
-          "line": 743,
+          "line": 752,
           "description": "Backward compatibility wrappers for old function names",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerLeanToRuby_",
-          "line": 747,
+          "line": 756,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "r_getRubyExactTemplate",
-          "line": 751,
+          "line": 760,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "copyRubyForSelectedRow_",
-          "line": 758,
+          "line": 767,
           "description": "Copy Ruby code for the selected row to clipboard via dialog Version# [12/29-10:45AM EST] by Claude Opus 4.1",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "copyCode",
-          "line": 885,
+          "line": 894,
           "description": null,
           "isPublic": true,
           "isHelper": false
@@ -702,8 +812,8 @@
         "installTriggerLeanToRuby_",
         "copyRubyForSelectedRow_"
       ],
-      "lines": 921,
-      "size": 30253
+      "lines": 930,
+      "size": 30583
     },
     {
       "path": "Macros.gs",
@@ -741,84 +851,84 @@
         },
         {
           "name": "logTriggerError_",
-          "line": 86,
+          "line": 95,
           "description": "Log trigger errors to a hidden sheet for diagnosis",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installMasterTrigger_",
-          "line": 126,
+          "line": 135,
           "description": "Install the MASTER onEdit trigger (replaces all individual triggers) This is the RECOMMENDED way to set up triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkTriggerHealthMenu_",
-          "line": 167,
+          "line": 176,
           "description": "Check trigger health and report status",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "autoRepairTriggers_",
-          "line": 265,
+          "line": 274,
           "description": "Auto-repair triggers if master trigger is missing Can be run manually or scheduled",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installDailyTriggerRepair_",
-          "line": 285,
+          "line": 294,
           "description": "Install a daily trigger health check (runs at 5 AM)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "viewTriggerErrorLog_",
-          "line": 310,
+          "line": 319,
           "description": "View the error log sheet",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "clearTriggerErrorLog_",
-          "line": 333,
+          "line": 342,
           "description": "Clear the error log",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "onOpen",
-          "line": 362,
+          "line": 371,
           "description": "============================================ MENU CREATION ============================================",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "goToRecoverCalculations_",
-          "line": 490,
+          "line": 509,
           "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 555,
+          "line": 574,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "listAllTriggers_",
-          "line": 623,
+          "line": 642,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 644,
+          "line": 663,
           "description": "System utility: Remove all triggers",
           "isPublic": false,
           "isHelper": true
@@ -830,6 +940,7 @@
         "handleEditMove_",
         "logTriggerError_",
         "handleEditAwningRuby_",
+        "handleEditFormula_",
         "installMasterTrigger_",
         "checkTriggerHealthMenu_",
         "autoRepairTriggers_",
@@ -841,8 +952,8 @@
         "listAllTriggers_",
         "removeAllTriggers_"
       ],
-      "lines": 655,
-      "size": 21202
+      "lines": 674,
+      "size": 22065
     },
     {
       "path": "Miles Log.gs",
@@ -1257,119 +1368,119 @@
         },
         {
           "name": "m_createPrintPacket_",
-          "line": 848,
-          "description": null,
+          "line": 851,
+          "description": "Create print packet from email attachments when \"Print Folder\" is selected Version: 02/02-12:15PM EST by Claude Opus 4.1",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createNextDayGinoEvent_",
-          "line": 1055,
+          "line": 1135,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testCalendarAccess_",
-          "line": 1134,
+          "line": 1214,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_stageMatches_",
-          "line": 1145,
+          "line": 1225,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_looksLikeUrl_",
-          "line": 1149,
+          "line": 1229,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_getUrlFromCell_",
-          "line": 1153,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "m_cleanAddressForGoogleEarth_",
-          "line": 1183,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "m_geocodeAddress_",
-          "line": 1200,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "m_extractCoordinates_",
-          "line": 1223,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "m_logOperation_",
           "line": 1233,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
+          "name": "m_cleanAddressForGoogleEarth_",
+          "line": 1263,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_geocodeAddress_",
+          "line": 1280,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_extractCoordinates_",
+          "line": 1303,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_logOperation_",
+          "line": 1313,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "testDriveAccess_",
-          "line": 1240,
+          "line": 1320,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "validateSheetStructure_",
-          "line": 1251,
+          "line": 1331,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerMove_",
-          "line": 1296,
+          "line": 1376,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersDaily_",
-          "line": 1311,
+          "line": 1391,
           "description": "Check empty folders daily at 7am (time-driven trigger)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersNow_",
-          "line": 1346,
+          "line": 1426,
           "description": "Check empty folders immediately (manual trigger from menu)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_checkEmptyFoldersInSheet_",
-          "line": 1375,
+          "line": 1455,
           "description": "Check all folders in a single sheet and highlight empty ones",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installDailyFolderCheckTrigger_",
-          "line": 1460,
+          "line": 1540,
           "description": "Install daily folder check trigger (7am)",
           "isPublic": false,
           "isHelper": true
@@ -1534,8 +1645,8 @@
         "MOVE_CONFIG",
         "Defines: MOVE_CONFIG"
       ],
-      "lines": 1484,
-      "size": 53966
+      "lines": 1564,
+      "size": 56842
     }
   ],
   "categories": {
@@ -1971,119 +2082,119 @@
           },
           {
             "name": "m_createPrintPacket_",
-            "line": 848,
-            "description": null,
+            "line": 851,
+            "description": "Create print packet from email attachments when \"Print Folder\" is selected Version: 02/02-12:15PM EST by Claude Opus 4.1",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createNextDayGinoEvent_",
-            "line": 1055,
+            "line": 1135,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testCalendarAccess_",
-            "line": 1134,
+            "line": 1214,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_stageMatches_",
-            "line": 1145,
+            "line": 1225,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_looksLikeUrl_",
-            "line": 1149,
+            "line": 1229,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_getUrlFromCell_",
-            "line": 1153,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "m_cleanAddressForGoogleEarth_",
-            "line": 1183,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "m_geocodeAddress_",
-            "line": 1200,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "m_extractCoordinates_",
-            "line": 1223,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "m_logOperation_",
             "line": 1233,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
+            "name": "m_cleanAddressForGoogleEarth_",
+            "line": 1263,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_geocodeAddress_",
+            "line": 1280,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_extractCoordinates_",
+            "line": 1303,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_logOperation_",
+            "line": 1313,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "testDriveAccess_",
-            "line": 1240,
+            "line": 1320,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "validateSheetStructure_",
-            "line": 1251,
+            "line": 1331,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerMove_",
-            "line": 1296,
+            "line": 1376,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersDaily_",
-            "line": 1311,
+            "line": 1391,
             "description": "Check empty folders daily at 7am (time-driven trigger)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersNow_",
-            "line": 1346,
+            "line": 1426,
             "description": "Check empty folders immediately (manual trigger from menu)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_checkEmptyFoldersInSheet_",
-            "line": 1375,
+            "line": 1455,
             "description": "Check all folders in a single sheet and highlight empty ones",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installDailyFolderCheckTrigger_",
-            "line": 1460,
+            "line": 1540,
             "description": "Install daily folder check trigger (7am)",
             "isPublic": false,
             "isHelper": true
@@ -2248,8 +2359,8 @@
           "MOVE_CONFIG",
           "Defines: MOVE_CONFIG"
         ],
-        "lines": 1484,
-        "size": 53966
+        "lines": 1564,
+        "size": 56842
       }
     ],
     "automation": [
@@ -2296,56 +2407,56 @@
           },
           {
             "name": "r_writeRubyToDrive_",
-            "line": 698,
+            "line": 707,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "r_getRubyExportFolder_",
-            "line": 716,
+            "line": 725,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerAwningRuby_",
-            "line": 731,
+            "line": 740,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleEditLeanToRuby_",
-            "line": 743,
+            "line": 752,
             "description": "Backward compatibility wrappers for old function names",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerLeanToRuby_",
-            "line": 747,
+            "line": 756,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "r_getRubyExactTemplate",
-            "line": 751,
+            "line": 760,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "copyRubyForSelectedRow_",
-            "line": 758,
+            "line": 767,
             "description": "Copy Ruby code for the selected row to clipboard via dialog Version# [12/29-10:45AM EST] by Claude Opus 4.1",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "copyCode",
-            "line": 885,
+            "line": 894,
             "description": null,
             "isPublic": true,
             "isHelper": false
@@ -2365,8 +2476,8 @@
           "installTriggerLeanToRuby_",
           "copyRubyForSelectedRow_"
         ],
-        "lines": 921,
-        "size": 30253
+        "lines": 930,
+        "size": 30583
       }
     ],
     "integration": [
@@ -2516,84 +2627,84 @@
           },
           {
             "name": "logTriggerError_",
-            "line": 86,
+            "line": 95,
             "description": "Log trigger errors to a hidden sheet for diagnosis",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installMasterTrigger_",
-            "line": 126,
+            "line": 135,
             "description": "Install the MASTER onEdit trigger (replaces all individual triggers) This is the RECOMMENDED way to set up triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkTriggerHealthMenu_",
-            "line": 167,
+            "line": 176,
             "description": "Check trigger health and report status",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "autoRepairTriggers_",
-            "line": 265,
+            "line": 274,
             "description": "Auto-repair triggers if master trigger is missing Can be run manually or scheduled",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installDailyTriggerRepair_",
-            "line": 285,
+            "line": 294,
             "description": "Install a daily trigger health check (runs at 5 AM)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "viewTriggerErrorLog_",
-            "line": 310,
+            "line": 319,
             "description": "View the error log sheet",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "clearTriggerErrorLog_",
-            "line": 333,
+            "line": 342,
             "description": "Clear the error log",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "onOpen",
-            "line": 362,
+            "line": 371,
             "description": "============================================ MENU CREATION ============================================",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "goToRecoverCalculations_",
-            "line": 490,
+            "line": 509,
             "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 555,
+            "line": 574,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "listAllTriggers_",
-            "line": 623,
+            "line": 642,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 644,
+            "line": 663,
             "description": "System utility: Remove all triggers",
             "isPublic": false,
             "isHelper": true
@@ -2605,6 +2716,7 @@
           "handleEditMove_",
           "logTriggerError_",
           "handleEditAwningRuby_",
+          "handleEditFormula_",
           "installMasterTrigger_",
           "checkTriggerHealthMenu_",
           "autoRepairTriggers_",
@@ -2616,8 +2728,8 @@
           "listAllTriggers_",
           "removeAllTriggers_"
         ],
-        "lines": 655,
-        "size": 21202
+        "lines": 674,
+        "size": 22065
       }
     ],
     "other": [
@@ -2629,112 +2741,126 @@
         "functions": [
           {
             "name": "er_buildCSV_",
-            "line": 117,
+            "line": 135,
             "description": "Build a 29-column CSV string from extracted data Columns: A-AC (Date through Awning Type)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_diagnosticCheck",
-            "line": 151,
+            "line": 169,
             "description": "DIAGNOSTIC FUNCTION - Quick check, no popup",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_isRubyEmail_",
-            "line": 177,
+            "line": 195,
             "description": "Determine if email is from Ruby",
             "isPublic": false,
             "isHelper": true
           },
           {
+            "name": "er_processApprovedEmail_",
+            "line": 204,
+            "description": "Process Liz's reply to Proposal Review emails Detects approval language and updates customer stage Version: 02/06-05:30PM EST by Claude Opus 4.5",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "er_processQuoteSentEmail_",
+            "line": 360,
+            "description": "Process sent quote emails - updates customer stage to \"Quote sent\" Detects when you send customer quote emails Version: 02/06-06:50PM EST by Claude Opus 4.5",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "er_processEmail_",
-            "line": 186,
+            "line": 460,
             "description": "Process a single email - writes CSV to column A Stage Automation will split it across columns",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_extractWithPatterns_",
-            "line": 335,
+            "line": 609,
             "description": "Extract data using pattern matching",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_extractStructured_",
-            "line": 440,
+            "line": 714,
             "description": "Extract data using structured key:value parsing",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_log_",
-            "line": 514,
+            "line": 788,
             "description": "Logging function",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_installTrigger",
-            "line": 527,
+            "line": 801,
             "description": "Install trigger - runs every 15 minutes for BOTH Ruby and \"Add lead\"",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_removeTrigger",
-            "line": 545,
+            "line": 819,
             "description": "Remove trigger",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_processNewEmails",
-            "line": 558,
+            "line": 832,
             "description": "MAIN: Process ALL pending emails (Ruby + Add lead) - runs automatically",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_processAddLeadEmails",
-            "line": 631,
+            "line": 952,
             "description": "Process only \"Add lead\" emails manually",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_testProcessing",
-            "line": 673,
+            "line": 994,
             "description": "Test processing - no popup, just runs and shows toast",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "checkTriggerHealth_",
-            "line": 747,
+            "line": 1068,
             "description": "Check if all expected triggers are installed - runs daily Only sends email if something is WRONG",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerHealthCheck_",
-            "line": 791,
+            "line": 1112,
             "description": "Install the daily health check trigger (runs at 7 AM)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeTriggerHealthCheck_",
-            "line": 816,
+            "line": 1137,
             "description": "Remove the health check trigger",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testTriggerHealthCheck_",
-            "line": 833,
+            "line": 1154,
             "description": "Test the health check (runs immediately, will email if triggers missing)",
             "isPublic": false,
             "isHelper": true
@@ -2745,6 +2871,8 @@
           "er_buildCSV_",
           "er_log_",
           "er_isRubyEmail_",
+          "er_processApprovedEmail_",
+          "er_processQuoteSentEmail_",
           "er_processEmail_",
           "er_extractWithPatterns_",
           "er_extractStructured_",
@@ -2754,8 +2882,102 @@
           "testTriggerHealthCheck_",
           "Defines: EMAIL_READER_CONFIG"
         ],
-        "lines": 840,
-        "size": 25354
+        "lines": 1161,
+        "size": 34907
+      },
+      {
+        "path": "Formula restoration.gs.gs",
+        "filename": "Formula restoration.gs.gs",
+        "purpose": "FORMULA RESTORATION SYSTEM Version# 01/28-10:45AM by Claude Opus 4.5 PURPOSE:",
+        "version": "01/28-10:45AM by Claude Opus 4.5",
+        "functions": [
+          {
+            "name": "handleEditFormula_",
+            "line": 151,
+            "description": "Main edit handler - detects when protected formulas are changed Called automatically on every edit via installable trigger",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fr_restoreScheduled_",
+            "line": 224,
+            "description": "Scheduled restoration handler - runs after delay to restore formulas Called automatically by time-based trigger",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fr_restoreAllFormulasNow_",
+            "line": 312,
+            "description": "Immediately restore all protected formulas across all sheets Use this to quickly reset all formulas without waiting for the 5-minute delay",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fr_viewProtectedFormulas_",
+            "line": 394,
+            "description": "Display all protected formulas organized by sheet and category Useful for reviewing what formulas are being monitored",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fr_viewPendingRestorations_",
+            "line": 433,
+            "description": "Check status of any pending formula restorations Shows which formulas are scheduled to be restored and when",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fr_deleteRestoreTrigger_",
+            "line": 478,
+            "description": "Delete restoration trigger for specific cell (placeholder for future enhancement)",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fr_cleanupTriggers_",
+            "line": 487,
+            "description": "Clean up restoration triggers when no more pending restorations exist",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "fr_logOperation_",
+            "line": 514,
+            "description": "Logging helper - writes to console log with timestamp",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installTriggerFormula_",
+            "line": 535,
+            "description": "Install the formula protection edit trigger Call this from the menu after adding new formulas or on initial setup",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "uninstallTriggerFormula_",
+            "line": 578,
+            "description": "Remove the formula protection trigger Use this if you need to temporarily disable formula protection",
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "handleEditFormula_",
+          "fr_logOperation_",
+          "fr_deleteRestoreTrigger_",
+          "fr_restoreScheduled_",
+          "fr_cleanupTriggers_",
+          "fr_restoreAllFormulasNow_",
+          "fr_viewProtectedFormulas_",
+          "fr_viewPendingRestorations_",
+          "installTriggerFormula_",
+          "uninstallTriggerFormula_",
+          "Defines: FORMULA_CONFIG"
+        ],
+        "lines": 607,
+        "size": 21097
       },
       {
         "path": "Lead follow up.gs.gs",
