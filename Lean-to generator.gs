@@ -443,7 +443,7 @@ model.commit_operation`;
  */
 function r_getAFrameRubyTemplate_() {
   return String.raw`# A-Frame Awning Generator
-# Ver: Claude Opus 4.1 - 01/13 - 11:45 PM EST
+# Ver: Claude Opus 4.1 - 02/04 - 12:45 PM EST - Material-based rafter spacing
 
 # === AWNING CONFIGURATION ===
 AWNING_TYPE          = "A-Frame"    # Label for awning type
@@ -469,9 +469,18 @@ peak_height      = PEAK_HEIGHT * 12
 front_bar_height = FRONT_BAR_HEIGHT * 12
 col_height       = COLUMN_HEIGHT * 12
 
-# Determine truss spacing
-num_trusses   = 4 + 1  # Number of trusses
-truss_spacing = length.to_f / 4
+# Determine rafter spacing (in inches) based on material
+spacing_ft = if AWNING_MATERIAL.downcase == "sunbrella"
+               3.5
+             else
+               5.0
+             end
+spacing_in = spacing_ft * 12
+
+# Compute number of spans/rafters (roundup of length/spacing)
+num_spans     = (length / spacing_in).ceil
+num_trusses   = num_spans + 1
+truss_spacing = length.to_f / num_spans
 
 # Create main group
 aframe_group = entities.add_group
@@ -513,7 +522,7 @@ end
 group_entities.add_line(peak_left, peak_right)
 
 # === FRONT BAR VERTICALS (LEFT SIDE) ===
-num_verticals = (4 * 2) + 1
+num_verticals = (num_spans * 2) + 1
 (0...num_verticals).each do |i|
   x_pos = [i * (truss_spacing / 2), length].min
   group_entities.add_line([x_pos, -projection, front_bar_height], [x_pos, -projection, 0])

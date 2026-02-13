@@ -844,7 +844,10 @@ function m_linkQuoteSentEmail_(sheet, row, displayName) {
   }
 }
 
-/*** FEATURE: Create print packet from email attachments when "Print Folder" is selected ***/
+/**
+ * Create print packet from email attachments when "Print Folder" is selected
+ * Version: 02/02-12:15PM EST by Claude Opus 4.1
+ */
 function m_createPrintPacket_(sheet, row) {
   const S = MOVE_CONFIG;
   
@@ -861,6 +864,7 @@ function m_createPrintPacket_(sheet, row) {
     const customerName = String(sheet.getRange(row, S.COLS.NAME).getValue() || '').trim();
     const displayName = String(sheet.getRange(row, S.COLS.DISPLAY).getDisplayValue() || '').trim();
     const jobType = String(sheet.getRange(row, S.COLS.JOB_TYPE).getValue() || '').trim();
+    const phone = String(sheet.getRange(row, S.COLS.PHONE).getValue() || '').trim();
     
     if (!displayName) {
       logCell.setValue('❌ Error: No display name (col F) found');
@@ -956,7 +960,7 @@ function m_createPrintPacket_(sheet, row) {
       return { message: 'Error: No Photos folder found' };
     }
     
-    logCell.setValue('📄 Creating Google Doc with images...');
+    logCell.setValue('📄 Creating Google Doc with cover page and images...');
     SpreadsheetApp.flush();
     
     // Create subfolder with date
@@ -970,43 +974,118 @@ function m_createPrintPacket_(sheet, row) {
       ? existingFolders.next() 
       : photosFolder.createFolder(subfolderName);
     
-    // Create Google Doc with images
+    // Create Google Doc with cover page and images
     const doc = DocumentApp.create(`Print Packet - ${displayName}`);
     const body = doc.getBody();
     
-    // Add title
-    body.appendParagraph(`Print Packet: ${displayName}`)
-      .setHeading(DocumentApp.ParagraphHeading.HEADING1)
-      .setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    // Set page margins (0.5 inch = 36 points)
+    body.setMarginTop(36);
+    body.setMarginBottom(36);
+    body.setMarginLeft(36);
+    body.setMarginRight(36);
     
-    body.appendParagraph(`Customer: ${customerName}`)
-      .setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    // ===== COVER PAGE =====
+    // Add some spacing at top
+    body.appendParagraph('').setSpacingAfter(100);
     
-    if (jobType) {
-      body.appendParagraph(`Job Type: ${jobType}`)
-        .setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    // Title
+    const titlePara = body.appendParagraph('PRINT PACKET');
+    titlePara.setHeading(DocumentApp.ParagraphHeading.HEADING1);
+    titlePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    titlePara.setSpacingAfter(40);
+    
+    // Display Name (large)
+    const displayPara = body.appendParagraph(displayName);
+    displayPara.setHeading(DocumentApp.ParagraphHeading.TITLE);
+    displayPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    displayPara.setSpacingAfter(30);
+    
+    // Horizontal line
+    body.appendHorizontalRule();
+    body.appendParagraph('').setSpacingAfter(20);
+    
+    // Customer Name
+    const nameLabel = body.appendParagraph('Customer:');
+    nameLabel.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    nameLabel.setBold(true);
+    nameLabel.setSpacingAfter(5);
+    
+    const namePara = body.appendParagraph(customerName);
+    namePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    namePara.setFontSize(18);
+    namePara.setSpacingAfter(25);
+    
+    // Phone Number
+    if (phone) {
+      const phoneLabel = body.appendParagraph('Phone:');
+      phoneLabel.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      phoneLabel.setBold(true);
+      phoneLabel.setSpacingAfter(5);
+      
+      const phonePara = body.appendParagraph(phone);
+      phonePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      phonePara.setFontSize(18);
+      phonePara.setSpacingAfter(25);
     }
     
-    body.appendParagraph(''); // Spacer
+    // Job Type (if available)
+    if (jobType) {
+      const jobLabel = body.appendParagraph('Job Type:');
+      jobLabel.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      jobLabel.setBold(true);
+      jobLabel.setSpacingAfter(5);
+      
+      const jobPara = body.appendParagraph(jobType);
+      jobPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      jobPara.setFontSize(14);
+      jobPara.setSpacingAfter(25);
+    }
     
-    // Add each image
+    // Bottom horizontal rule (no photo count)
+    body.appendParagraph('').setSpacingAfter(30);
+    body.appendHorizontalRule();
+    
+    // ===== IMAGE PAGES =====
+    // Page dimensions (Letter size: 8.5 x 11 inches = 612 x 792 points)
+    // With 0.5" margins on each side: 7.5 x 10 inches = 540 x 720 points usable
+    const maxWidth = 540;  // 7.5 inches in points
+    const maxHeight = 680; // Leave some room for page number, ~9.5 inches
+    
     for (let i = 0; i < imageAttachments.length; i++) {
       const attachment = imageAttachments[i];
+      
+      // Page break before each image
+      body.appendPageBreak();
+      
       try {
         const blob = attachment.copyBlob();
         const image = body.appendImage(blob);
         
-        // Scale image to fit page (6.5 inches wide for letter size with margins)
-        const maxWidth = 468; // 6.5 inches * 72 points per inch
-        if (image.getWidth() > maxWidth) {
-          const ratio = maxWidth / image.getWidth();
-          image.setWidth(maxWidth);
-          image.setHeight(image.getHeight() * ratio);
-        }
+        // Get original dimensions
+        const origWidth = image.getWidth();
+        const origHeight = image.getHeight();
         
-        body.appendParagraph(''); // Spacer between images
+        // Calculate scale to fit page while maintaining aspect ratio
+        const widthRatio = maxWidth / origWidth;
+        const heightRatio = maxHeight / origHeight;
+        const scale = Math.min(widthRatio, heightRatio);
+        
+        // Apply scaled dimensions
+        const newWidth = Math.floor(origWidth * scale);
+        const newHeight = Math.floor(origHeight * scale);
+        
+        image.setWidth(newWidth);
+        image.setHeight(newHeight);
+        
+        // Center the image paragraph
+        const imgParagraph = image.getParent().asParagraph();
+        imgParagraph.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+        
+        // (No caption below image)
+        
       } catch (imgErr) {
-        body.appendParagraph(`Error loading image ${i + 1}: ${attachment.getName()}`);
+        body.appendParagraph(`Error loading image ${i + 1}: ${attachment.getName()}`)
+          .setAlignment(DocumentApp.HorizontalAlignment.CENTER);
       }
     }
     
@@ -1020,18 +1099,19 @@ function m_createPrintPacket_(sheet, row) {
     // Create link in column B (OVERWRITES any existing content)
     const docUrl = doc.getUrl();
     const linkText = `📄 Print Packet (${imageAttachments.length} images)`;
-    const richText = SpreadsheetApp.newRichTextValue()
+    const richTextLink = SpreadsheetApp.newRichTextValue()
       .setText(linkText)
       .setLinkUrl(0, linkText.length, docUrl)
       .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
       .build();
     
-    logCell.setRichTextValue(richText); // This overwrites
+    logCell.setRichTextValue(richTextLink); // This overwrites
     
     if (S.ENABLE_LOGGING) {
       m_logOperation_('Print packet created', {
         customerName,
         displayName,
+        phone,
         imageCount: imageAttachments.length,
         subfolder: subfolderName,
         docUrl

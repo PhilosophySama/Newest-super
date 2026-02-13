@@ -43,6 +43,24 @@ const EMAIL_READER_CONFIG = {
         useAI: true,
         useFallback: true
       }
+    },
+    {
+      name: 'Liz Approval Replies',
+      query: 'from:Liz@WalkerAwning.com subject:"Proposal Review" -label:LeadProcessed',
+      enabled: true,
+      sourceType: 'lizapproval',
+      settings: {
+        stage: 'Email customer'
+      }
+    },
+    {
+      name: 'Quote Sent Detection',
+      query: 'from:me subject:"Your awning quote from Walker Awning" -label:LeadProcessed',
+      enabled: true,
+      sourceType: 'quotesent',
+      settings: {
+        stage: 'Quote sent'
+      }
     }
   ],
   
@@ -178,7 +196,263 @@ function er_isRubyEmail_(message) {
   const from = message.getFrom().toLowerCase();
   return from.includes('noreply@ruby.com');
 }
-
+/**
+ * Process Liz's reply to Proposal Review emails
+ * Detects approval language and updates customer stage
+ * Version: 02/06-05:30PM EST by Claude Opus 4.5
+ */
+function er_processApprovedEmail_(message, processedLabel) {
+  const C = EMAIL_READER_CONFIG;
+  
+  try {
+    const thread = message.getThread();
+    
+    // Check if already processed
+    const labels = thread.getLabels();
+    if (labels.some(l => l.getName() === C.PROCESSED_LABEL)) {
+      er_log_('Liz reply already processed - skipping', { messageId: message.getId() });
+      return false;
+    }
+    
+    // Get the LAST message in thread (Liz's reply)
+    const messages = thread.getMessages();
+    const lastMessage = messages[messages.length - 1];
+    
+    // Verify it's from Liz
+    const from = lastMessage.getFrom().toLowerCase();
+    if (!from.includes('liz@walkerawning.com')) {
+      er_log_('Last message not from Liz - skipping', { from });
+      return false;
+    }
+    
+    // Check if Liz's reply contains approval language
+    const replyBody = lastMessage.getPlainBody().toLowerCase();
+    const approvalPatterns = [
+      /\bok\b/i,
+      /\bapproved?\b/i,
+      /looks?\s+good/i,
+      /sounds?\s+good/i,
+      /perfect/i,
+      /great/i,
+      /\byes\b/i,
+      /go\s+ahead/i,
+      /send\s+it/i
+    ];
+    
+    const isApproval = approvalPatterns.some(pattern => pattern.test(replyBody));
+    
+    if (!isApproval) {
+      er_log_('Liz reply does not contain approval language', { 
+        messageId: message.getId(),
+        bodyPreview: replyBody.substring(0, 100)
+      });
+      // Still mark as processed so we don't check again
+      thread.addLabel(processedLabel);
+      return false;
+    }
+    
+    // Parse subject from FIRST message: "Proposal Review: [Display Name] - [Job Type]"
+    const firstMessage = messages[0];
+    const subject = firstMessage.getSubject();
+    
+    const match = subject.match(/Proposal Review:\s*(.+?)\s*-\s*(.+)/i);
+    
+    if (!match) {
+      er_log_('Subject does not match expected format', { 
+        subject,
+        messageId: message.getId() 
+      });
+      thread.addLabel(processedLabel);
+      return false;
+    }
+    
+    const displayName = match[1].trim();
+    const jobType = match[2].trim();
+    
+    er_log_('Liz approved proposal', { 
+      displayName, 
+      jobType, 
+      subject,
+      replyPreview: replyBody.substring(0, 50)
+    });
+    
+    // Find customer in Leads sheet
+    const ss = SpreadsheetApp.getActive();
+    const sheet = ss.getSheetByName(C.TARGET_SHEET);
+    
+    if (!sheet) {
+      throw new Error(`Sheet "${C.TARGET_SHEET}" not found`);
+    }
+    
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) {
+      er_log_('No data rows in Leads sheet', {});
+      thread.addLabel(processedLabel);
+      return false;
+    }
+    
+    // Get Display Name (F) and Job Type (R) columns
+    const displayNames = sheet.getRange(2, C.COLS.DISPLAY, lastRow - 1, 1).getValues();
+    const jobTypes = sheet.getRange(2, C.COLS.JOB_TYPE, lastRow - 1, 1).getValues();
+    
+    // Find matching row
+    let matchRow = -1;
+    for (let i = 0; i < displayNames.length; i++) {
+      const rowDisplay = String(displayNames[i][0]).trim();
+      const rowJobType = String(jobTypes[i][0]).trim();
+      
+      if (rowDisplay.toLowerCase() === displayName.toLowerCase() && 
+          rowJobType.toLowerCase() === jobType.toLowerCase()) {
+        matchRow = i + 2; // +2 because we started at row 2
+        break;
+      }
+    }
+    
+    if (matchRow === -1) {
+      er_log_('No matching customer found', { displayName, jobType });
+      thread.addLabel(processedLabel);
+      return false;
+    }
+    
+    // Update Stage column to "Email customer"
+    sheet.getRange(matchRow, C.COLS.STAGE).setValue('Email customer');
+    SpreadsheetApp.flush();
+    
+    er_log_('Updated customer stage to Email customer', { 
+      row: matchRow,
+      displayName,
+      jobType 
+    });
+    
+    // Add "Approved" label for tracking
+    let approvedLabel = GmailApp.getUserLabelByName('Approved');
+    if (!approvedLabel) {
+      approvedLabel = GmailApp.createLabel('Approved');
+    }
+    thread.addLabel(approvedLabel);
+    
+    // Add processed label
+    thread.addLabel(processedLabel);
+    
+    er_log_('Added Approved and LeadProcessed labels', { messageId: message.getId() });
+    
+    SpreadsheetApp.getActive().toast(
+      `✅ Liz approved: ${displayName}\n→ Email customer`,
+      'Proposal Approved',
+      5
+    );
+    
+    return true;
+    
+  } catch (err) {
+    er_log_('Liz approval processing error', { 
+      error: err.toString(),
+      stack: err.stack 
+    });
+    throw err;
+  }
+}
+/**
+ * Process sent quote emails - updates customer stage to "Quote sent"
+ * Detects when you send customer quote emails
+ * Version: 02/06-06:50PM EST by Claude Opus 4.5
+ */
+function er_processQuoteSentEmail_(message, processedLabel) {
+  const C = EMAIL_READER_CONFIG;
+  
+  try {
+    const thread = message.getThread();
+    
+    // Check if already processed
+    const labels = thread.getLabels();
+    if (labels.some(l => l.getName() === C.PROCESSED_LABEL)) {
+      er_log_('Quote sent email already processed - skipping', { messageId: message.getId() });
+      return false;
+    }
+    
+    const subject = message.getSubject();
+    
+    // Parse subject: "Your awning quote from Walker Awning - [Display Name]"
+    const match = subject.match(/Your awning quote from Walker Awning\s*-\s*(.+)/i);
+    
+    if (!match) {
+      er_log_('Quote sent email subject does not match expected format', { 
+        subject,
+        messageId: message.getId() 
+      });
+      thread.addLabel(processedLabel);
+      return false;
+    }
+    
+    const displayName = match[1].trim();
+    
+    er_log_('Processing quote sent email', { displayName, subject });
+    
+    // Find customer in Leads sheet
+    const ss = SpreadsheetApp.getActive();
+    const sheet = ss.getSheetByName(C.TARGET_SHEET);
+    
+    if (!sheet) {
+      throw new Error(`Sheet "${C.TARGET_SHEET}" not found`);
+    }
+    
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) {
+      er_log_('No data rows in Leads sheet', {});
+      thread.addLabel(processedLabel);
+      return false;
+    }
+    
+    // Get Display Name column (F = 6)
+    const displayNames = sheet.getRange(2, C.COLS.DISPLAY, lastRow - 1, 1).getValues();
+    
+    // Find matching row
+    let matchRow = -1;
+    for (let i = 0; i < displayNames.length; i++) {
+      const rowDisplay = String(displayNames[i][0]).trim();
+      
+      if (rowDisplay.toLowerCase() === displayName.toLowerCase()) {
+        matchRow = i + 2; // +2 because we started at row 2
+        break;
+      }
+    }
+    
+    if (matchRow === -1) {
+      er_log_('No matching customer found', { displayName });
+      thread.addLabel(processedLabel);
+      return false;
+    }
+    
+    // Update Stage column to "Quote sent"
+    sheet.getRange(matchRow, C.COLS.STAGE).setValue('Quote sent');
+    SpreadsheetApp.flush();
+    
+    er_log_('Updated customer stage to Quote sent', { 
+      row: matchRow,
+      displayName
+    });
+    
+    // Add processed label
+    thread.addLabel(processedLabel);
+    
+    er_log_('Added LeadProcessed label', { messageId: message.getId() });
+    
+    SpreadsheetApp.getActive().toast(
+      `✅ Quote sent: ${displayName}\n→ Quote sent`,
+      'Quote Tracked',
+      5
+    );
+    
+    return true;
+    
+  } catch (err) {
+    er_log_('Quote sent processing error', { 
+      error: err.toString(),
+      stack: err.stack 
+    });
+    throw err;
+  }
+}
 /**
  * Process a single email - writes CSV to column A
  * Stage Automation will split it across columns
@@ -529,11 +803,11 @@ function er_installTrigger() {
   
   ScriptApp.newTrigger('er_processNewEmails')
     .timeBased()
-    .everyMinutes(15)
+    .everyMinutes(1)  // Run every 1 minute for near-real-time
     .create();
   
   SpreadsheetApp.getActive().toast(
-    'Auto-check installed (every 15 min)\nRuby + Add lead emails',
+    'Auto-check installed (every 1 min)\nMon-Fri, 7:45 AM - 5:00 PM',
     '✅ Email Reader',
     5
   );
@@ -557,6 +831,31 @@ function er_removeTrigger() {
  */
 function er_processNewEmails() {
   const C = EMAIL_READER_CONFIG;
+  
+  // BUSINESS HOURS CHECK: Only run Mon-Fri, 7:45 AM - 5:00 PM EST
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const timeInMinutes = hour * 60 + minute;
+  
+  const startTime = 7 * 60 + 45;  // 7:45 AM = 465 minutes
+  const endTime = 17 * 60;         // 5:00 PM = 1020 minutes
+  
+  // Skip if weekend (Sunday=0, Saturday=6)
+  if (dayOfWeek === 0 || dayOfWeek === 6) {
+    er_log_('Skipped - Weekend', { day: dayOfWeek });
+    return 0;
+  }
+  
+  // Skip if outside business hours
+  if (timeInMinutes < startTime || timeInMinutes >= endTime) {
+    er_log_('Skipped - Outside business hours', { 
+      time: `${hour}:${minute}`,
+      dayOfWeek 
+    });
+    return 0;
+  }
   
   try {
     // Ensure labels exist
@@ -588,12 +887,34 @@ function er_processNewEmails() {
       for (const thread of threads) {
         const messages = thread.getMessages();
         for (const message of messages) {
+          let success = false;
+          
+          // Handle "Liz approval replies" differently
+          if (search.sourceType === 'lizapproval') {
+            success = er_processApprovedEmail_(message, processedLabel);
+            if (success) {
+              totalProcessed++;
+              addLeadProcessed++;
+            }
+            continue;
+          }
+          
+          // Handle "Quote sent" emails differently
+          if (search.sourceType === 'quotesent') {
+            success = er_processQuoteSentEmail_(message, processedLabel);
+            if (success) {
+              totalProcessed++;
+              addLeadProcessed++;
+            }
+            continue;
+          }
+          
           // For Ruby search, only process Ruby emails
           if (search.sourceType === 'ruby' && !message.getFrom().includes('noreply@ruby.com')) {
             continue;
           }
           
-          const success = er_processEmail_(message, search, processedLabel);
+          success = er_processEmail_(message, search, processedLabel);
           if (success) {
             totalProcessed++;
             if (search.sourceType === 'ruby') {

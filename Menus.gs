@@ -61,7 +61,16 @@ function masterOnEditHandler_(e) {
     handlerResults.push({ handler: 'Awning Ruby', status: 'ERROR', error: err.message });
     logTriggerError_('handleEditAwningRuby_', err, e);
   }
-  
+  // 5. Formula Protection (auto-restore protected formulas)
+  try {
+    if (typeof handleEditFormula_ === 'function') {
+      handleEditFormula_(e);
+      handlerResults.push({ handler: 'Formula Protection', status: 'OK' });
+    }
+  } catch (err) {
+    handlerResults.push({ handler: 'Formula Protection', status: 'ERROR', error: err.message });
+    logTriggerError_('handleEditFormula_', err, e);
+  }
   // 4. Follow-up Draft Creator (if still needed - may be redundant with V2)
   try {
     if (typeof handleEditDraft_FU === 'function') {
@@ -451,7 +460,17 @@ function onOpen() {
       .addItem('🛑 Remove Health Check', 'removeTriggerHealthCheck_')
       .addToUi();
 
-    // System utilities menu
+    // Formula Protection menu
+    ui.createMenu('🔢 Formulas')
+      .addItem('Install Formula Protection', 'installTriggerFormula_')
+      .addItem('Disable Formula Protection', 'uninstallTriggerFormula_')
+      .addSeparator()
+      .addItem('Restore All Formulas Now', 'fr_restoreAllFormulasNow_')
+      .addItem('View Protected Formulas', 'fr_viewProtectedFormulas_')
+      .addItem('View Pending Restorations', 'fr_viewPendingRestorations_')
+      .addToUi();
+
+// System utilities menu
     ui.createMenu('⚙️ System')
       .addItem('View All Triggers', 'listAllTriggers_')
       .addItem('Remove All Triggers', 'removeAllTriggers_')
