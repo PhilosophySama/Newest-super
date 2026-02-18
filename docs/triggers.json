@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-02-13T18:46:12.848Z",
+    "lastUpdated": "2026-02-18T14:05:42.272Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -10,11 +10,11 @@
     "totalFiles": 11,
     "totalFunctions": 169,
     "totalTriggers": 20,
-    "totalLines": 8460,
+    "totalLines": 8584,
     "publicFunctions": 49,
     "helperFunctions": 156,
     "avgFunctionsPerFile": 15,
-    "avgLinesPerFile": 769
+    "avgLinesPerFile": 780
   },
   "files": [
     {
@@ -116,154 +116,154 @@
         },
         {
           "name": "v2_buildPlainBody_",
-          "line": 1526,
+          "line": 1527,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_extractUrlFromCell_",
-          "line": 1538,
+          "line": 1539,
           "description": "Helpers ===================== */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_looksLikeUrl_",
-          "line": 1588,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_safeString_",
           "line": 1589,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "d_htmlEscape_",
+          "name": "d_safeString_",
           "line": 1590,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
+          "name": "d_htmlEscape_",
+          "line": 1591,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "d_colLetterToIndex_",
-          "line": 1592,
+          "line": 1593,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_getSpreadsheet_",
-          "line": 1598,
+          "line": 1599,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_writeB_",
-          "line": 1605,
+          "line": 1606,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_withRetry_",
-          "line": 1616,
+          "line": 1617,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_specificErrorMessage_",
-          "line": 1632,
+          "line": 1633,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_shortErr_",
-          "line": 1639,
+          "line": 1640,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_validateConfig_",
-          "line": 1641,
+          "line": 1642,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isValidEmail_",
-          "line": 1648,
+          "line": 1649,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_firstLinkInRichText_",
-          "line": 1650,
+          "line": 1651,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isGmailDraftUrl_",
-          "line": 1662,
+          "line": 1663,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_templateSafe_",
-          "line": 1666,
+          "line": 1667,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_timestamp_",
-          "line": 1678,
+          "line": 1679,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeLogErrorToSheet_",
-          "line": 1684,
+          "line": 1685,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateRouteMapUrl_",
-          "line": 1700,
+          "line": 1701,
           "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateSimpleMapUrl_",
-          "line": 1768,
+          "line": 1769,
           "description": "Fallback: Generate simple map URL with just markers (no route line)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testMapsApiConnection",
-          "line": 1782,
+          "line": 1783,
           "description": "Test function - run this to verify Maps API works",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "d_generateSatelliteMapUrl_",
-          "line": 1799,
+          "line": 1800,
           "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
           "isPublic": false,
           "isHelper": true
@@ -353,8 +353,8 @@
         "d_generateSimpleMapUrl_",
         "DRAFTS_V2"
       ],
-      "lines": 1821,
-      "size": 73535
+      "lines": 1822,
+      "size": 73549
     },
     {
       "path": "Email Reader.gs",
@@ -506,7 +506,7 @@
         "Defines: EMAIL_READER_CONFIG"
       ],
       "lines": 1161,
-      "size": 34907
+      "size": 34933
     },
     {
       "path": "Formula restoration.gs.gs",
@@ -1368,119 +1368,119 @@
         },
         {
           "name": "m_createPrintPacket_",
-          "line": 851,
-          "description": "Create print packet from email attachments when \"Print Folder\" is selected Version: 02/02-12:15PM EST by Claude Opus 4.1",
+          "line": 857,
+          "description": "2. Google Earth satellite image (full page) 3. Google Maps route image (full page) 4. Customer photos (one per page, deduplicated)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createNextDayGinoEvent_",
-          "line": 1135,
+          "line": 1258,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testCalendarAccess_",
-          "line": 1214,
+          "line": 1337,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_stageMatches_",
-          "line": 1225,
+          "line": 1348,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_looksLikeUrl_",
-          "line": 1229,
+          "line": 1352,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_getUrlFromCell_",
-          "line": 1233,
+          "line": 1356,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_cleanAddressForGoogleEarth_",
-          "line": 1263,
+          "line": 1386,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_geocodeAddress_",
-          "line": 1280,
+          "line": 1403,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_extractCoordinates_",
-          "line": 1303,
+          "line": 1426,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_logOperation_",
-          "line": 1313,
+          "line": 1436,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testDriveAccess_",
-          "line": 1320,
+          "line": 1443,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "validateSheetStructure_",
-          "line": 1331,
+          "line": 1454,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerMove_",
-          "line": 1376,
+          "line": 1499,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersDaily_",
-          "line": 1391,
+          "line": 1514,
           "description": "Check empty folders daily at 7am (time-driven trigger)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersNow_",
-          "line": 1426,
+          "line": 1549,
           "description": "Check empty folders immediately (manual trigger from menu)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_checkEmptyFoldersInSheet_",
-          "line": 1455,
+          "line": 1578,
           "description": "Check all folders in a single sheet and highlight empty ones",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installDailyFolderCheckTrigger_",
-          "line": 1540,
+          "line": 1663,
           "description": "Install daily folder check trigger (7am)",
           "isPublic": false,
           "isHelper": true
@@ -1645,8 +1645,8 @@
         "MOVE_CONFIG",
         "Defines: MOVE_CONFIG"
       ],
-      "lines": 1564,
-      "size": 56842
+      "lines": 1687,
+      "size": 62116
     }
   ],
   "categories": {
@@ -1750,154 +1750,154 @@
           },
           {
             "name": "v2_buildPlainBody_",
-            "line": 1526,
+            "line": 1527,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_extractUrlFromCell_",
-            "line": 1538,
+            "line": 1539,
             "description": "Helpers ===================== */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_looksLikeUrl_",
-            "line": 1588,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_safeString_",
             "line": 1589,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "d_htmlEscape_",
+            "name": "d_safeString_",
             "line": 1590,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
+            "name": "d_htmlEscape_",
+            "line": 1591,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "d_colLetterToIndex_",
-            "line": 1592,
+            "line": 1593,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_getSpreadsheet_",
-            "line": 1598,
+            "line": 1599,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_writeB_",
-            "line": 1605,
+            "line": 1606,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_withRetry_",
-            "line": 1616,
+            "line": 1617,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_specificErrorMessage_",
-            "line": 1632,
+            "line": 1633,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_shortErr_",
-            "line": 1639,
+            "line": 1640,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_validateConfig_",
-            "line": 1641,
+            "line": 1642,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isValidEmail_",
-            "line": 1648,
+            "line": 1649,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_firstLinkInRichText_",
-            "line": 1650,
+            "line": 1651,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isGmailDraftUrl_",
-            "line": 1662,
+            "line": 1663,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_templateSafe_",
-            "line": 1666,
+            "line": 1667,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_timestamp_",
-            "line": 1678,
+            "line": 1679,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeLogErrorToSheet_",
-            "line": 1684,
+            "line": 1685,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateRouteMapUrl_",
-            "line": 1700,
+            "line": 1701,
             "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateSimpleMapUrl_",
-            "line": 1768,
+            "line": 1769,
             "description": "Fallback: Generate simple map URL with just markers (no route line)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testMapsApiConnection",
-            "line": 1782,
+            "line": 1783,
             "description": "Test function - run this to verify Maps API works",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "d_generateSatelliteMapUrl_",
-            "line": 1799,
+            "line": 1800,
             "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
             "isPublic": false,
             "isHelper": true
@@ -1987,8 +1987,8 @@
           "d_generateSimpleMapUrl_",
           "DRAFTS_V2"
         ],
-        "lines": 1821,
-        "size": 73535
+        "lines": 1822,
+        "size": 73549
       },
       {
         "path": "Stage Automation.gs",
@@ -2082,119 +2082,119 @@
           },
           {
             "name": "m_createPrintPacket_",
-            "line": 851,
-            "description": "Create print packet from email attachments when \"Print Folder\" is selected Version: 02/02-12:15PM EST by Claude Opus 4.1",
+            "line": 857,
+            "description": "2. Google Earth satellite image (full page) 3. Google Maps route image (full page) 4. Customer photos (one per page, deduplicated)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createNextDayGinoEvent_",
-            "line": 1135,
+            "line": 1258,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testCalendarAccess_",
-            "line": 1214,
+            "line": 1337,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_stageMatches_",
-            "line": 1225,
+            "line": 1348,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_looksLikeUrl_",
-            "line": 1229,
+            "line": 1352,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_getUrlFromCell_",
-            "line": 1233,
+            "line": 1356,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_cleanAddressForGoogleEarth_",
-            "line": 1263,
+            "line": 1386,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_geocodeAddress_",
-            "line": 1280,
+            "line": 1403,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_extractCoordinates_",
-            "line": 1303,
+            "line": 1426,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_logOperation_",
-            "line": 1313,
+            "line": 1436,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testDriveAccess_",
-            "line": 1320,
+            "line": 1443,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "validateSheetStructure_",
-            "line": 1331,
+            "line": 1454,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerMove_",
-            "line": 1376,
+            "line": 1499,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersDaily_",
-            "line": 1391,
+            "line": 1514,
             "description": "Check empty folders daily at 7am (time-driven trigger)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersNow_",
-            "line": 1426,
+            "line": 1549,
             "description": "Check empty folders immediately (manual trigger from menu)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_checkEmptyFoldersInSheet_",
-            "line": 1455,
+            "line": 1578,
             "description": "Check all folders in a single sheet and highlight empty ones",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installDailyFolderCheckTrigger_",
-            "line": 1540,
+            "line": 1663,
             "description": "Install daily folder check trigger (7am)",
             "isPublic": false,
             "isHelper": true
@@ -2359,8 +2359,8 @@
           "MOVE_CONFIG",
           "Defines: MOVE_CONFIG"
         ],
-        "lines": 1564,
-        "size": 56842
+        "lines": 1687,
+        "size": 62116
       }
     ],
     "automation": [
@@ -2883,7 +2883,7 @@
           "Defines: EMAIL_READER_CONFIG"
         ],
         "lines": 1161,
-        "size": 34907
+        "size": 34933
       },
       {
         "path": "Formula restoration.gs.gs",
