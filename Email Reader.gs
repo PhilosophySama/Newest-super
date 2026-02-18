@@ -55,7 +55,7 @@ const EMAIL_READER_CONFIG = {
     },
     {
       name: 'Quote Sent Detection',
-      query: 'from:me subject:"Your awning quote from Walker Awning" -label:LeadProcessed',
+      query: 'from:me (in:sent OR in:scheduled) subject:"Your awning quote from Walker Awning" -label:LeadProcessed',
       enabled: true,
       sourceType: 'quotesent',
       settings: {

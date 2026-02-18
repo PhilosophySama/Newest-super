@@ -846,10 +846,18 @@ function m_linkQuoteSentEmail_(sheet, row, displayName) {
 
 /**
  * Create print packet from email attachments when "Print Folder" is selected
- * Version: 02/02-12:15PM EST by Claude Opus 4.1
+ * Version: 02/17-3:45PM EST by Claude Opus 4.1
+ * 
+ * Structure:
+ * 1. Cover page (Title, Display Name, Customer, Phone, Email, Address)
+ * 2. Google Earth satellite image (full page)
+ * 3. Google Maps route image (full page)
+ * 4. Customer photos (one per page, deduplicated)
  */
 function m_createPrintPacket_(sheet, row) {
   const S = MOVE_CONFIG;
+  const MAPS_API_KEY = 'AIzaSyDlilK6vuz8txGn0Cwsy2oNJy2aOlldNYg';
+  const SHOP_ADDRESS = 'Walker Awning, 5190 NW 10th Terrace, Fort Lauderdale, FL 33309';
   
   // ALWAYS clear column B first to ensure clean slate
   const logCell = sheet.getRange(row, 2); // Column B
@@ -858,13 +866,15 @@ function m_createPrintPacket_(sheet, row) {
   try {
     // Debug: Write initial message
     logCell.setValue('🔄 Creating print packet...');
-    SpreadsheetApp.flush(); // Force write
+    SpreadsheetApp.flush();
     
     // Get customer data
     const customerName = String(sheet.getRange(row, S.COLS.NAME).getValue() || '').trim();
     const displayName = String(sheet.getRange(row, S.COLS.DISPLAY).getDisplayValue() || '').trim();
     const jobType = String(sheet.getRange(row, S.COLS.JOB_TYPE).getValue() || '').trim();
     const phone = String(sheet.getRange(row, S.COLS.PHONE).getValue() || '').trim();
+    const email = String(sheet.getRange(row, S.COLS.EMAIL).getValue() || '').trim();
+    const address = String(sheet.getRange(row, S.COLS.ADDRESS).getDisplayValue() || '').trim();
     
     if (!displayName) {
       logCell.setValue('❌ Error: No display name (col F) found');
@@ -876,13 +886,12 @@ function m_createPrintPacket_(sheet, row) {
       return { message: 'Error: No customer name found' };
     }
     
-    // Search for email with just display name (no job type suffix for better match rate)
+    // Search for email with just display name
     const subject = `Proposal Review: ${displayName}`;
     
     logCell.setValue(`🔍 Searching for email: "${subject}"...`);
     SpreadsheetApp.flush();
     
-    // Search for the email
     const searchQuery = `subject:"${subject}"`;
     const threads = GmailApp.search(searchQuery, 0, 1);
     
@@ -891,7 +900,6 @@ function m_createPrintPacket_(sheet, row) {
       return { message: `No email found with subject: "${subject}"` };
     }
     
-    // Get attachments from the email
     const thread = threads[0];
     const messages = thread.getMessages();
     if (messages.length === 0) {
@@ -899,21 +907,26 @@ function m_createPrintPacket_(sheet, row) {
       return { message: 'Email thread found but no messages' };
     }
     
-    logCell.setValue('📎 Extracting image attachments...');
+    logCell.setValue('📎 Extracting image attachments (latest email only)...');
     SpreadsheetApp.flush();
     
-    // Get all image attachments from all messages in the thread
-    let imageAttachments = [];
-    for (const message of messages) {
-      const attachments = message.getAttachments();
-      for (const attachment of attachments) {
-        const contentType = attachment.getContentType();
-        // Only include image attachments
-        if (contentType && contentType.startsWith('image/')) {
-          imageAttachments.push(attachment);
+    // Get images from LATEST email only (to avoid duplicates)
+    const latestMessage = messages[messages.length - 1];
+    const attachments = latestMessage.getAttachments();
+    
+    // Deduplicate by filename AND size
+    const seenImages = new Map(); // key: "filename|size" -> attachment
+    for (const attachment of attachments) {
+      const contentType = attachment.getContentType();
+      if (contentType && contentType.startsWith('image/')) {
+        const key = `${attachment.getName()}|${attachment.getSize()}`;
+        if (!seenImages.has(key)) {
+          seenImages.set(key, attachment);
         }
       }
     }
+    
+    const imageAttachments = Array.from(seenImages.values());
     
     if (imageAttachments.length === 0) {
       logCell.setValue('❌ No image attachments found in email');
@@ -928,7 +941,6 @@ function m_createPrintPacket_(sheet, row) {
     let photosFolder = null;
     
     try {
-      // Try to extract folder ID from rich text link
       const richText = photosCell.getRichTextValue();
       if (richText) {
         const folderUrl = richText.getLinkUrl();
@@ -940,7 +952,6 @@ function m_createPrintPacket_(sheet, row) {
         }
       }
       
-      // Fallback: try to get from formula
       if (!photosFolder) {
         const formula = photosCell.getFormula();
         if (formula) {
@@ -960,7 +971,7 @@ function m_createPrintPacket_(sheet, row) {
       return { message: 'Error: No Photos folder found' };
     }
     
-    logCell.setValue('📄 Creating Google Doc with cover page and images...');
+    logCell.setValue('📄 Creating Google Doc with cover page, maps, and images...');
     SpreadsheetApp.flush();
     
     // Create subfolder with date
@@ -968,13 +979,12 @@ function m_createPrintPacket_(sheet, row) {
     const monthYear = Utilities.formatDate(now, Session.getScriptTimeZone(), 'MM/yy');
     const subfolderName = `Customer Folder - ${customerName} - ${monthYear}`;
     
-    // Check if subfolder already exists
     const existingFolders = photosFolder.getFoldersByName(subfolderName);
     const subfolder = existingFolders.hasNext() 
       ? existingFolders.next() 
       : photosFolder.createFolder(subfolderName);
     
-    // Create Google Doc with cover page and images
+    // Create Google Doc
     const doc = DocumentApp.create(`Print Packet - ${displayName}`);
     const body = doc.getBody();
     
@@ -984,23 +994,23 @@ function m_createPrintPacket_(sheet, row) {
     body.setMarginLeft(36);
     body.setMarginRight(36);
     
-    // ===== COVER PAGE =====
-    // Add some spacing at top
-    body.appendParagraph('').setSpacingAfter(100);
+    // Page dimensions
+    const maxWidth = 540;  // 7.5 inches in points
+    const maxHeight = 680; // ~9.5 inches
     
-    // Title
+    // ===== COVER PAGE =====
+    body.appendParagraph('').setSpacingAfter(80);
+    
     const titlePara = body.appendParagraph('PRINT PACKET');
     titlePara.setHeading(DocumentApp.ParagraphHeading.HEADING1);
     titlePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     titlePara.setSpacingAfter(40);
     
-    // Display Name (large)
     const displayPara = body.appendParagraph(displayName);
     displayPara.setHeading(DocumentApp.ParagraphHeading.TITLE);
     displayPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     displayPara.setSpacingAfter(30);
     
-    // Horizontal line
     body.appendHorizontalRule();
     body.appendParagraph('').setSpacingAfter(20);
     
@@ -1013,9 +1023,9 @@ function m_createPrintPacket_(sheet, row) {
     const namePara = body.appendParagraph(customerName);
     namePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     namePara.setFontSize(18);
-    namePara.setSpacingAfter(25);
+    namePara.setSpacingAfter(20);
     
-    // Phone Number
+    // Phone
     if (phone) {
       const phoneLabel = body.appendParagraph('Phone:');
       phoneLabel.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
@@ -1025,10 +1035,36 @@ function m_createPrintPacket_(sheet, row) {
       const phonePara = body.appendParagraph(phone);
       phonePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
       phonePara.setFontSize(18);
-      phonePara.setSpacingAfter(25);
+      phonePara.setSpacingAfter(20);
     }
     
-    // Job Type (if available)
+    // Email
+    if (email) {
+      const emailLabel = body.appendParagraph('Email:');
+      emailLabel.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      emailLabel.setBold(true);
+      emailLabel.setSpacingAfter(5);
+      
+      const emailPara = body.appendParagraph(email);
+      emailPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      emailPara.setFontSize(14);
+      emailPara.setSpacingAfter(20);
+    }
+    
+    // Address
+    if (address) {
+      const addrLabel = body.appendParagraph('Address:');
+      addrLabel.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      addrLabel.setBold(true);
+      addrLabel.setSpacingAfter(5);
+      
+      const addrPara = body.appendParagraph(address);
+      addrPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      addrPara.setFontSize(14);
+      addrPara.setSpacingAfter(20);
+    }
+    
+    // Job Type
     if (jobType) {
       const jobLabel = body.appendParagraph('Job Type:');
       jobLabel.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
@@ -1038,50 +1074,135 @@ function m_createPrintPacket_(sheet, row) {
       const jobPara = body.appendParagraph(jobType);
       jobPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
       jobPara.setFontSize(14);
-      jobPara.setSpacingAfter(25);
+      jobPara.setSpacingAfter(20);
     }
     
-    // Bottom horizontal rule (no photo count)
     body.appendParagraph('').setSpacingAfter(30);
     body.appendHorizontalRule();
     
-    // ===== IMAGE PAGES =====
-    // Page dimensions (Letter size: 8.5 x 11 inches = 612 x 792 points)
-    // With 0.5" margins on each side: 7.5 x 10 inches = 540 x 720 points usable
-    const maxWidth = 540;  // 7.5 inches in points
-    const maxHeight = 680; // Leave some room for page number, ~9.5 inches
+    // ===== GOOGLE EARTH PAGE (Satellite) =====
+    if (address) {
+      logCell.setValue('🛰️ Generating satellite image...');
+      SpreadsheetApp.flush();
+      
+      body.appendPageBreak();
+      
+      try {
+        // Geocode address for satellite image
+        const coords = m_geocodeAddress_(address);
+        
+        if (coords) {
+          const satelliteUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${coords.lat},${coords.lng}&zoom=19&size=640x640&maptype=satellite&key=${MAPS_API_KEY}`;
+          
+          const satResponse = UrlFetchApp.fetch(satelliteUrl);
+          const satBlob = satResponse.getBlob();
+          const satImage = body.appendImage(satBlob);
+          
+          // Scale to fit page
+          const origWidth = satImage.getWidth();
+          const origHeight = satImage.getHeight();
+          const scale = Math.min(maxWidth / origWidth, maxHeight / origHeight);
+          satImage.setWidth(Math.floor(origWidth * scale));
+          satImage.setHeight(Math.floor(origHeight * scale));
+          
+          const satParagraph = satImage.getParent().asParagraph();
+          satParagraph.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+        } else {
+          body.appendParagraph('Could not generate satellite image - address not found')
+            .setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+        }
+      } catch (satErr) {
+        body.appendParagraph('Error generating satellite image: ' + satErr.message)
+          .setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+        if (S.ENABLE_LOGGING) {
+          m_logOperation_('Satellite image error', { error: satErr.message });
+        }
+      }
+    }
+    
+    // ===== GOOGLE MAPS PAGE (Route) =====
+    if (address) {
+      logCell.setValue('🗺️ Generating route map...');
+      SpreadsheetApp.flush();
+      
+      body.appendPageBreak();
+      
+      try {
+        const routeUrl = `https://maps.googleapis.com/maps/api/staticmap?size=640x640&maptype=roadmap&markers=color:green|label:A|${encodeURIComponent(SHOP_ADDRESS)}&markers=color:red|label:B|${encodeURIComponent(address)}&path=color:0x0000ff|weight:5|enc:&key=${MAPS_API_KEY}`;
+        
+        // Get directions to draw the route
+        const directions = Maps.newDirectionFinder()
+          .setOrigin(SHOP_ADDRESS)
+          .setDestination(address)
+          .setMode(Maps.DirectionFinder.Mode.DRIVING)
+          .getDirections();
+        
+        let routeMapUrl = routeUrl;
+        if (directions.routes && directions.routes.length > 0) {
+          const polyline = directions.routes[0].overview_polyline.points;
+          routeMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=640x640&maptype=roadmap&markers=color:green|label:A|${encodeURIComponent(SHOP_ADDRESS)}&markers=color:red|label:B|${encodeURIComponent(address)}&path=color:0x4285F4|weight:5|enc:${polyline}&key=${MAPS_API_KEY}`;
+        }
+        
+        const routeResponse = UrlFetchApp.fetch(routeMapUrl);
+        const routeBlob = routeResponse.getBlob();
+        const routeImage = body.appendImage(routeBlob);
+        
+        // Scale to fit page
+        const origWidth = routeImage.getWidth();
+        const origHeight = routeImage.getHeight();
+        const scale = Math.min(maxWidth / origWidth, maxHeight / origHeight);
+        routeImage.setWidth(Math.floor(origWidth * scale));
+        routeImage.setHeight(Math.floor(origHeight * scale));
+        
+        const routeParagraph = routeImage.getParent().asParagraph();
+        routeParagraph.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+        
+        // Add distance/duration info below map
+        if (directions.routes && directions.routes.length > 0) {
+          const leg = directions.routes[0].legs[0];
+          if (leg) {
+            const distanceText = `${leg.distance.text}  |  ${leg.duration.text}`;
+            const distPara = body.appendParagraph(distanceText);
+            distPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+            distPara.setFontSize(14);
+            distPara.setBold(true);
+            distPara.setSpacingBefore(15);
+          }
+        }
+        
+      } catch (routeErr) {
+        body.appendParagraph('Error generating route map: ' + routeErr.message)
+          .setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+        if (S.ENABLE_LOGGING) {
+          m_logOperation_('Route map error', { error: routeErr.message });
+        }
+      }
+    }
+    
+    // ===== PHOTO PAGES =====
+    logCell.setValue(`📸 Adding ${imageAttachments.length} photos...`);
+    SpreadsheetApp.flush();
     
     for (let i = 0; i < imageAttachments.length; i++) {
       const attachment = imageAttachments[i];
       
-      // Page break before each image
       body.appendPageBreak();
       
       try {
         const blob = attachment.copyBlob();
         const image = body.appendImage(blob);
         
-        // Get original dimensions
         const origWidth = image.getWidth();
         const origHeight = image.getHeight();
-        
-        // Calculate scale to fit page while maintaining aspect ratio
         const widthRatio = maxWidth / origWidth;
         const heightRatio = maxHeight / origHeight;
         const scale = Math.min(widthRatio, heightRatio);
         
-        // Apply scaled dimensions
-        const newWidth = Math.floor(origWidth * scale);
-        const newHeight = Math.floor(origHeight * scale);
+        image.setWidth(Math.floor(origWidth * scale));
+        image.setHeight(Math.floor(origHeight * scale));
         
-        image.setWidth(newWidth);
-        image.setHeight(newHeight);
-        
-        // Center the image paragraph
         const imgParagraph = image.getParent().asParagraph();
         imgParagraph.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-        
-        // (No caption below image)
         
       } catch (imgErr) {
         body.appendParagraph(`Error loading image ${i + 1}: ${attachment.getName()}`)
@@ -1096,29 +1217,31 @@ function m_createPrintPacket_(sheet, row) {
     subfolder.addFile(docFile);
     DriveApp.getRootFolder().removeFile(docFile);
     
-    // Create link in column B (OVERWRITES any existing content)
+    // Create link in column B
     const docUrl = doc.getUrl();
-    const linkText = `📄 Print Packet (${imageAttachments.length} images)`;
+    const linkText = `📄 Print Packet (${imageAttachments.length} photos)`;
     const richTextLink = SpreadsheetApp.newRichTextValue()
       .setText(linkText)
       .setLinkUrl(0, linkText.length, docUrl)
       .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
       .build();
     
-    logCell.setRichTextValue(richTextLink); // This overwrites
+    logCell.setRichTextValue(richTextLink);
     
     if (S.ENABLE_LOGGING) {
       m_logOperation_('Print packet created', {
         customerName,
         displayName,
         phone,
+        email,
+        address,
         imageCount: imageAttachments.length,
         subfolder: subfolderName,
         docUrl
       });
     }
     
-    return { message: `✅ Print packet created with ${imageAttachments.length} images. Click link in column B.` };
+    return { message: `✅ Print packet created with ${imageAttachments.length} photos. Click link in column B.` };
     
   } catch (err) {
     logCell.setValue('❌ Error: ' + (err.message || err.toString()));

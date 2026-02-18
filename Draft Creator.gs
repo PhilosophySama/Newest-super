@@ -1512,12 +1512,13 @@ function v2_buildHtmlBody_(data) {
     // Map image - clickable
     html += '<a href="' + esc(mapsDirectionsUrl) + '" target="_blank">';
     html += '<img src="' + esc(data.routeMapData.mapUrl) + '" alt="Route Map" style="max-width:100%; border:1px solid #ccc; border-radius:8px;">';
-    html += '</a><br><br>';
+    html += '</a><br>';
   }
 
   html += data.qbUrl
     ? '<a href="' + esc(data.qbUrl) + '" target="_blank" style="font-size:24pt;">' + esc(L.QUICKBOOKS) + '</a>'
     : '<span style="font-size:24pt;">' + esc(L.QUICKBOOKS) + ' (No URL)</span>';
+  html += '<br>';
 
   html += '</div>';
   return html;
