@@ -226,7 +226,7 @@ function checkTriggerHealthMenu_() {
   }
   
   // Check for expected time-based triggers
-  const expectedTimeBased = ['er_processNewEmails', 'runMileageSync_', 'checkEmptyFoldersDaily_'];
+  const expectedTimeBased = ['er_processNewEmails', 'runMileageSync_', 'checkEmptyFoldersDaily_', 'emailWeeklySchedulePDF_'];
   const missingTimeBased = expectedTimeBased.filter(
     expected => !timeBasedTriggers.some(t => t.handler === expected)
   );
@@ -476,6 +476,12 @@ function onOpen() {
       .addItem('Remove All Triggers', 'removeAllTriggers_')
       .addToUi();
 
+    // Weekly Schedule PDF menu
+    ui.createMenu('📅 Schedule')
+      .addItem('Email Weekly Schedule PDF Now', 'emailWeeklySchedulePDF_')
+      .addItem('Install Monday Auto-Email Trigger', 'installWeeklyScheduleTrigger_')
+      .addToUi();
+
     console.log('Menus created successfully');
     
     // Auto-check trigger health on open (silent)
@@ -671,4 +677,64 @@ function removeAllTriggers_() {
     triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
     ui.alert('Success', `Removed ${triggers.length} triggers.\n\nRemember to reinstall triggers when ready:\n🔧 Triggers → Install Master Trigger`, ui.ButtonSet.OK);
   }
+}
+// ─── Weekly Schedule PDF Emailer ────────────────────────────────────────────
+// version1 [03/09-4:10PM] by Claude Sonnet 4.6
+
+function emailWeeklySchedulePDF_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Employee Weekly Schedule');
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert('Sheet "Employee Weekly Schedule" not found.');
+    return;
+  }
+
+  var ssId    = ss.getId();
+  var sheetId = sheet.getSheetId();
+  var url     = 'https://docs.google.com/spreadsheets/d/' + ssId +
+                '/export?format=pdf' +
+                '&gid=' + sheetId +
+                '&portrait=true' +
+                '&fitw=true' +
+                '&gridlines=false' +
+                '&printtitle=false' +
+                '&sheetnames=false' +
+                '&pagenum=UNDEFINED' +
+                '&fzr=false';
+
+  var token    = ScriptApp.getOAuthToken();
+  var response = UrlFetchApp.fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+  var dateStr  = Utilities.formatDate(new Date(), 'America/New_York', 'MMMM d, yyyy');
+  var pdfBlob  = response.getBlob().setName(
+    'Employee_Weekly_Schedule_' + 
+    Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd') + '.pdf'
+  );
+
+  GmailApp.sendEmail(
+    'Gino@WalkerAwning.com',
+    'Employee Weekly Schedule — ' + dateStr,
+    'Hi Gino,\n\nAttached is the Employee Weekly Schedule for the week of ' + dateStr + '.\n\nWalker Awning Automation',
+    { attachments: [pdfBlob] }
+  );
+
+  SpreadsheetApp.getActiveSpreadsheet().toast('✅ Schedule PDF emailed to Gino@WalkerAwning.com', 'Email Sent', 5);
+  Logger.log('Weekly schedule PDF emailed successfully.');
+}
+
+function installWeeklyScheduleTrigger_() {
+  ScriptApp.getProjectTriggers().forEach(function(t) {
+    if (t.getHandlerFunction() === 'emailWeeklySchedulePDF_') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+
+  ScriptApp.newTrigger('emailWeeklySchedulePDF_')
+    .timeBased()
+    .onWeekDay(ScriptApp.WeekDay.MONDAY)
+    .atHour(8)
+    .nearMinute(0)
+    .inTimezone('America/New_York')
+    .create();
+
+  SpreadsheetApp.getUi().alert('✅ Monday 8:00 AM trigger installed.\nYou will receive the PDF automatically every Monday.');
 }

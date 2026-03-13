@@ -46,7 +46,7 @@ const EMAIL_READER_CONFIG = {
     },
     {
       name: 'Liz Approval Replies',
-      query: 'from:Liz@WalkerAwning.com subject:"Proposal Review" -label:LeadProcessed',
+      query: 'from:Liz@WalkerAwning.com subject:"Proposal Review" -label:Approved',
       enabled: true,
       sourceType: 'lizapproval',
       settings: {
@@ -55,7 +55,7 @@ const EMAIL_READER_CONFIG = {
     },
     {
       name: 'Quote Sent Detection',
-      query: 'from:me (in:sent OR in:scheduled) subject:"Your awning quote from Walker Awning" -label:LeadProcessed',
+      query: 'from:me (in:sent OR in:scheduled) subject:"Your awning quote from Walker Awning" -label:QuoteSent',
       enabled: true,
       sourceType: 'quotesent',
       settings: {
@@ -324,17 +324,14 @@ function er_processApprovedEmail_(message, processedLabel) {
       jobType 
     });
     
-    // Add "Approved" label for tracking
+    // Add "Approved" label for tracking (but NOT LeadProcessed)
     let approvedLabel = GmailApp.getUserLabelByName('Approved');
     if (!approvedLabel) {
       approvedLabel = GmailApp.createLabel('Approved');
     }
     thread.addLabel(approvedLabel);
     
-    // Add processed label
-    thread.addLabel(processedLabel);
-    
-    er_log_('Added Approved and LeadProcessed labels', { messageId: message.getId() });
+    er_log_('Added Approved label', { messageId: message.getId() });
     
     SpreadsheetApp.getActive().toast(
       `✅ Liz approved: ${displayName}\n→ Email customer`,
@@ -432,10 +429,14 @@ function er_processQuoteSentEmail_(message, processedLabel) {
       displayName
     });
     
-    // Add processed label
-    thread.addLabel(processedLabel);
+    // Add QuoteSent label to prevent reprocessing
+    let quoteSentLabel = GmailApp.getUserLabelByName('QuoteSent');
+    if (!quoteSentLabel) {
+      quoteSentLabel = GmailApp.createLabel('QuoteSent');
+    }
+    thread.addLabel(quoteSentLabel);
     
-    er_log_('Added LeadProcessed label', { messageId: message.getId() });
+    er_log_('Added QuoteSent label', { messageId: message.getId() });
     
     SpreadsheetApp.getActive().toast(
       `✅ Quote sent: ${displayName}\n→ Quote sent`,

@@ -856,7 +856,7 @@ function m_linkQuoteSentEmail_(sheet, row, displayName) {
  */
 function m_createPrintPacket_(sheet, row) {
   const S = MOVE_CONFIG;
-  const MAPS_API_KEY = 'AIzaSyDlilK6vuz8txGn0Cwsy2oNJy2aOlldNYg';
+  const MAPS_API_KEY = PropertiesService.getScriptProperties().getProperty('MAPS_API_KEY');
   const SHOP_ADDRESS = 'Walker Awning, 5190 NW 10th Terrace, Fort Lauderdale, FL 33309';
   
   // ALWAYS clear column B first to ensure clean slate

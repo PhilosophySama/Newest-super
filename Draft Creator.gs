@@ -38,6 +38,7 @@ const DRAFTS_V2 = {
   ROUGH_QUOTE_STAGE: 'Rough quote',    // Rough quote trigger
   CUSTOMER_INFO_STAGE: 'Customer Info', // Info request trigger
   COI_STAGE: 'COI Req',                // COI request trigger
+  FOLLOWUP_STAGE: 'F/U',               // Follow-up reply trigger
 
   COLS: {
     LOG_B: 'B',
@@ -272,6 +273,13 @@ function handleEditDraft_V2(e) {
       return;
     }
     
+    // Handle "F/U" stage - create follow-up reply draft
+    if (newValLower === String(DRAFTS_V2.FOLLOWUP_STAGE).toLowerCase()) {
+      const result = v2_createFollowUpDraft_(sh, row);
+      SpreadsheetApp.getActive().toast(result.toast, 'Follow-Up Draft', 5);
+      return;
+    }
+
     // Handle "qDraft" stage - create main draft
     if (newValLower === String(DRAFTS_V2.TARGET_STAGE).toLowerCase()) {
       const result = v2_createDraftForRow_(sh, row, DRAFTS_V2.EMAIL.SKIP_IF_DRAFT_EXISTS);
@@ -923,6 +931,107 @@ Gino Carneiro</p>
 }
 
 /**
+ * Create follow-up draft when "F/U" is selected.
+ * Finds original sent quote email, copies its body, and creates a new draft
+ * with a follow-up message prepended and the original quoted below.
+ * Version: 03/03-12:30PM EST by Claude Sonnet 4.6
+ */
+function v2_createFollowUpDraft_(sh, row) {
+  try {
+    const lastCol = sh.getLastColumn();
+    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
+    const idx = (L) => d_colLetterToIndex_(L) - 1;
+
+    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
+    const firstName = customerName ? customerName.split(' ')[0] : 'there';
+    const customerEmail = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]);
+    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]) || 'Unnamed Lead';
+
+    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+
+    if (!customerEmail || !d_isValidEmail_(customerEmail)) {
+      logCell.setValue('No valid customer email in col I — cannot create follow-up.');
+      return { toast: 'No valid customer email found.' };
+    }
+
+    // --- Search for original sent quote email ---
+    let originalBody = null;
+    let originalSubject = null;
+    let originalDate = null;
+
+    const queries = [
+      'subject:"Your awning quote from Walker Awning - ' + displayName + '" in:sent newer_than:' + DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS + 'd',
+      'to:' + customerEmail + ' in:sent newer_than:' + DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS + 'd',
+      '"' + displayName + '" in:sent newer_than:' + DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS + 'd'
+    ];
+
+    for (var q = 0; q < queries.length; q++) {
+      const results = GmailApp.search(queries[q], 0, DRAFTS_V2.EMAIL_SEARCH.MAX_RESULTS);
+      if (results.length > 0) {
+        const msgs = results[0].getMessages();
+        const last = msgs[msgs.length - 1];
+        originalBody = last.getBody();
+        originalSubject = last.getSubject();
+        originalDate = Utilities.formatDate(last.getDate(), Session.getScriptTimeZone(), 'MMMM dd, yyyy');
+        break;
+      }
+    }
+
+    // --- Build follow-up message ---
+    const subject = 'Following up: ' + (originalSubject || 'Your Walker Awning quote - ' + displayName);
+
+    const followUpHtml =
+      '<div style="font-family: Arial, sans-serif; color: #333;">' +
+      '<p>Hello ' + d_htmlEscape_(firstName) + ',</p>' +
+      '<p>Just a friendly follow-up on the proposal I sent over. I\'ve included it below for your convenience — ' +
+      'please don\'t hesitate to reach out with any questions or if you\'d like to make any changes.</p>' +
+      '<p>Best regards,<br>Gino Carneiro<br>Walker Awning</p>' +
+      '</div>';
+
+    const followUpPlain =
+      'Hello ' + firstName + ',\n\n' +
+      'Just a friendly follow-up on the proposal I sent over. I\'ve included it below for your convenience — ' +
+      'please don\'t hesitate to reach out with any questions or if you\'d like to make any changes.\n\n' +
+      'Best regards,\nGino Carneiro\nWalker Awning';
+
+    // Build full HTML: follow-up message + divider + original email quoted below
+    let fullHtml = followUpHtml;
+    if (originalBody) {
+      fullHtml +=
+        '<hr style="border:none;border-top:1px solid #ccc;margin:24px 0;">' +
+        '<p style="color:#888;font-size:12px;">--- Original message sent ' + originalDate + ' ---</p>' +
+        '<div style="opacity:0.85;">' + originalBody + '</div>';
+    }
+
+    const draft = d_withRetry_(function() {
+      return GmailApp.createDraft(customerEmail, subject, followUpPlain, { htmlBody: fullHtml });
+    });
+
+    const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' +
+      encodeURIComponent(draft.getMessage().getId());
+
+    const linkText = originalBody ? '🔁 F/U w/ Quote' : '🔁 F/U Draft';
+    const richText = SpreadsheetApp.newRichTextValue()
+      .setText(linkText)
+      .setLinkUrl(0, linkText.length, draftUrl)
+      .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+      .build();
+    logCell.setRichTextValue(richText);
+
+    return { 
+      toast: originalBody 
+        ? 'Follow-up draft created with original quote attached.' 
+        : 'Follow-up draft created (original quote not found).' 
+    };
+
+  } catch (err) {
+    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+    logCell.setValue('Error creating follow-up: ' + d_shortErr_(err));
+    return { toast: 'Error creating follow-up: ' + d_shortErr_(err) };
+  }
+}
+
+/**
  * Create rough quote draft/message when "Rough quote" is selected
  */
 function v2_createRoughQuote_(sh, row) {
@@ -1495,19 +1604,25 @@ function v2_buildHtmlBody_(data) {
     const mapsDirectionsUrl = 'https://www.google.com/maps/dir/' + encodeURIComponent(DRAFTS_V2.MAPS_CONFIG.SHOP_ADDRESS) + '/' + encodeURIComponent(data.address);
     
     // Distance and Time - plain text
-    if (data.routeMapData.distance || data.routeMapData.duration) {
-      let infoText = '';
-      if (data.routeMapData.distance) {
-        infoText += data.routeMapData.distance;
+    if (data.routeMapData.distance || data.routeMapData.duration || data.routeMapData.compass) {
+        let infoText = '';
+        if (data.routeMapData.compass) {
+          infoText += data.routeMapData.compass;
+        }
+        if (data.routeMapData.compass && data.routeMapData.distance) {
+          infoText += '  |  ';
+        }
+        if (data.routeMapData.distance) {
+          infoText += data.routeMapData.distance;
+        }
+        if (data.routeMapData.distance && data.routeMapData.duration) {
+          infoText += '  |  ';
+        }
+        if (data.routeMapData.duration) {
+          infoText += data.routeMapData.duration;
+        }
+        html += '<span style="font-size:24pt;">' + esc(infoText) + '</span><br>';
       }
-      if (data.routeMapData.distance && data.routeMapData.duration) {
-        infoText += '  |  ';
-      }
-      if (data.routeMapData.duration) {
-        infoText += data.routeMapData.duration;
-      }
-      html += '<span style="font-size:24pt;">' + esc(infoText) + '</span><br>';
-    }
     
     // Map image - clickable
     html += '<a href="' + esc(mapsDirectionsUrl) + '" target="_blank">';
@@ -1701,9 +1816,9 @@ function d_safeLogErrorToSheet_(sh, row, err) {
 function d_generateRouteMapUrl_(destinationAddress) {
   const M = DRAFTS_V2.MAPS_CONFIG;
   
-  const apiKey = PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('MAPS_API_KEY');
   if (!apiKey) {
-    console.error('GOOGLE_MAPS_API_KEY not found in Script Properties');
+    console.error('MAPS_API_KEY not found in Script Properties');
     return null;
   }
   
@@ -1738,6 +1853,18 @@ function d_generateRouteMapUrl_(destinationAddress) {
     // Extract distance and duration
     const distance = leg.distance ? leg.distance.text : null;
     const duration = leg.duration ? leg.duration.text : null;
+
+    // Calculate compass direction from shop to destination
+    const startLat = leg.start_location.lat * Math.PI / 180;
+    const startLng = leg.start_location.lng * Math.PI / 180;
+    const endLat = leg.end_location.lat * Math.PI / 180;
+    const endLng = leg.end_location.lng * Math.PI / 180;
+    const dLng = endLng - startLng;
+    const x = Math.sin(dLng) * Math.cos(endLat);
+    const y = Math.cos(startLat) * Math.sin(endLat) - Math.sin(startLat) * Math.cos(endLat) * Math.cos(dLng);
+    const bearing = (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+    const directions = ['N','NE','E','SE','S','SW','W','NW','N'];
+    const compass = directions[Math.round(bearing / 45)];
     
     const staticMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?' +
       'size=' + M.MAP_WIDTH + 'x' + M.MAP_HEIGHT +
@@ -1750,7 +1877,8 @@ function d_generateRouteMapUrl_(destinationAddress) {
     return { 
       mapUrl: staticMapUrl, 
       distance: distance,
-      duration: duration
+      duration: duration,
+      compass: compass
     };
     
   } catch (err) {
@@ -1798,7 +1926,7 @@ function testMapsApiConnection() {
  * Returns the satellite image URL or null on failure
  */
 function d_generateSatelliteMapUrl_(address) {
-  const apiKey = PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('MAPS_API_KEY');
   if (!apiKey || !address) {
     return null;
   }
