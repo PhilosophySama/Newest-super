@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-02-18T14:05:42.272Z",
+    "lastUpdated": "2026-03-13T11:56:53.397Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,13 +8,13 @@
   },
   "stats": {
     "totalFiles": 11,
-    "totalFunctions": 169,
+    "totalFunctions": 172,
     "totalTriggers": 20,
-    "totalLines": 8584,
+    "totalLines": 8779,
     "publicFunctions": 49,
-    "helperFunctions": 156,
-    "avgFunctionsPerFile": 15,
-    "avgLinesPerFile": 780
+    "helperFunctions": 159,
+    "avgFunctionsPerFile": 16,
+    "avgLinesPerFile": 798
   },
   "files": [
     {
@@ -25,245 +25,252 @@
       "functions": [
         {
           "name": "installTriggerDrafts_V2",
-          "line": 188,
+          "line": 189,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "handleEditDraft_V2",
-          "line": 207,
+          "line": 208,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_searchAndLinkEmail_",
-          "line": 289,
+          "line": 297,
           "description": "Search Gmail for existing emails/drafts and link in column B",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCustomerDraft_",
-          "line": 379,
+          "line": 387,
           "description": "Create customer follow-up draft when \"Email customer\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createHandoffDraft_",
-          "line": 484,
+          "line": 492,
           "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCustomerInfoDraft_",
-          "line": 560,
+          "line": 568,
           "description": "Create customer info request draft when \"Customer Info\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCOIDraft_",
-          "line": 777,
+          "line": 785,
           "description": "Create COI request draft when \"COI Req\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
+          "name": "v2_createFollowUpDraft_",
+          "line": 939,
+          "description": "Finds original sent quote email, copies its body, and creates a new draft with a follow-up message prepended and the original quoted below. Version: 03/03-12:30PM EST by Claude Sonnet 4.6",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "v2_createRoughQuote_",
-          "line": 928,
+          "line": 1037,
           "description": "Create rough quote draft/message when \"Rough quote\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createDraftsForAllRows_V2",
-          "line": 1041,
+          "line": 1150,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_createDraftForRow_",
-          "line": 1088,
+          "line": 1197,
           "description": "Row → Draft creation ========================= */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_exportRecoverRangeAsHtml_",
-          "line": 1263,
+          "line": 1372,
           "description": "@param {Spreadsheet} ss - The spreadsheet object @param {string} rangeOverride - Optional range to export (e.g., \"A1:K14\" or \"M1:S30\") @returns {string|null} HTML table string or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_sheetsDataToHtml_",
-          "line": 1322,
+          "line": 1431,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildHtmlBody_",
-          "line": 1467,
+          "line": 1576,
           "description": "Email body builders ================ */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildPlainBody_",
-          "line": 1527,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_extractUrlFromCell_",
-          "line": 1539,
-          "description": "Helpers ===================== */",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_looksLikeUrl_",
-          "line": 1589,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_safeString_",
-          "line": 1590,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_htmlEscape_",
-          "line": 1591,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_colLetterToIndex_",
-          "line": 1593,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "v2_getSpreadsheet_",
-          "line": 1599,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_writeB_",
-          "line": 1606,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_withRetry_",
-          "line": 1617,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_specificErrorMessage_",
-          "line": 1633,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_shortErr_",
-          "line": 1640,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "v2_validateConfig_",
           "line": 1642,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
+          "name": "d_extractUrlFromCell_",
+          "line": 1654,
+          "description": "Helpers ===================== */",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_looksLikeUrl_",
+          "line": 1704,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_safeString_",
+          "line": 1705,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_htmlEscape_",
+          "line": 1706,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_colLetterToIndex_",
+          "line": 1708,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_getSpreadsheet_",
+          "line": 1714,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_writeB_",
+          "line": 1721,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_withRetry_",
+          "line": 1732,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_specificErrorMessage_",
+          "line": 1748,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_shortErr_",
+          "line": 1755,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_validateConfig_",
+          "line": 1757,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "d_isValidEmail_",
-          "line": 1649,
+          "line": 1764,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_firstLinkInRichText_",
-          "line": 1651,
+          "line": 1766,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isGmailDraftUrl_",
-          "line": 1663,
+          "line": 1778,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_templateSafe_",
-          "line": 1667,
+          "line": 1782,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_timestamp_",
-          "line": 1679,
+          "line": 1794,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeLogErrorToSheet_",
-          "line": 1685,
+          "line": 1800,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateRouteMapUrl_",
-          "line": 1701,
+          "line": 1816,
           "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateSimpleMapUrl_",
-          "line": 1769,
+          "line": 1897,
           "description": "Fallback: Generate simple map URL with just markers (no route line)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testMapsApiConnection",
-          "line": 1783,
+          "line": 1911,
           "description": "Test function - run this to verify Maps API works",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "d_generateSatelliteMapUrl_",
-          "line": 1800,
+          "line": 1928,
           "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
           "isPublic": false,
           "isHelper": true
@@ -329,6 +336,7 @@
         "v2_createRoughQuote_",
         "v2_createCustomerInfoDraft_",
         "v2_createCOIDraft_",
+        "v2_createFollowUpDraft_",
         "v2_createDraftForRow_",
         "d_shortErr_",
         "d_safeString_",
@@ -353,8 +361,8 @@
         "d_generateSimpleMapUrl_",
         "DRAFTS_V2"
       ],
-      "lines": 1822,
-      "size": 73549
+      "lines": 1950,
+      "size": 79341
     },
     {
       "path": "Email Reader.gs",
@@ -392,98 +400,98 @@
         },
         {
           "name": "er_processQuoteSentEmail_",
-          "line": 360,
+          "line": 357,
           "description": "Process sent quote emails - updates customer stage to \"Quote sent\" Detects when you send customer quote emails Version: 02/06-06:50PM EST by Claude Opus 4.5",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_processEmail_",
-          "line": 460,
+          "line": 461,
           "description": "Process a single email - writes CSV to column A Stage Automation will split it across columns",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_extractWithPatterns_",
-          "line": 609,
+          "line": 610,
           "description": "Extract data using pattern matching",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_extractStructured_",
-          "line": 714,
+          "line": 715,
           "description": "Extract data using structured key:value parsing",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_log_",
-          "line": 788,
+          "line": 789,
           "description": "Logging function",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "er_installTrigger",
-          "line": 801,
+          "line": 802,
           "description": "Install trigger - runs every 15 minutes for BOTH Ruby and \"Add lead\"",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_removeTrigger",
-          "line": 819,
+          "line": 820,
           "description": "Remove trigger",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_processNewEmails",
-          "line": 832,
+          "line": 833,
           "description": "MAIN: Process ALL pending emails (Ruby + Add lead) - runs automatically",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_processAddLeadEmails",
-          "line": 952,
+          "line": 953,
           "description": "Process only \"Add lead\" emails manually",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "er_testProcessing",
-          "line": 994,
+          "line": 995,
           "description": "Test processing - no popup, just runs and shows toast",
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "checkTriggerHealth_",
-          "line": 1068,
+          "line": 1069,
           "description": "Check if all expected triggers are installed - runs daily Only sends email if something is WRONG",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerHealthCheck_",
-          "line": 1112,
+          "line": 1113,
           "description": "Install the daily health check trigger (runs at 7 AM)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeTriggerHealthCheck_",
-          "line": 1137,
+          "line": 1138,
           "description": "Remove the health check trigger",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testTriggerHealthCheck_",
-          "line": 1154,
+          "line": 1155,
           "description": "Test the health check (runs immediately, will email if triggers missing)",
           "isPublic": false,
           "isHelper": true
@@ -505,8 +513,8 @@
         "testTriggerHealthCheck_",
         "Defines: EMAIL_READER_CONFIG"
       ],
-      "lines": 1161,
-      "size": 34933
+      "lines": 1162,
+      "size": 35038
     },
     {
       "path": "Formula restoration.gs.gs",
@@ -907,29 +915,43 @@
         },
         {
           "name": "goToRecoverCalculations_",
-          "line": 509,
+          "line": 515,
           "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 574,
+          "line": 580,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "listAllTriggers_",
-          "line": 642,
+          "line": 648,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 663,
+          "line": 669,
           "description": "System utility: Remove all triggers",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "emailWeeklySchedulePDF_",
+          "line": 684,
+          "description": "─── Weekly Schedule PDF Emailer ──────────────────────────────────────────── version1 [03/09-4:10PM] by Claude Sonnet 4.6",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "installWeeklyScheduleTrigger_",
+          "line": 724,
+          "description": null,
           "isPublic": false,
           "isHelper": true
         }
@@ -950,10 +972,12 @@
         "goToRecoverCalculations_",
         "showQuickBooksSetup_",
         "listAllTriggers_",
-        "removeAllTriggers_"
+        "removeAllTriggers_",
+        "emailWeeklySchedulePDF_",
+        "installWeeklyScheduleTrigger_"
       ],
-      "lines": 674,
-      "size": 22065
+      "lines": 740,
+      "size": 24532
     },
     {
       "path": "Miles Log.gs",
@@ -1646,7 +1670,7 @@
         "Defines: MOVE_CONFIG"
       ],
       "lines": 1687,
-      "size": 62116
+      "size": 62142
     }
   ],
   "categories": {
@@ -1659,245 +1683,252 @@
         "functions": [
           {
             "name": "installTriggerDrafts_V2",
-            "line": 188,
+            "line": 189,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "handleEditDraft_V2",
-            "line": 207,
+            "line": 208,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_searchAndLinkEmail_",
-            "line": 289,
+            "line": 297,
             "description": "Search Gmail for existing emails/drafts and link in column B",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCustomerDraft_",
-            "line": 379,
+            "line": 387,
             "description": "Create customer follow-up draft when \"Email customer\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createHandoffDraft_",
-            "line": 484,
+            "line": 492,
             "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCustomerInfoDraft_",
-            "line": 560,
+            "line": 568,
             "description": "Create customer info request draft when \"Customer Info\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCOIDraft_",
-            "line": 777,
+            "line": 785,
             "description": "Create COI request draft when \"COI Req\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
+            "name": "v2_createFollowUpDraft_",
+            "line": 939,
+            "description": "Finds original sent quote email, copies its body, and creates a new draft with a follow-up message prepended and the original quoted below. Version: 03/03-12:30PM EST by Claude Sonnet 4.6",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "v2_createRoughQuote_",
-            "line": 928,
+            "line": 1037,
             "description": "Create rough quote draft/message when \"Rough quote\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createDraftsForAllRows_V2",
-            "line": 1041,
+            "line": 1150,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_createDraftForRow_",
-            "line": 1088,
+            "line": 1197,
             "description": "Row → Draft creation ========================= */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_exportRecoverRangeAsHtml_",
-            "line": 1263,
+            "line": 1372,
             "description": "@param {Spreadsheet} ss - The spreadsheet object @param {string} rangeOverride - Optional range to export (e.g., \"A1:K14\" or \"M1:S30\") @returns {string|null} HTML table string or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_sheetsDataToHtml_",
-            "line": 1322,
+            "line": 1431,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildHtmlBody_",
-            "line": 1467,
+            "line": 1576,
             "description": "Email body builders ================ */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildPlainBody_",
-            "line": 1527,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_extractUrlFromCell_",
-            "line": 1539,
-            "description": "Helpers ===================== */",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_looksLikeUrl_",
-            "line": 1589,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_safeString_",
-            "line": 1590,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_htmlEscape_",
-            "line": 1591,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_colLetterToIndex_",
-            "line": 1593,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "v2_getSpreadsheet_",
-            "line": 1599,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_writeB_",
-            "line": 1606,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_withRetry_",
-            "line": 1617,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_specificErrorMessage_",
-            "line": 1633,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_shortErr_",
-            "line": 1640,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "v2_validateConfig_",
             "line": 1642,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
+            "name": "d_extractUrlFromCell_",
+            "line": 1654,
+            "description": "Helpers ===================== */",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_looksLikeUrl_",
+            "line": 1704,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_safeString_",
+            "line": 1705,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_htmlEscape_",
+            "line": 1706,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_colLetterToIndex_",
+            "line": 1708,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_getSpreadsheet_",
+            "line": 1714,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_writeB_",
+            "line": 1721,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_withRetry_",
+            "line": 1732,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_specificErrorMessage_",
+            "line": 1748,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_shortErr_",
+            "line": 1755,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_validateConfig_",
+            "line": 1757,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "d_isValidEmail_",
-            "line": 1649,
+            "line": 1764,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_firstLinkInRichText_",
-            "line": 1651,
+            "line": 1766,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isGmailDraftUrl_",
-            "line": 1663,
+            "line": 1778,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_templateSafe_",
-            "line": 1667,
+            "line": 1782,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_timestamp_",
-            "line": 1679,
+            "line": 1794,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeLogErrorToSheet_",
-            "line": 1685,
+            "line": 1800,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateRouteMapUrl_",
-            "line": 1701,
+            "line": 1816,
             "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateSimpleMapUrl_",
-            "line": 1769,
+            "line": 1897,
             "description": "Fallback: Generate simple map URL with just markers (no route line)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testMapsApiConnection",
-            "line": 1783,
+            "line": 1911,
             "description": "Test function - run this to verify Maps API works",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "d_generateSatelliteMapUrl_",
-            "line": 1800,
+            "line": 1928,
             "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
             "isPublic": false,
             "isHelper": true
@@ -1963,6 +1994,7 @@
           "v2_createRoughQuote_",
           "v2_createCustomerInfoDraft_",
           "v2_createCOIDraft_",
+          "v2_createFollowUpDraft_",
           "v2_createDraftForRow_",
           "d_shortErr_",
           "d_safeString_",
@@ -1987,8 +2019,8 @@
           "d_generateSimpleMapUrl_",
           "DRAFTS_V2"
         ],
-        "lines": 1822,
-        "size": 73549
+        "lines": 1950,
+        "size": 79341
       },
       {
         "path": "Stage Automation.gs",
@@ -2360,7 +2392,7 @@
           "Defines: MOVE_CONFIG"
         ],
         "lines": 1687,
-        "size": 62116
+        "size": 62142
       }
     ],
     "automation": [
@@ -2683,29 +2715,43 @@
           },
           {
             "name": "goToRecoverCalculations_",
-            "line": 509,
+            "line": 515,
             "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 574,
+            "line": 580,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "listAllTriggers_",
-            "line": 642,
+            "line": 648,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 663,
+            "line": 669,
             "description": "System utility: Remove all triggers",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "emailWeeklySchedulePDF_",
+            "line": 684,
+            "description": "─── Weekly Schedule PDF Emailer ──────────────────────────────────────────── version1 [03/09-4:10PM] by Claude Sonnet 4.6",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "installWeeklyScheduleTrigger_",
+            "line": 724,
+            "description": null,
             "isPublic": false,
             "isHelper": true
           }
@@ -2726,10 +2772,12 @@
           "goToRecoverCalculations_",
           "showQuickBooksSetup_",
           "listAllTriggers_",
-          "removeAllTriggers_"
+          "removeAllTriggers_",
+          "emailWeeklySchedulePDF_",
+          "installWeeklyScheduleTrigger_"
         ],
-        "lines": 674,
-        "size": 22065
+        "lines": 740,
+        "size": 24532
       }
     ],
     "other": [
@@ -2769,98 +2817,98 @@
           },
           {
             "name": "er_processQuoteSentEmail_",
-            "line": 360,
+            "line": 357,
             "description": "Process sent quote emails - updates customer stage to \"Quote sent\" Detects when you send customer quote emails Version: 02/06-06:50PM EST by Claude Opus 4.5",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_processEmail_",
-            "line": 460,
+            "line": 461,
             "description": "Process a single email - writes CSV to column A Stage Automation will split it across columns",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_extractWithPatterns_",
-            "line": 609,
+            "line": 610,
             "description": "Extract data using pattern matching",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_extractStructured_",
-            "line": 714,
+            "line": 715,
             "description": "Extract data using structured key:value parsing",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_log_",
-            "line": 788,
+            "line": 789,
             "description": "Logging function",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "er_installTrigger",
-            "line": 801,
+            "line": 802,
             "description": "Install trigger - runs every 15 minutes for BOTH Ruby and \"Add lead\"",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_removeTrigger",
-            "line": 819,
+            "line": 820,
             "description": "Remove trigger",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_processNewEmails",
-            "line": 832,
+            "line": 833,
             "description": "MAIN: Process ALL pending emails (Ruby + Add lead) - runs automatically",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_processAddLeadEmails",
-            "line": 952,
+            "line": 953,
             "description": "Process only \"Add lead\" emails manually",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "er_testProcessing",
-            "line": 994,
+            "line": 995,
             "description": "Test processing - no popup, just runs and shows toast",
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "checkTriggerHealth_",
-            "line": 1068,
+            "line": 1069,
             "description": "Check if all expected triggers are installed - runs daily Only sends email if something is WRONG",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerHealthCheck_",
-            "line": 1112,
+            "line": 1113,
             "description": "Install the daily health check trigger (runs at 7 AM)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeTriggerHealthCheck_",
-            "line": 1137,
+            "line": 1138,
             "description": "Remove the health check trigger",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testTriggerHealthCheck_",
-            "line": 1154,
+            "line": 1155,
             "description": "Test the health check (runs immediately, will email if triggers missing)",
             "isPublic": false,
             "isHelper": true
@@ -2882,8 +2930,8 @@
           "testTriggerHealthCheck_",
           "Defines: EMAIL_READER_CONFIG"
         ],
-        "lines": 1161,
-        "size": 34933
+        "lines": 1162,
+        "size": 35038
       },
       {
         "path": "Formula restoration.gs.gs",
