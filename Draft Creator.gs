@@ -1,6 +1,6 @@
 /**
  * Draft Creator.gs
- * Version: 01/28-12:30AM EST by Claude Opus 4.5
+ * Version: 03/13-12:15PM EST by Claude Sonnet 4.6
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
@@ -600,15 +600,23 @@ function v2_createCustomerInfoDraft_(sh, row) {
     const fabric = d_safeString_(vals[idx(DRAFTS_V2.COLS.FABRIC)]); // AB
     
     // Build list of missing items
+    const customerType = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_TYPE)]); // G
     const missingItems = [];
     if (!fabricColor) missingItems.push('Fabric Color');
     if (!name) missingItems.push('Your Name');
-    if (!displayName) missingItems.push('Display Name');
+    if (!displayName) {
+      if (customerType.toLowerCase() === 'res') {
+        missingItems.push('Is this for your home?');
+      } else {
+        missingItems.push('Project name');
+      }
+    }
     if (!phone) missingItems.push('Best Phone Number');
     if (!email) missingItems.push('Email Address');
     if (!address) missingItems.push('Project Address');
-    if (!jobType) missingItems.push('What kind of awning you are looking to get');
+    if (!jobType) missingItems.push('Would you like a re-cover or brand new awning?');
     if (!length || !width) missingItems.push('Rough dimensions of the awning (Length x Width)');
+    if (!valanceStyle) missingItems.push('Would you like a hanging valance or a wrapped one?');
     
     // If nothing is missing, don't send
     if (missingItems.length === 0) {
@@ -629,10 +637,11 @@ function v2_createCustomerInfoDraft_(sh, row) {
       htmlBulletList += `  <li>${d_htmlEscape_(item)}</li>\n`;
     });
     
-    // Determine if we need Sunbrella link based on conditions
-    const needsSunbrellaLink = 
-      (valanceStyle.toLowerCase() === 'wrapped' && fabric.toLowerCase() === 'vinyl') ||
-      (valanceStyle.toLowerCase() === 'hanging' && fabric.toLowerCase() === 'vinyl');
+    // Sunbrella link shows when AB is Sunbrella or blank
+    const needsSunbrellaLink =
+      fabric.toLowerCase() === 'sunbrella' || fabric === '';
+    // Swatches line shows only when there are attachments or a Sunbrella link to offer
+    const hasSwatches = ['', 'vinyl', 'ferrari', 'sunbrella'].includes(fabric.toLowerCase());
     
     // Create plain text body
     let plainBody = `Hello ${firstName},
@@ -642,9 +651,10 @@ May I just get a bit more info from you?
 Please provide:
 ${bulletList}`;
 
-    // Add Sunbrella link to plain text if needed
-    if (needsSunbrellaLink) {
-      plainBody += `\nSunbrella colors here: https://www.sunbrella.com/browse-fabrics/fabrics-by-use/shade-awnings-pergolas\n`;
+    if (hasSwatches) {
+      plainBody += needsSunbrellaLink
+        ? `\nI've attached some swatches for your perusal. Sunbrella colors are here: https://www.sunbrella.com/browse-fabrics/fabrics-by-use/shade-awnings-pergolas\n`
+        : `\nI've attached some swatches for your perusal.\n`;
     }
 
     plainBody += `\nAlso please send me some pics of the frame of the awning and I will get an estimate to you right away.
@@ -665,9 +675,10 @@ Walker Awning`;
 <ul style="line-height: 1.8;">
 ${htmlBulletList}</ul>`;
 
-    // Add Sunbrella link to HTML if needed
-    if (needsSunbrellaLink) {
-      htmlBody += `\n<p><a href="https://www.sunbrella.com/browse-fabrics/fabrics-by-use/shade-awnings-pergolas" target="_blank" style="color: #0066cc; text-decoration: underline;">Sunbrella colors here</a></p>`;
+    if (hasSwatches) {
+      htmlBody += needsSunbrellaLink
+        ? `\n<p>I've attached some swatches for your perusal. Sunbrella colors are <a href="https://www.sunbrella.com/browse-fabrics/fabrics-by-use/shade-awnings-pergolas" target="_blank" style="color: #0066cc; text-decoration: underline;">here</a>.</p>`
+        : `\n<p>I've attached some swatches for your perusal.</p>`;
     }
 
     htmlBody += `\n<p>Also please send me some pics of the frame of the awning and I will get an estimate to you right away.</p>
@@ -690,41 +701,20 @@ Walker Awning</p>
       const attachments = [];
       
       try {
-        // Condition 1: If AB = Sunbrella, attach 2025 Sunbrella Colors.pdf
-        if (fabric.toLowerCase() === 'sunbrella') {
-          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.SUNBRELLA_FILE_ID) {
-            const sunbrellaFile = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.SUNBRELLA_FILE_ID);
-            attachments.push(sunbrellaFile.getBlob());
-          }
+        // Attachment logic based on AB (Fabric) column only
+        // Sunbrella is never attached — it is handled via link in the email body
+        const fabricLower = fabric.toLowerCase();
+        if (fabricLower === '' || fabricLower === 'vinyl') {
+          // AB blank or Vinyl → Patio 500 + Coastline Plus only
+          attachments.push(DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID).getBlob());
+          attachments.push(DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID).getBlob());
+        } else if (fabricLower === 'ferrari') {
+          // AB = Ferrari → Patio 500 + Coastline Plus + Serge Ferrari
+          attachments.push(DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID).getBlob());
+          attachments.push(DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID).getBlob());
+          attachments.push(DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_FERRARI_FILE_ID).getBlob());
         }
-        
-        // Condition 2: If Z = wrapped AND AB = Vinyl, attach 3 vinyl files
-        if (valanceStyle.toLowerCase() === 'wrapped' && fabric.toLowerCase() === 'vinyl') {
-          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_FERRARI_FILE_ID) {
-            const ferrariFile = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_FERRARI_FILE_ID);
-            attachments.push(ferrariFile.getBlob());
-          }
-          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID) {
-            const patio500File = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID);
-            attachments.push(patio500File.getBlob());
-          }
-          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID) {
-            const coastlineFile = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID);
-            attachments.push(coastlineFile.getBlob());
-          }
-        }
-        
-        // Condition 3: If Z = hanging AND AB = Vinyl, attach 2 vinyl files
-        if (valanceStyle.toLowerCase() === 'hanging' && fabric.toLowerCase() === 'vinyl') {
-          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID) {
-            const patio500File = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_PATIO500_FILE_ID);
-            attachments.push(patio500File.getBlob());
-          }
-          if (DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS && DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID) {
-            const coastlineFile = DriveApp.getFileById(DRAFTS_V2.CUSTOMER_INFO_ATTACHMENTS.VINYL_COASTLINE_FILE_ID);
-            attachments.push(coastlineFile.getBlob());
-          }
-        }
+        // AB = Sunbrella → link in body only, no attachment
         
         // Add attachments to options if any exist
         if (attachments.length > 0) {
