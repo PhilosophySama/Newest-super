@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-03-13T11:56:53.397Z",
+    "lastUpdated": "2026-03-16T12:17:03.283Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -10,18 +10,18 @@
     "totalFiles": 11,
     "totalFunctions": 172,
     "totalTriggers": 20,
-    "totalLines": 8779,
+    "totalLines": 8769,
     "publicFunctions": 49,
     "helperFunctions": 159,
     "avgFunctionsPerFile": 16,
-    "avgLinesPerFile": 798
+    "avgLinesPerFile": 797
   },
   "files": [
     {
       "path": "Draft Creator.gs",
       "filename": "Draft Creator.gs",
-      "purpose": "Draft Creator.gs Version: 01/28-12:30AM EST by Claude Opus 4.5 PURPOSE",
-      "version": "01/28-12:30AM EST by Claude Opus 4.5",
+      "purpose": "Draft Creator.gs Version: 03/13-12:15PM EST by Claude Sonnet 4.6 PURPOSE",
+      "version": "03/13-12:15PM EST by Claude Sonnet 4.6",
       "functions": [
         {
           "name": "installTriggerDrafts_V2",
@@ -67,210 +67,210 @@
         },
         {
           "name": "v2_createCOIDraft_",
-          "line": 785,
+          "line": 775,
           "description": "Create COI request draft when \"COI Req\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createFollowUpDraft_",
-          "line": 939,
+          "line": 929,
           "description": "Finds original sent quote email, copies its body, and creates a new draft with a follow-up message prepended and the original quoted below. Version: 03/03-12:30PM EST by Claude Sonnet 4.6",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createRoughQuote_",
-          "line": 1037,
+          "line": 1027,
           "description": "Create rough quote draft/message when \"Rough quote\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createDraftsForAllRows_V2",
-          "line": 1150,
+          "line": 1140,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_createDraftForRow_",
-          "line": 1197,
+          "line": 1187,
           "description": "Row → Draft creation ========================= */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_exportRecoverRangeAsHtml_",
-          "line": 1372,
+          "line": 1362,
           "description": "@param {Spreadsheet} ss - The spreadsheet object @param {string} rangeOverride - Optional range to export (e.g., \"A1:K14\" or \"M1:S30\") @returns {string|null} HTML table string or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_sheetsDataToHtml_",
-          "line": 1431,
+          "line": 1421,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildHtmlBody_",
-          "line": 1576,
+          "line": 1566,
           "description": "Email body builders ================ */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildPlainBody_",
-          "line": 1642,
+          "line": 1632,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_extractUrlFromCell_",
-          "line": 1654,
+          "line": 1644,
           "description": "Helpers ===================== */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_looksLikeUrl_",
-          "line": 1704,
+          "line": 1694,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeString_",
-          "line": 1705,
+          "line": 1695,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_htmlEscape_",
-          "line": 1706,
+          "line": 1696,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_colLetterToIndex_",
-          "line": 1708,
+          "line": 1698,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_getSpreadsheet_",
-          "line": 1714,
+          "line": 1704,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_writeB_",
-          "line": 1721,
+          "line": 1711,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_withRetry_",
-          "line": 1732,
+          "line": 1722,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_specificErrorMessage_",
-          "line": 1748,
+          "line": 1738,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_shortErr_",
-          "line": 1755,
+          "line": 1745,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_validateConfig_",
-          "line": 1757,
+          "line": 1747,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isValidEmail_",
-          "line": 1764,
+          "line": 1754,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_firstLinkInRichText_",
-          "line": 1766,
+          "line": 1756,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_isGmailDraftUrl_",
-          "line": 1778,
+          "line": 1768,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_templateSafe_",
-          "line": 1782,
+          "line": 1772,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_timestamp_",
-          "line": 1794,
+          "line": 1784,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeLogErrorToSheet_",
-          "line": 1800,
+          "line": 1790,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateRouteMapUrl_",
-          "line": 1816,
+          "line": 1806,
           "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateSimpleMapUrl_",
-          "line": 1897,
+          "line": 1887,
           "description": "Fallback: Generate simple map URL with just markers (no route line)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testMapsApiConnection",
-          "line": 1911,
+          "line": 1901,
           "description": "Test function - run this to verify Maps API works",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "d_generateSatelliteMapUrl_",
-          "line": 1928,
+          "line": 1918,
           "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
           "isPublic": false,
           "isHelper": true
@@ -361,8 +361,8 @@
         "d_generateSimpleMapUrl_",
         "DRAFTS_V2"
       ],
-      "lines": 1950,
-      "size": 79341
+      "lines": 1940,
+      "size": 78740
     },
     {
       "path": "Email Reader.gs",
@@ -1678,8 +1678,8 @@
       {
         "path": "Draft Creator.gs",
         "filename": "Draft Creator.gs",
-        "purpose": "Draft Creator.gs Version: 01/28-12:30AM EST by Claude Opus 4.5 PURPOSE",
-        "version": "01/28-12:30AM EST by Claude Opus 4.5",
+        "purpose": "Draft Creator.gs Version: 03/13-12:15PM EST by Claude Sonnet 4.6 PURPOSE",
+        "version": "03/13-12:15PM EST by Claude Sonnet 4.6",
         "functions": [
           {
             "name": "installTriggerDrafts_V2",
@@ -1725,210 +1725,210 @@
           },
           {
             "name": "v2_createCOIDraft_",
-            "line": 785,
+            "line": 775,
             "description": "Create COI request draft when \"COI Req\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createFollowUpDraft_",
-            "line": 939,
+            "line": 929,
             "description": "Finds original sent quote email, copies its body, and creates a new draft with a follow-up message prepended and the original quoted below. Version: 03/03-12:30PM EST by Claude Sonnet 4.6",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createRoughQuote_",
-            "line": 1037,
+            "line": 1027,
             "description": "Create rough quote draft/message when \"Rough quote\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createDraftsForAllRows_V2",
-            "line": 1150,
+            "line": 1140,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_createDraftForRow_",
-            "line": 1197,
+            "line": 1187,
             "description": "Row → Draft creation ========================= */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_exportRecoverRangeAsHtml_",
-            "line": 1372,
+            "line": 1362,
             "description": "@param {Spreadsheet} ss - The spreadsheet object @param {string} rangeOverride - Optional range to export (e.g., \"A1:K14\" or \"M1:S30\") @returns {string|null} HTML table string or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_sheetsDataToHtml_",
-            "line": 1431,
+            "line": 1421,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildHtmlBody_",
-            "line": 1576,
+            "line": 1566,
             "description": "Email body builders ================ */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildPlainBody_",
-            "line": 1642,
+            "line": 1632,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_extractUrlFromCell_",
-            "line": 1654,
+            "line": 1644,
             "description": "Helpers ===================== */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_looksLikeUrl_",
-            "line": 1704,
+            "line": 1694,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeString_",
-            "line": 1705,
+            "line": 1695,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_htmlEscape_",
-            "line": 1706,
+            "line": 1696,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_colLetterToIndex_",
-            "line": 1708,
+            "line": 1698,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_getSpreadsheet_",
-            "line": 1714,
+            "line": 1704,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_writeB_",
-            "line": 1721,
+            "line": 1711,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_withRetry_",
-            "line": 1732,
+            "line": 1722,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_specificErrorMessage_",
-            "line": 1748,
+            "line": 1738,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_shortErr_",
-            "line": 1755,
+            "line": 1745,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_validateConfig_",
-            "line": 1757,
+            "line": 1747,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isValidEmail_",
-            "line": 1764,
+            "line": 1754,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_firstLinkInRichText_",
-            "line": 1766,
+            "line": 1756,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_isGmailDraftUrl_",
-            "line": 1778,
+            "line": 1768,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_templateSafe_",
-            "line": 1782,
+            "line": 1772,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_timestamp_",
-            "line": 1794,
+            "line": 1784,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeLogErrorToSheet_",
-            "line": 1800,
+            "line": 1790,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateRouteMapUrl_",
-            "line": 1816,
+            "line": 1806,
             "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateSimpleMapUrl_",
-            "line": 1897,
+            "line": 1887,
             "description": "Fallback: Generate simple map URL with just markers (no route line)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testMapsApiConnection",
-            "line": 1911,
+            "line": 1901,
             "description": "Test function - run this to verify Maps API works",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "d_generateSatelliteMapUrl_",
-            "line": 1928,
+            "line": 1918,
             "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
             "isPublic": false,
             "isHelper": true
@@ -2019,8 +2019,8 @@
           "d_generateSimpleMapUrl_",
           "DRAFTS_V2"
         ],
-        "lines": 1950,
-        "size": 79341
+        "lines": 1940,
+        "size": 78740
       },
       {
         "path": "Stage Automation.gs",
