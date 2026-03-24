@@ -1,6 +1,6 @@
 /**
  * Draft Creator.gs
- * Version: 03/13-12:15PM EST by Claude Sonnet 4.6
+ * Version: 03/16-12:00PM EST by Claude Sonnet 4.6
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
@@ -16,6 +16,7 @@
  * - Removed 5-second delay - drafts now create BEFORE row moves
  * - "Email customer" now uses Job Type (R) instead of Job Description (K)
  * - "Email customer" signature moved after QuickBooks button
+ * - Added v2_createPlotMapDraft_: satellite map draft for Schedule/2.Sched/Schedule Instal rows (Leads, F/U, Awarded) with per-stop distance + ETA legend
  *
  * NOTES
  * - HTML export requires enabling "Google Sheets API" in Advanced Google Services + GCP Console.
@@ -1936,5 +1937,501 @@ function d_generateSatelliteMapUrl_(address) {
     console.error('Error generating satellite map URL:', err);
     return null;
   }
+}
+/**
+ * Scans Leads, F/U, and Awarded for rows with Stage (col D) matching
+ * schedule trigger words, builds a satellite Static Maps image auto-fitted
+ * to all locations, fetches distance/ETA per stop, and creates a Gmail draft.
+ * Version: 03/16-12:00PM by Claude Sonnet 4.6
+ */
+function v2_createPlotMapDraft_() {
+  const apiKey = PropertiesService.getScriptProperties().getProperty('MAPS_API_KEY');
+  if (!apiKey) {
+    SpreadsheetApp.getUi().alert('MAPS_API_KEY not found in Script Properties.');
+    return;
+  }
+
+  const ss             = SpreadsheetApp.getActiveSpreadsheet();
+  const sh             = ss.getActiveSheet();
+  const activeSheetName = sh.getName();
+  const allowedSheets  = ['Leads', 'F/U', 'Awarded'];
+  const STAGE_COL      = 4;   // D
+  const NAME_COL       = 5;   // E
+  const FOLDER_COL     = 6;   // F
+  const QB_COL         = 16;  // P
+  const EARTH_COL      = 17;  // Q
+  const ADDRESS_COL    = 10;  // J
+  const JOB_TYPE_COL   = 18;  // R
+  const READ_COL       = 18;
+  const TRIGGERS     = ['schedule', '2.sched', 'schedule instal'];
+  const ENG_TRIGGERS       = ['planning & engineering', 'permitting'];
+  const SCHEDULED_TRIGGERS = ['scheduled'];
+  const SHOP_ADDRESS   = DRAFTS_V2.MAPS_CONFIG.SHOP_ADDRESS;
+
+  if (!allowedSheets.includes(activeSheetName)) {
+    SpreadsheetApp.getUi().alert(`Please switch to one of these sheets first: ${allowedSheets.join(', ')}`);
+    return;
+  }
+
+  const plotRows      = [];
+  const engRows       = [];
+  let scheduledRows = [];
+
+  const lastRow = sh.getLastRow();
+  if (lastRow >= 2) {
+    const data = sh.getRange(2, 1, lastRow - 1, READ_COL).getValues();
+    for (let i = 0; i < data.length; i++) {
+      const stage   = String(data[i][STAGE_COL   - 1] || '').trim().toLowerCase();
+      const name    = String(data[i][NAME_COL    - 1] || '').trim();
+      const address = String(data[i][ADDRESS_COL - 1] || '').trim();
+      const isSchedule  = TRIGGERS.includes(stage);
+      const isEng       = ENG_TRIGGERS.includes(stage);
+      const isScheduled = SCHEDULED_TRIGGERS.includes(stage);
+      const isFix       = stage === 'fix';
+      if ((isSchedule || isEng || isScheduled || isFix) && address) {
+        const cleanAddress = address.replace(/[\r\n]+/g, ', ').replace(/,\s*,/g, ',').trim();
+        const folderUrl = (() => {
+          try {
+            const cell = sh.getRange(i + 2, FOLDER_COL);
+            const rtv = cell.getRichTextValue();
+            if (rtv) {
+              const runs = rtv.getRuns();
+              for (let k = 0; k < runs.length; k++) {
+                const u = runs[k].getLinkUrl();
+                if (u) return u;
+              }
+              const whole = rtv.getLinkUrl();
+              if (whole) return whole;
+            }
+          } catch (_) {}
+          return '';
+        })();
+        const jobType     = String(data[i][JOB_TYPE_COL - 1] || '').trim();
+        const displayName = String(data[i][FOLDER_COL - 1] || '').trim() || name || cleanAddress;
+        const qbUrl       = (() => {
+          try {
+            const cell = sh.getRange(i + 2, QB_COL);
+            const rtv = cell.getRichTextValue();
+            if (rtv) {
+              const runs = rtv.getRuns();
+              for (let k = 0; k < runs.length; k++) {
+                const u = runs[k].getLinkUrl();
+                if (u) return u;
+              }
+              const whole = rtv.getLinkUrl();
+              if (whole) return whole;
+            }
+            const val = String(cell.getValue() || '').trim();
+            if (/^https?:\/\/\S+/i.test(val)) return val;
+          } catch (_) {}
+          return '';
+        })();
+        const cityParts = cleanAddress.split(',');
+        const city      = cityParts.length > 1 ? cityParts[1].trim().replace(/\s+[A-Z]{2}\s*\d{0,5}\s*$/i, '').trim() : cleanAddress;
+        const earthUrl = (() => {
+          try {
+            const cell = sh.getRange(i + 2, EARTH_COL);
+            const rtv = cell.getRichTextValue();
+            if (rtv) {
+              const runs = rtv.getRuns();
+              for (let k = 0; k < runs.length; k++) {
+                const u = runs[k].getLinkUrl();
+                if (u) return u;
+              }
+              const whole = rtv.getLinkUrl();
+              if (whole) return whole;
+            }
+          } catch (_) {}
+          return '';
+        })();
+        if (isSchedule || isFix) {
+          plotRows.push({ name: displayName, address: cleanAddress, city, folderUrl, qbUrl, earthUrl, jobType, distance: null, duration: null, lat: 0, isFix: isFix });
+        } else if (isEng) {
+          engRows.push({ name: displayName, address: cleanAddress, city, folderUrl, qbUrl, jobType, distance: null, duration: null, lat: 0 });
+        } else if (isScheduled) {
+          scheduledRows.push({ name: displayName, address: cleanAddress, city, folderUrl, qbUrl, jobType, distance: null, duration: null, lat: 0, scheduledDate: null });
+        }
+      }
+    }
+  }
+
+  // --- Fetch distance + lat for Scheduled rows ---
+  for (let i = 0; i < scheduledRows.length; i++) {
+    try {
+      const directionsUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
+        'origin=' + encodeURIComponent(SHOP_ADDRESS) +
+        '&destination=' + encodeURIComponent(scheduledRows[i].address) +
+        '&key=' + apiKey;
+      const resp = UrlFetchApp.fetch(directionsUrl, { muteHttpExceptions: true });
+      const data = JSON.parse(resp.getContentText());
+      if (data.status === 'OK' && data.routes && data.routes[0]) {
+        const leg = data.routes[0].legs[0];
+        scheduledRows[i].lat = leg.end_location ? leg.end_location.lat : 0;
+        scheduledRows[i].lng = leg.end_location ? leg.end_location.lng : 0;
+      } else {
+        scheduledRows[i].lat = 0;
+      }
+    } catch (e) {
+      console.error('Directions fetch failed for ' + scheduledRows[i].address + ': ' + e.message);
+      scheduledRows[i].lat = 0;
+    }
+  }
+
+  // --- Lookup calendar dates for Scheduled rows ---
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() + 2);
+    const allCals = CalendarApp.getAllCalendars();
+    const allEvents = [];
+    for (let c = 0; c < allCals.length; c++) {
+      try {
+        const evs = allCals[c].getEvents(today, futureDate);
+        for (let e = 0; e < evs.length; e++) {
+          if (evs[e].isAllDayEvent()) allEvents.push(evs[e]);
+        }
+      } catch (_) {}
+    }
+    for (let i = 0; i < scheduledRows.length; i++) {
+      const clean = scheduledRows[i].name.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+      const match = allEvents.find(ev => {
+        const title = ev.getTitle().toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+        return title.includes(clean);
+      });
+      if (match) {
+        scheduledRows[i].scheduledDate    = Utilities.formatDate(
+          match.getStartTime(), Session.getScriptTimeZone(), 'MM/dd'
+        );
+        scheduledRows[i].scheduledDateRaw = match.getStartTime();
+      }
+    }
+  } catch (calErr) {
+    console.error('Calendar lookup failed: ' + calErr.message);
+  }
+
+  // --- Keep only scheduled rows with a confirmed calendar match ---
+  scheduledRows = scheduledRows.filter(r => r.scheduledDateRaw);
+
+  // --- Sort north to south (highest lat first) ---
+  plotRows.sort((a, b) => b.lat - a.lat);
+  engRows.sort((a, b) => b.lat - a.lat);
+  scheduledRows.sort((a, b) => {
+    if (!a.scheduledDateRaw && !b.scheduledDateRaw) return 0;
+    if (!a.scheduledDateRaw) return 1;
+    if (!b.scheduledDateRaw) return -1;
+    return a.scheduledDateRaw - b.scheduledDateRaw;
+  });
+
+  // --- Fetch distance + ETA + lat for each location ---
+  for (let i = 0; i < plotRows.length; i++) {
+    try {
+      const directionsUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
+        'origin=' + encodeURIComponent(SHOP_ADDRESS) +
+        '&destination=' + encodeURIComponent(plotRows[i].address) +
+        '&key=' + apiKey;
+      const resp = UrlFetchApp.fetch(directionsUrl, { muteHttpExceptions: true });
+      const data = JSON.parse(resp.getContentText());
+      if (data.status === 'OK' && data.routes && data.routes[0]) {
+        const leg = data.routes[0].legs[0];
+        plotRows[i].distance = leg.distance ? leg.distance.text : null;
+        plotRows[i].duration = leg.duration ? leg.duration.text : null;
+        plotRows[i].lat      = leg.end_location ? leg.end_location.lat : 0;
+        plotRows[i].lng      = leg.end_location ? leg.end_location.lng : 0;
+      } else {
+        plotRows[i].lat = 0;
+      }
+    } catch (e) {
+      console.error('Directions fetch failed for ' + plotRows[i].address + ': ' + e.message);
+      plotRows[i].lat = 0;
+    }
+  }
+
+  // --- Fetch distance + ETA + lat for Planning & Engineering rows ---
+  for (let i = 0; i < engRows.length; i++) {
+    try {
+      const directionsUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
+        'origin=' + encodeURIComponent(SHOP_ADDRESS) +
+        '&destination=' + encodeURIComponent(engRows[i].address) +
+        '&key=' + apiKey;
+      const resp = UrlFetchApp.fetch(directionsUrl, { muteHttpExceptions: true });
+      const data = JSON.parse(resp.getContentText());
+      if (data.status === 'OK' && data.routes && data.routes[0]) {
+        const leg = data.routes[0].legs[0];
+        engRows[i].distance = leg.distance ? leg.distance.text : null;
+        engRows[i].duration = leg.duration ? leg.duration.text : null;
+        engRows[i].lat      = leg.end_location ? leg.end_location.lat : 0;
+        engRows[i].lng      = leg.end_location ? leg.end_location.lng : 0;
+      } else {
+        engRows[i].lat = 0;
+      }
+    } catch (e) {
+      console.error('Directions fetch failed for ' + engRows[i].address + ': ' + e.message);
+      engRows[i].lat = 0;
+    }
+  }
+
+  // --- Sort north to south (highest lat first) ---
+  plotRows.sort((a, b) => b.lat - a.lat);
+  engRows.sort((a, b) => b.lat - a.lat);
+
+  // --- Build satellite map markers (no center/zoom = API auto-fits) ---
+  const LABELS     = 'ABCDEFGHIJKLMNOPQRST';
+  let markersParam = '';
+
+  for (let i = 0; i < plotRows.length; i++) {
+    const label = LABELS[i];
+    const loc   = plotRows[i].lat ? `${plotRows[i].lat},${plotRows[i].lng}` : encodeURIComponent(plotRows[i].address);
+    markersParam += `&markers=size:mid%7Ccolor:blue%7Clabel:${label}%7C${loc}`;
+  }
+  for (let i = 0; i < engRows.length; i++) {
+    const label = LABELS[plotRows.length + i];
+    const loc   = engRows[i].lat ? `${engRows[i].lat},${engRows[i].lng}` : encodeURIComponent(engRows[i].address);
+    markersParam += `&markers=size:mid%7Ccolor:red%7Clabel:${label}%7C${loc}`;
+  }
+  for (let i = 0; i < scheduledRows.length; i++) {
+    const label = LABELS[plotRows.length + engRows.length + i];
+    const loc   = scheduledRows[i].lat ? `${scheduledRows[i].lat},${scheduledRows[i].lng}` : encodeURIComponent(scheduledRows[i].address);
+    markersParam += `&markers=size:mid%7Ccolor:green%7Clabel:${label}%7C${loc}`;
+  }
+
+  const mapUrl =
+    'https://maps.googleapis.com/maps/api/staticmap?' +
+    'size=640x640' +
+    '&scale=2' +
+    '&maptype=satellite' +
+    markersParam +
+    '&key=' + apiKey;
+
+  // --- Fetch satellite image ---
+  let mapBlob;
+  try {
+    const resp = UrlFetchApp.fetch(mapUrl, { muteHttpExceptions: true });
+    if (resp.getResponseCode() !== 200) {
+      SpreadsheetApp.getUi().alert(
+        'Maps API error (' + resp.getResponseCode() + '): ' +
+        resp.getContentText().substring(0, 300)
+      );
+      return;
+    }
+    mapBlob = resp.getBlob().setName('schedule_map.png');
+  } catch (e) {
+    SpreadsheetApp.getUi().alert('Failed to fetch map image: ' + e.message);
+    return;
+  }
+
+  // --- Fetch full route static map image (schedule stops only) ---
+  let routeMapBlob = null;
+  if (plotRows.length > 0) {
+    try {
+      let routeMarkersParam = '';
+      for (let i = 0; i < plotRows.length; i++) {
+        const label = LABELS[i];
+        const loc   = plotRows[i].lat ? `${plotRows[i].lat},${plotRows[i].lng}` : encodeURIComponent(plotRows[i].address);
+        routeMarkersParam += `&markers=size:mid%7Ccolor:blue%7Clabel:${label}%7C${loc}`;
+      }
+
+      let routePolyline = null;
+      if (plotRows.length >= 2) {
+        const origin      = plotRows[0].lat ? `${plotRows[0].lat},${plotRows[0].lng}` : encodeURIComponent(plotRows[0].address);
+        const destination = plotRows[plotRows.length - 1].lat ? `${plotRows[plotRows.length - 1].lat},${plotRows[plotRows.length - 1].lng}` : encodeURIComponent(plotRows[plotRows.length - 1].address);
+        const waypointList = plotRows.slice(1, -1).map(r => r.lat ? `${r.lat},${r.lng}` : encodeURIComponent(r.address)).join('|');
+        const routeDirUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
+          'origin=' + origin +
+          '&destination=' + destination +
+          (waypointList ? '&waypoints=' + encodeURIComponent(waypointList) : '') +
+          '&key=' + apiKey;
+        const routeResp = UrlFetchApp.fetch(routeDirUrl, { muteHttpExceptions: true });
+        const routeData = JSON.parse(routeResp.getContentText());
+        if (routeData.status === 'OK' && routeData.routes && routeData.routes[0]) {
+          routePolyline = routeData.routes[0].overview_polyline.points;
+        }
+      }
+
+      let routeMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?' +
+        'size=640x400&scale=2&maptype=roadmap' +
+        routeMarkersParam;
+      if (routePolyline) {
+        routeMapUrl += '&path=color:0x1a73e8|weight:5|enc:' + routePolyline;
+      }
+      routeMapUrl += '&key=' + apiKey;
+
+      const routeResp2 = UrlFetchApp.fetch(routeMapUrl, { muteHttpExceptions: true });
+      if (routeResp2.getResponseCode() === 200) {
+        routeMapBlob = routeResp2.getBlob().setName('route_map.png');
+      }
+    } catch (e) {
+      console.error('Full route map fetch failed: ' + e.message);
+    }
+  }
+
+  // --- Calculate tomorrow's date for Schedule button label ---
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tPad = n => String(n).padStart(2, '0');
+  const tomorrowLabel = tPad(tomorrow.getMonth() + 1) + '/' + tPad(tomorrow.getDate());
+  const tomorrowCalDate = tomorrow.getFullYear() +
+    tPad(tomorrow.getMonth() + 1) +
+    tPad(tomorrow.getDate());
+
+  // --- Build schedule legend rows (red) ---
+  const schedLegendRows = plotRows.map((item, i) => {
+    const label    = LABELS[i];
+    const distText = item.distance ? item.distance : '—';
+    const mapsLink = 'https://www.google.com/maps/dir/' +
+      encodeURIComponent(SHOP_ADDRESS) + '/' +
+      encodeURIComponent(item.address);
+    const labelColor = item.isFix ? '#0b2158' : '#2471a3';
+    const linkColor  = item.isFix ? '#0b2158' : '#1a73e8';
+    const btnColor   = item.isFix ? '#0b2158' : '#1a73e8';
+    const driveLinkText = item.isFix ? 'Fix' : (item.jobType || '—');
+    const nameCell = item.qbUrl
+      ? `<a href="${item.qbUrl}" target="_blank" style="color:${linkColor};text-decoration:none;">${item.name}</a>`
+      : item.name;
+    const typeCell = item.folderUrl
+      ? `<a href="${item.folderUrl}" target="_blank" style="color:${linkColor};text-decoration:none;">${driveLinkText}</a>`
+      : driveLinkText;
+    const cityCell = item.earthUrl
+      ? `<a href="${item.earthUrl}" target="_blank" style="color:${linkColor};text-decoration:none;">${item.city || item.address}</a>`
+      : `<a href="${mapsLink}" target="_blank" style="color:${linkColor};text-decoration:none;">${item.city || item.address}</a>`;
+    const distCell = `<a href="${mapsLink}" target="_blank" style="color:${linkColor};text-decoration:none;">${distText}</a>`;
+    const calDescription = encodeURIComponent(
+      'Type: ' + (item.jobType || '—') + '\n' +
+      'Distance from shop: ' + (item.distance || '—') + '\n' +
+      'Drive time: ' + (item.duration || '—') + '\n' +
+      (item.folderUrl ? 'Drive Link: ' + item.folderUrl : '')
+    );
+    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+      `&text=${encodeURIComponent(item.name)}` +
+      `&dates=${tomorrowCalDate}/${tomorrowCalDate}` +
+      `&details=${calDescription}` +
+      `&location=${encodeURIComponent(item.address)}` +
+      `&ctz=America%2FNew_York`;
+    const scheduleBtn = `<a href="${calUrl}" target="_blank" style="display:inline-block;padding:3px 8px;background:${btnColor};color:#fff;border-radius:4px;text-decoration:none;font-size:10pt;white-space:nowrap;">${tomorrowLabel}</a>`;
+    return `<tr>
+       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:${labelColor};">${label}</td>
+       <td style="padding:5px 12px 5px 4px;font-size:13pt;">${nameCell}</td>
+       <td style="padding:5px 8px;font-size:11pt;color:#333;">${typeCell}</td>
+       <td style="padding:5px 8px;font-size:11pt;">${cityCell}</td>
+       <td style="padding:5px 8px;font-size:11pt;color:#333;">${distCell}</td>
+       <td style="padding:5px 8px;">${scheduleBtn}</td>
+     </tr>`;
+  }).join('');
+
+  // --- Build planning & engineering legend rows (blue) ---
+  const engLegendRows = engRows.map((item, i) => {
+    const label    = LABELS[plotRows.length + i];
+    const nameCell = item.qbUrl
+      ? `<a href="${item.qbUrl}" target="_blank" style="color:#c0392b;text-decoration:none;">${item.name}</a>`
+      : `<span style="color:#c0392b;">${item.name}</span>`;
+    const typeCell = item.folderUrl
+      ? `<a href="${item.folderUrl}" target="_blank" style="color:#c0392b;text-decoration:none;">${item.jobType || '—'}</a>`
+      : `<span style="color:#c0392b;">${item.jobType || '—'}</span>`;
+    return `<tr>
+       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#c0392b;">${label}</td>
+       <td style="padding:5px 12px 5px 4px;font-size:13pt;">${nameCell}</td>
+       <td style="padding:5px 8px;font-size:11pt;">${typeCell}</td>
+     </tr>`;
+  }).join('');
+
+  // --- Build scheduled legend rows (green) ---
+  const scheduledLegendRows = scheduledRows.map((item, i) => {
+    const label    = LABELS[plotRows.length + engRows.length + i];
+    const mapsLink = 'https://www.google.com/maps/dir/' +
+      encodeURIComponent(SHOP_ADDRESS) + '/' +
+      encodeURIComponent(item.address);
+    const nameCell = item.qbUrl
+      ? `<a href="${item.qbUrl}" target="_blank" style="color:#1e8449;text-decoration:none;">${item.name}</a>`
+      : `<span style="color:#1e8449;">${item.name}</span>`;
+    const mapsCell = `<a href="${mapsLink}" target="_blank" style="color:#1e8449;text-decoration:none;">${item.city || item.address}</a>`;
+    const calSearchUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(item.name)}`;
+    const dateCell = item.scheduledDate
+      ? `<a href="${calSearchUrl}" target="_blank" style="color:#1e8449;text-decoration:none;">${item.scheduledDate}</a>`
+      : `<span style="color:#1e8449;">—</span>`;
+    return `<tr>
+       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#1e8449;">${label}</td>
+       <td style="padding:5px 12px 5px 4px;font-size:13pt;">${nameCell}</td>
+       <td style="padding:5px 8px;font-size:11pt;">${mapsCell}</td>
+       <td style="padding:5px 8px;font-size:11pt;">${dateCell}</td>
+     </tr>`;
+  }).join('');
+
+  const allAddresses = plotRows
+    .map(item => item.lat ? `${item.lat},${item.lng}` : encodeURIComponent(item.address))
+    .join('/');
+
+  const htmlBody =
+    `<div style="font-family:Arial,sans-serif;">` +
+    `<p style="font-size:16pt;font-weight:bold;">Scheduling items — ${plotRows.length + engRows.length + scheduledRows.length} Location(s)</p>` +
+    `<img src="cid:schedulemap" alt="Satellite Scheduling items" style="max-width:640px;border:2px solid #333;border-radius:6px;" /><br><br>` +
+    `<table style="border-collapse:collapse;"><tr valign="top">` +
+    // Left table - Schedule (red)
+    `<td style="padding-right:20px;">` +
+    `<p style="font-size:13pt;font-weight:bold;color:#2471a3;margin:0 0 6px 0;text-align:center;">Schedule</p>` +
+    `<table style="border-collapse:collapse;">` +
+    `<tr style="font-size:11pt;color:#888;border-bottom:1px solid #ddd;">` +
+    `<th style="padding:4px 12px 4px 4px;text-align:left;"></th>` +
+    `<th style="padding:4px 12px 4px 4px;text-align:left;">Estimate Link</th>` +
+    `<th style="padding:4px 8px;text-align:left;">Drive<br>Link</th>` +
+    `<th style="padding:4px 8px;text-align:left;">Earth<br>Link</th>` +
+    `<th style="padding:4px 8px;text-align:left;">Maps<br>Link</th>` +
+    `<th style="padding:4px 8px;text-align:left;">Add to<br>calendar</th>` +
+    `</tr>` +
+    schedLegendRows +
+    `</table></td>` +
+    // Divider
+    `<td style="border-left:2px solid #ddd;padding:0;"></td>` +
+    // Right table - Planning & Engineering (blue)
+    `<td style="padding-left:20px;padding-top:22px;">` +
+    `<p style="font-size:13pt;font-weight:bold;color:#c0392b;margin:0 0 6px 0;text-align:center;">Planning & Engineering</p>` +
+    `<table style="border-collapse:collapse;">` +
+    `<tr style="font-size:11pt;color:#888;border-bottom:1px solid #ddd;">` +
+    `<th style="padding:4px 12px 4px 4px;text-align:left;"></th>` +
+    `<th style="padding:4px 12px 4px 4px;text-align:left;">Estimate Link</th>` +
+    `<th style="padding:4px 8px;text-align:left;">Drive Link</th>` +
+    `</tr>` +
+    engLegendRows +
+    `</table></td>` +
+    `</tr></table>` +
+    `<div style="margin-top:12px;padding-left:250px;"><a href="https://www.google.com/maps/dir/${encodeURIComponent(SHOP_ADDRESS)}/${allAddresses}" target="_blank" style="display:inline-block;padding:6px 14px;background:#1a73e8;color:#fff;border-radius:4px;text-decoration:none;font-size:11pt;font-weight:bold;">Full Route in Google Maps Link</a></div>` +
+    (scheduledRows.length > 0 ?
+      `<br><div style="display:inline-block;">` +
+      `<p style="font-size:13pt;font-weight:bold;color:#1e8449;margin:16px 0 6px 0;text-align:center;">Scheduled</p>` +
+      `<table style="border-collapse:collapse;">` +
+      `<tr style="font-size:11pt;color:#888;border-bottom:1px solid #ddd;">` +
+      `<th style="padding:4px 12px 4px 4px;text-align:left;"></th>` +
+      `<th style="padding:4px 12px 4px 4px;text-align:left;">Estimate Link</th>` +
+      `<th style="padding:4px 8px;text-align:left;">Maps<br>Link</th>` +
+      `<th style="padding:4px 8px;text-align:left;">Scheduled<br>For</th>` +
+      `</tr>` +
+      scheduledLegendRows +
+      `</table></div><br>`
+    : '') +
+    (routeMapBlob ? `<br><a href="https://www.google.com/maps/dir/${encodeURIComponent(SHOP_ADDRESS)}/${allAddresses}" target="_blank"><img src="cid:routemap" alt="Full Route" style="max-width:640px;border:1px solid #ccc;border-radius:6px;" /></a>` : '') +
+    `</div>`;
+
+  const schedPlain = plotRows.map((item, i) =>
+    `${LABELS[i]} — ${item.name}  |  ${item.jobType || '—'}  |  ${item.city || item.address}  |  ${item.distance || '—'}`
+  ).join('\n');
+  const engPlain = engRows.map((item, i) =>
+    `${LABELS[plotRows.length + i]} — ${item.name}  |  ${item.jobType || '—'}`
+  ).join('\n');
+  const scheduledPlain = scheduledRows.map((item, i) =>
+    `${LABELS[plotRows.length + engRows.length + i]} — ${item.name}  |  ${item.scheduledDate || '—'}`
+  ).join('\n');
+  const plainBody =
+    `Scheduling items — ${plotRows.length + engRows.length + scheduledRows.length} Location(s)\n\n` +
+    (plotRows.length      ? `Schedule:\n${schedPlain}\n\n` : '') +
+    (engRows.length       ? `Planning & Engineering:\n${engPlain}\n\n` : '') +
+    (scheduledRows.length ? `Scheduled:\n${scheduledPlain}` : '');
+
+  GmailApp.createDraft(
+    'Liz@WalkerAwning.com',
+    `Scheduling items — ${plotRows.length + engRows.length + scheduledRows.length} Location(s)`,
+    plainBody,
+    { htmlBody, inlineImages: Object.assign({ schedulemap: mapBlob }, routeMapBlob ? { routemap: routeMapBlob } : {}) }
+  );
+
+  SpreadsheetApp.getActive().toast(`Draft created — ${plotRows.length} schedule + ${engRows.length} planning + ${scheduledRows.length} scheduled location(s).`, 'Plot Map', 5);
 }
 /** end-of-file */

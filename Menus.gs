@@ -405,6 +405,8 @@ function onOpen() {
       .addItem('Create Drafts For All Rows (V2)', 'createDraftsForAllRows_V2')
       .addSeparator()
       .addItem('📊 Go to Re-cover Calculations', 'goToRecoverCalculations_')
+      .addSeparator()
+      .addItem('🗺️ Create Schedule Map Draft', 'v2_createPlotMapDraft_')
       .addToUi();
 
     // Mileage Log menu
