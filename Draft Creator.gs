@@ -1,6 +1,6 @@
 /**
  * Draft Creator.gs
- * Version: 03/16-12:00PM EST by Claude Sonnet 4.6
+ * Version: 04/01-10:30AM EST by Claude Opus 4.1
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
@@ -11,13 +11,16 @@
  * - Create customer info request drafts when Stage (col D) becomes "Customer Info" on Leads, F/U, and Awarded sheets.
  * - Create COI request drafts when Stage (col D) becomes "COI Req" on F/U, Awarded, and Heaven sheets only.
  * - Under PICS, embed a Re-cover!A1:K14 snapshot (HTML only).
+ * - Create design review reply drafts when Stage (col D) becomes "Design Review" on allowed sheets.
  *
  * CHANGES IN THIS VERSION:
  * - Removed 5-second delay - drafts now create BEFORE row moves
  * - "Email customer" now uses Job Type (R) instead of Job Description (K)
  * - "Email customer" signature moved after QuickBooks button
  * - Added v2_createPlotMapDraft_: satellite map draft for Schedule/2.Sched/Schedule Instal rows (Leads, F/U, Awarded) with per-stop distance + ETA legend
- *
+ * - Added v2_createDesignReviewDraft_: replies to existing Proposal Review thread with first-slide screenshot and link to "Shop Drawing - [F]" Slides file
+ */
+ /*
  * NOTES
  * - HTML export requires enabling "Google Sheets API" in Advanced Google Services + GCP Console.
  * - Column F is both Display Name + PICS link (hyperlink supported).
@@ -40,6 +43,8 @@ const DRAFTS_V2 = {
   CUSTOMER_INFO_STAGE: 'Customer Info', // Info request trigger
   COI_STAGE: 'COI Req',                // COI request trigger
   FOLLOWUP_STAGE: 'F/U',               // Follow-up reply trigger
+  DESIGN_REVIEW_STAGE: 'Design Review',       // Design review reply trigger
+  LIZ_DESIGN_REVIEW_STAGE: 'Liz Design Review', // Awarded-only email search trigger
 
   COLS: {
     LOG_B: 'B',
@@ -278,6 +283,24 @@ function handleEditDraft_V2(e) {
     if (newValLower === String(DRAFTS_V2.FOLLOWUP_STAGE).toLowerCase()) {
       const result = v2_createFollowUpDraft_(sh, row);
       SpreadsheetApp.getActive().toast(result.toast, 'Follow-Up Draft', 5);
+      return;
+    }
+
+    // Handle "Design Review" stage - reply to Proposal Review thread with Slides screenshot
+    if (newValLower === String(DRAFTS_V2.DESIGN_REVIEW_STAGE).toLowerCase()) {
+      const result = v2_createDesignReviewDraft_(sh, row);
+      SpreadsheetApp.getActive().toast(result.toast, 'Design Review', 5);
+      return;
+    }
+
+    // Handle "Liz Design Review" stage - Awarded sheet only, search and link existing thread
+    if (newValLower === String(DRAFTS_V2.LIZ_DESIGN_REVIEW_STAGE).toLowerCase()) {
+      if (sheetName !== 'Awarded') {
+        SpreadsheetApp.getActive().toast('Liz Design Review only available on Awarded sheet.', 'Liz Design Review', 5);
+        return;
+      }
+      const result = v2_searchAndLinkEmail_(sh, row);
+      SpreadsheetApp.getActive().toast(result.message, 'Liz Design Review', 5);
       return;
     }
 
@@ -2532,4 +2555,117 @@ function v2_createPlotMapDraft_() {
 
   SpreadsheetApp.getActive().toast(`Draft created — ${plotRows.length} schedule + ${engRows.length} planning + ${scheduledRows.length} scheduled location(s).`, 'Plot Map', 5);
 }
+/**
+ * Create a design review reply draft on the existing Proposal Review thread.
+ * Finds the Gmail thread by subject "Proposal Review: [F]", exports the first
+ * slide of "Shop Drawing - [F]" as a PNG, and creates a reply draft with the
+ * image embedded and the file linked below.
+ * Version: 04/01-10:30AM EST by Claude Opus 4.1
+ */
+function v2_createDesignReviewDraft_(sh, row) {
+  try {
+    const lastCol = sh.getLastColumn();
+    const vals    = sh.getRange(row, 1, 1, lastCol).getValues()[0];
+    const idx     = (L) => d_colLetterToIndex_(L) - 1;
+    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+
+    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]);
+    if (!displayName) {
+      const msg = 'No display name in column F';
+      logCell.setValue(msg);
+      return { toast: msg };
+    }
+
+    // 1. Find the existing Proposal Review thread
+    // Search using first word of display name to avoid Gmail misreading hyphens,
+    // then match locally against full display name (case-insensitive, contains check)
+    const firstWord = displayName.split(/\s+/)[0];
+    const searchQuery = 'subject:"Proposal Review: ' + firstWord + '" newer_than:' + DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS + 'd';
+    const candidates = GmailApp.search(searchQuery, 0, 20);
+    const displayNameLower = displayName.toLowerCase();
+    const thread = candidates.find(t =>
+      t.getFirstMessageSubject().toLowerCase().includes(displayNameLower)
+    ) || null;
+
+    if (!thread) {
+      const msg = 'No thread found for "Proposal Review: ' + displayName + '"';
+      logCell.setValue(msg);
+      return { toast: msg };
+    }
+
+    // 2. Find "Shop Drawing - [displayName]" Google Slides file in Drive
+    const fileName = 'Shop Drawing - ' + displayName;
+    const files    = DriveApp.getFilesByName(fileName);
+    let slideBlob  = null;
+    let slideUrl   = null;
+    let slideId    = null;
+
+    while (files.hasNext()) {
+      const f = files.next();
+      if (f.getMimeType() === 'application/vnd.google-apps.presentation') {
+        slideId  = f.getId();
+        slideUrl = f.getUrl();
+        break;
+      }
+    }
+
+    if (!slideUrl) {
+      const msg = 'Slides file not found: "' + fileName + '"';
+      logCell.setValue(msg);
+      return { toast: msg };
+    }
+
+    // 3. Export first slide as PNG
+    try {
+      const exportUrl = 'https://docs.google.com/presentation/d/' + slideId + '/export/png';
+      const resp = UrlFetchApp.fetch(exportUrl, {
+        headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+        muteHttpExceptions: true
+      });
+      if (resp.getResponseCode() === 200) {
+        slideBlob = resp.getBlob().setName('design_review.png');
+      } else {
+        console.error('Slide PNG export HTTP ' + resp.getResponseCode());
+      }
+    } catch (exportErr) {
+      console.error('Slide export error:', exportErr);
+    }
+
+    // 4. Build draft body
+    const plainBody = 'Design Review:\n\n' + slideUrl;
+
+    let htmlBody = '<div style="font-family:Arial,sans-serif;">';
+    htmlBody += '<p style="font-size:14pt;font-weight:bold;">Design Review:</p>';
+    if (slideBlob) {
+      htmlBody += '<img src="cid:slideimage" alt="' + d_htmlEscape_(fileName) + '" style="max-width:100%;border:1px solid #ccc;border-radius:4px;" /><br><br>';
+    }
+    htmlBody += '<a href="' + d_htmlEscape_(slideUrl) + '" target="_blank" style="font-size:12pt;">' + d_htmlEscape_(fileName) + '</a>';
+    htmlBody += '</div>';
+
+    // 5. Create reply draft on the existing thread
+    const options = { htmlBody: htmlBody };
+    if (slideBlob) options.inlineImages = { slideimage: slideBlob };
+
+    const draft      = thread.createDraftReply(plainBody, options);
+    const draftMsgId = draft.getMessage().getId();
+    const draftUrl   = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMsgId);
+
+    // 6. Write link to column B
+    const linkText = '🎨 Design Review';
+    const richText = SpreadsheetApp.newRichTextValue()
+      .setText(linkText)
+      .setLinkUrl(0, linkText.length, draftUrl)
+      .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+      .build();
+    logCell.setRichTextValue(richText);
+
+    return { toast: slideBlob ? 'Design Review draft created & linked in B' : 'Design Review draft created (slide image unavailable) & linked in B' };
+
+  } catch (err) {
+    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+    logCell.setValue('Error creating design review draft: ' + d_shortErr_(err));
+    return { toast: 'Error creating design review draft: ' + d_shortErr_(err) };
+  }
+}
+
 /** end-of-file */

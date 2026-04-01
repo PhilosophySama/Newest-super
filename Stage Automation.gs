@@ -178,6 +178,11 @@ function handleEditMove_(e) {
       m_createShopDrawing_(sheet, row);
     }
 
+    // ── Shop Drawing — triggered by "Shop Drawing" on Awarded ──
+    if (isAwarded && stageValueLower === 'shop drawing') {
+      m_createShopDrawing_(sheet, row);
+    }
+
     const handled = handleStageChange_(e, sheet, row, r.getValue());
     
     // Auto-sort after stage change ONLY if:
@@ -992,6 +997,41 @@ function m_createPrintPacket_(sheet, row) {
       return { message: 'Error: No Photos folder found' };
     }
     
+    // Search for Shop Drawing Slides file in the Drive folder
+    logCell.setValue('📐 Looking for Shop Drawing file...');
+    SpreadsheetApp.flush();
+    
+    let shopDrawingUrl = null;
+    try {
+      const shopDrawingName = `Shop Drawing - ${displayName}`;
+      let slideFiles = photosFolder.getFilesByName(shopDrawingName);
+      
+      if (!slideFiles.hasNext()) {
+        // Not found — create it now, then re-search
+        logCell.setValue('📐 Shop Drawing not found — creating now...');
+        SpreadsheetApp.flush();
+        m_createShopDrawing_(sheet, row);
+        Utilities.sleep(2000); // Give Drive a moment to register the new file
+        slideFiles = photosFolder.getFilesByName(shopDrawingName); // Re-search
+      }
+      
+      if (slideFiles.hasNext()) {
+        const slideFile = slideFiles.next();
+        shopDrawingUrl = slideFile.getUrl();
+        if (S.ENABLE_LOGGING) {
+          m_logOperation_('Shop Drawing found', { name: shopDrawingName, url: shopDrawingUrl });
+        }
+      } else {
+        if (S.ENABLE_LOGGING) {
+          m_logOperation_('Shop Drawing still not found after creation attempt', { name: shopDrawingName });
+        }
+      }
+    } catch (shopDrawingErr) {
+      if (S.ENABLE_LOGGING) {
+        m_logOperation_('Shop Drawing search error', { error: shopDrawingErr.message });
+      }
+    }
+    
     // Fetch up to 3 images from the Drive folder (combined with email attachments)
     logCell.setValue('🖼️ Fetching Drive folder images...');
     SpreadsheetApp.flush();
@@ -1003,7 +1043,7 @@ function m_createPrintPacket_(sheet, row) {
         const file = driveFiles.next();
         const mimeType = file.getMimeType();
         if (mimeType && mimeType.startsWith('image/')) {
-          driveImages.push(file.getBlob());
+          driveImages.push(file.getAs('image/jpeg'));
         }
       }
       if (driveImages.length > 0) {
@@ -1125,6 +1165,60 @@ function m_createPrintPacket_(sheet, row) {
     body.appendParagraph('').setSpacingAfter(30);
     body.appendHorizontalRule();
     
+    // ===== SHOP DRAWING LINK PAGE (17x11 — print separately) =====
+    if (shopDrawingUrl) {
+      body.appendPageBreak();
+      
+      body.appendParagraph('').setSpacingAfter(120);
+      
+      const shopTitlePara = body.appendParagraph('SHOP DRAWING');
+      shopTitlePara.setHeading(DocumentApp.ParagraphHeading.HEADING1);
+      shopTitlePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      shopTitlePara.setSpacingAfter(20);
+      
+      const shopSubPara = body.appendParagraph('Print at 17" × 11" (Tabloid/Ledger)');
+      shopSubPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      shopSubPara.setItalic(true);
+      shopSubPara.setFontSize(12);
+      shopSubPara.setSpacingAfter(60);
+      
+      const shopLinkText = `📐 Open Shop Drawing: ${displayName}`;
+      const shopLinkPara = body.appendParagraph(shopLinkText);
+      shopLinkPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      shopLinkPara.setFontSize(18);
+      shopLinkPara.setLinkUrl(shopDrawingUrl);
+      shopLinkPara.setBold(true);
+      shopLinkPara.setSpacingAfter(40);
+      
+      body.appendParagraph('(Click above → File → Print → Set paper size to Tabloid 11×17)')
+        .setAlignment(DocumentApp.HorizontalAlignment.CENTER)
+        .setItalic(true)
+        .setFontSize(10);
+
+      // Also link the Proposal Review email thread
+      try {
+        const proposalQuery = `subject:"Proposal Review: ${displayName}"`;
+        const proposalThreads = GmailApp.search(proposalQuery, 0, 1);
+        if (proposalThreads.length > 0) {
+          const proposalMessages = proposalThreads[0].getMessages();
+          if (proposalMessages.length > 0) {
+            const proposalMsgId = proposalMessages[proposalMessages.length - 1].getId();
+            const proposalUrl = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent('subject:"Proposal Review: ' + displayName + '"')}`;
+            const emailLinkText = `📧 Proposal Review Email: ${displayName}`;
+            const emailLinkPara = body.appendParagraph(emailLinkText);
+            emailLinkPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+            emailLinkPara.setFontSize(14);
+            emailLinkPara.setLinkUrl(proposalUrl);
+            emailLinkPara.setSpacingBefore(20);
+          }
+        }
+      } catch (emailLinkErr) {
+        if (S.ENABLE_LOGGING) {
+          m_logOperation_('Proposal email link error on shop drawing page', { error: emailLinkErr.message });
+        }
+      }
+    }
+
     // ===== GOOGLE EARTH PAGE (Satellite) =====
     if (address) {
       logCell.setValue('🛰️ Generating satellite image...');
@@ -1173,19 +1267,32 @@ function m_createPrintPacket_(sheet, row) {
       body.appendPageBreak();
       
       try {
-        const routeUrl = `https://maps.googleapis.com/maps/api/staticmap?size=640x640&maptype=roadmap&markers=color:green|label:A|${encodeURIComponent(SHOP_ADDRESS)}&markers=color:red|label:B|${encodeURIComponent(address)}&path=color:0x0000ff|weight:5|enc:&key=${MAPS_API_KEY}`;
+        const cleanRouteAddress = address.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+        const routeUrl = `https://maps.googleapis.com/maps/api/staticmap?size=640x640&maptype=roadmap&markers=color:green%7Clabel:A%7C${encodeURIComponent(SHOP_ADDRESS)}&markers=color:red%7Clabel:B%7C${encodeURIComponent(cleanRouteAddress)}&key=${MAPS_API_KEY}`;
         
         // Get directions to draw the route
         const directions = Maps.newDirectionFinder()
           .setOrigin(SHOP_ADDRESS)
-          .setDestination(address)
+          .setDestination(cleanRouteAddress)
           .setMode(Maps.DirectionFinder.Mode.DRIVING)
           .getDirections();
         
         let routeMapUrl = routeUrl;
         if (directions.routes && directions.routes.length > 0) {
-          const polyline = directions.routes[0].overview_polyline.points;
-          routeMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=640x640&maptype=roadmap&markers=color:green|label:A|${encodeURIComponent(SHOP_ADDRESS)}&markers=color:red|label:B|${encodeURIComponent(address)}&path=color:0x4285F4|weight:5|enc:${polyline}&key=${MAPS_API_KEY}`;
+          const steps = directions.routes[0].legs[0].steps;
+          const waypoints = [];
+          const sampleRate = Math.max(1, Math.floor(steps.length / 20));
+          for (let s = 0; s < steps.length; s += sampleRate) {
+            const loc = steps[s].start_location;
+            waypoints.push(`${loc.lat},${loc.lng}`);
+          }
+          const lastLoc = steps[steps.length - 1].end_location;
+          waypoints.push(`${lastLoc.lat},${lastLoc.lng}`);
+          const pathStr = waypoints.join('%7C');
+          const markersA = `color:green%7Clabel:A%7C${encodeURIComponent(SHOP_ADDRESS)}`;
+          const markersB = `color:red%7Clabel:B%7C${encodeURIComponent(cleanRouteAddress)}`;
+          const pathParam = `color:0x4285F4%7Cweight:5%7C${pathStr}`;
+          routeMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=640x640&maptype=roadmap&markers=${markersA}&markers=${markersB}&path=${pathParam}&key=${MAPS_API_KEY}`;
         }
         
         const routeResponse = UrlFetchApp.fetch(routeMapUrl);
@@ -1290,7 +1397,8 @@ function m_createPrintPacket_(sheet, row) {
     
     // Create link in column B
     const docUrl = doc.getUrl();
-    const linkText = `📄 Print Packet (${imageAttachments.length} email + ${driveImages.length} Drive photos)`;
+    const shopDrawingNote = shopDrawingUrl ? ' + 📐 Shop Drawing' : '';
+    const linkText = `📄 Print Packet (${imageAttachments.length} email + ${driveImages.length} Drive photos${shopDrawingNote})`;
     const richTextLink = SpreadsheetApp.newRichTextValue()
       .setText(linkText)
       .setLinkUrl(0, linkText.length, docUrl)

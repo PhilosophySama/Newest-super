@@ -12,7 +12,8 @@ function m_createShopDrawing_(sheet, row) {
     var scriptProps = PropertiesService.getScriptProperties();
     var templateId  = scriptProps.getProperty('SHOP_DRAWING_TEMPLATE_ID');
     if (!templateId) {
-      Logger.log('m_createShopDrawing_: SHOP_DRAWING_TEMPLATE_ID not set in Script Properties. Run m_createShopDrawingTemplate_() first.');
+      Logger.log('m_createShopDrawing_: SHOP_DRAWING_TEMPLATE_ID not set.');
+      SpreadsheetApp.getActive().toast('Shop Drawing failed: Template ID not set in Script Properties.', 'Shop Drawing Error', 6);
       return;
     }
 
@@ -20,7 +21,7 @@ function m_createShopDrawing_(sheet, row) {
     var colE  = sheet.getRange(row, 5).getValue();   // Customer Name
     var colH  = sheet.getRange(row, 8).getValue();   // Phone
     var colJ  = sheet.getRange(row, 10).getValue();  // Address
-    var colZ  = sheet.getRange(row, 26).getValue();  // Valance
+    var colR  = String(sheet.getRange(row, 18).getValue() || '').trim(); // Job Type
     var colAA = sheet.getRange(row, 27).getValue();  // Frame Type
     var colAB = sheet.getRange(row, 28).getValue();  // Fabric
 
@@ -31,11 +32,13 @@ function m_createShopDrawing_(sheet, row) {
     var folderUrl = m_getFolderUrlFromCell_(colF);
     if (!folderUrl) {
       Logger.log('m_createShopDrawing_: No folder URL found in col F, row ' + row);
+      SpreadsheetApp.getActive().toast('Shop Drawing failed: No folder link in col F.', 'Shop Drawing Error', 6);
       return;
     }
     var folderId = m_extractFolderIdFromUrl_(folderUrl);
     if (!folderId) {
       Logger.log('m_createShopDrawing_: Could not parse folder ID from URL: ' + folderUrl);
+      SpreadsheetApp.getActive().toast('Shop Drawing failed: Could not parse folder ID.', 'Shop Drawing Error', 6);
       return;
     }
 
@@ -45,42 +48,142 @@ function m_createShopDrawing_(sheet, row) {
     var existing = folder.getFilesByName(fileName);
     if (existing.hasNext()) {
       Logger.log('m_createShopDrawing_: Already exists, skipping — ' + fileName);
+      SpreadsheetApp.getActive().toast('Shop Drawing already exists — skipped.', 'Shop Drawing', 4);
       return;
     }
 
-    // Copy template into customer folder
+    // ── Search for inline 3D render image from Proposal Review email ──
+    var renderBlob = null;
+    try {
+      var searchQuery = 'in:sent subject:"Proposal Review: ' + displayName + '"';
+      var threads = GmailApp.search(searchQuery, 0, 1);
+      if (threads.length > 0) {
+        var messages = threads[0].getMessages();
+        if (messages.length > 0) {
+          var message = messages[messages.length - 1]; // most recent
+          var inlineImages = message.getAttachments({
+            includeInlineImages: true,
+            includeAttachments:  false
+          });
+          // Filter for image types only
+          var imageAttachments = inlineImages.filter(function(a) {
+            return a.getContentType() && a.getContentType().indexOf('image/') === 0;
+          });
+          if (imageAttachments.length > 0) {
+            renderBlob = imageAttachments[0].copyBlob();
+            Logger.log('m_createShopDrawing_: Found inline render image.');
+          } else {
+            Logger.log('m_createShopDrawing_: No inline images in email — skipping image.');
+          }
+        }
+      } else {
+        Logger.log('m_createShopDrawing_: No Proposal Review email found — skipping image.');
+      }
+    } catch (emailErr) {
+      Logger.log('m_createShopDrawing_: Email search error — ' + emailErr.message);
+    }
+
+    // ── Copy template into customer folder ──
     var templateFile = DriveApp.getFileById(templateId);
     var copy         = templateFile.makeCopy(fileName, folder);
-
-    // Fill placeholders
     var presentation = SlidesApp.openById(copy.getId());
+    var slide        = presentation.getSlides()[0];
     var today        = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MM/dd/yyyy');
 
+    // ── Insert 3D render image above footer if found ──
+    if (renderBlob) {
+      try {
+        // Get slide dimensions
+        var slideWidth  = presentation.getPageWidth();   // points
+        var slideHeight = presentation.getPageHeight();  // points
+
+        // Footer occupies roughly bottom 1.5 inches (108 pts)
+        // Image fills the remaining space with padding
+        var imgPadding   = 18;   // 0.25 inch padding
+        var footerHeight = 108;
+        var maxWidth     = (slideWidth  - (imgPadding * 2)) * 0.65;
+        var maxHeight    = (slideHeight - footerHeight - (imgPadding * 2)) * 0.65;
+
+        // Insert first to get natural dimensions, then scale with locked aspect ratio
+        var insertedImage = slide.insertImage(renderBlob);
+        var naturalWidth  = insertedImage.getWidth();
+        var naturalHeight = insertedImage.getHeight();
+        var scale         = Math.min(maxWidth / naturalWidth, maxHeight / naturalHeight);
+        var imgWidth      = naturalWidth  * scale;
+        var imgHeight     = naturalHeight * scale;
+
+        // Center on page
+        var imgLeft = (slideWidth  - imgWidth)  / 2;
+        var imgTop  = (slideHeight - imgHeight) / 2;
+
+        insertedImage.setWidth(imgWidth);
+        insertedImage.setHeight(imgHeight);
+        insertedImage.setLeft(imgLeft);
+        insertedImage.setTop(imgTop);
+
+        Logger.log('m_createShopDrawing_: Render image inserted into slide.');
+      } catch (imgErr) {
+        Logger.log('m_createShopDrawing_: Image insert error — ' + imgErr.message);
+      }
+    }
+
+    // ── Fill footer placeholders ──
+    var isAwardedSheet = sheet.getName() === 'Awarded';
+
+    var colRLower = colR.toLowerCase();
+    var notesText = '';
+    if (colRLower === 'aluminum canopy') {
+      notesText =
+        'NOTES:\n' +
+        'Structures designed with FL BLDG Code 2023 8E-1620 & not to exceed 170 MPH Vasd\n' +
+        'ASCE 7 - 22CH 6, 29 Exp C-3 sec. Gust Cat 2.\n' +
+        'STRUCTURAL ALUMINUM:\n' +
+        'These specifications shall apply to the design of aluminum alloy load carrying members. ' +
+        'Computation of forces, moments, stresses and deflections shall be in accordance with accepted methods of elastic structural analysis and engineering design.\n' +
+        '1. All elements shall be aluminum alloy 6051-T6 or alloy 6063-T52 unless noted otherwise\n' +
+        '2. All welds to comply with A.W.S code (latest addition)\n' +
+        '3. Cover welds with corrosion resistance coating\n' +
+        '4. Structures are designed in accordance with the following codes: - Aluminum design manual\n' +
+        '5. All frames have designed using rational analysis\n' +
+        '6. All connections shall be fully welded with the structural aluminum alloy fillet weld: 5356 unless noted elsewhere\n' +
+        '7. Aluminum members in contact with concrete shall be protected with alkali-resistant coating such as heavy bodied bituminous paint or water methacrylate lacquer';
+    } else if (colRLower === 'complete build' || colRLower === 'demo + complete') {
+      notesText =
+        'NOTES:\n' +
+        'Clear Height:\n' +
+        'Mounting to:\n' +
+        'Pitch:';
+    }
+    // Re-cover and anything else → notesText stays ''
+
     var replacements = {
-      '{{CLIENT_NAME_PHONE}}': (colE || '') + (colH ? '  |  ' + colH : ''),
+      '{{CLIENT_NAME_PHONE}}': (displayName || '') + (colH ? '  |  ' + colH : ''),
       '{{ADDRESS}}':           String(colJ  || '-'),
-      '{{FABRIC}}':            String(colAB || '-'),
-      '{{FRAME}}':             String(colAA || '-'),
-      '{{VALANCE}}':           String(colZ  || '-'),
-      '{{PROJECT_MGR}}':       'Gino',
-      '{{DATE}}':              today
+      '{{FABRIC}}':            isAwardedSheet ? '' : String(colAB || '-'),
+      '{{FRAME}}':             isAwardedSheet ? '' : String(colAA || '-'),
+      '{{DATE}}':              today,
+      '{{NOTES}}':             notesText
     };
 
-    presentation.getSlides().forEach(function(slide) {
-      slide.getShapes().forEach(function(shape) {
-        if (!shape.getText) return;
-        var tf = shape.getText();
-        Object.keys(replacements).forEach(function(key) {
-          tf.replaceAllText(key, replacements[key]);
-        });
+    slide.getShapes().forEach(function(shape) {
+      if (!shape.getText) return;
+      var tf = shape.getText();
+      Object.keys(replacements).forEach(function(key) {
+        tf.replaceAllText(key, replacements[key]);
       });
     });
 
     presentation.saveAndClose();
     Logger.log('m_createShopDrawing_: Created "' + fileName + '" → folder ' + folderId);
+    SpreadsheetApp.getActive().toast(
+      'Shop Drawing created' + (renderBlob ? ' with 3D render' : ' (no render found)') + ': ' + fileName,
+      'Shop Drawing',
+      5
+    );
 
   } catch (e) {
     Logger.log('m_createShopDrawing_ error: ' + e.message);
+    SpreadsheetApp.getActive().toast('Shop Drawing failed: ' + e.message, 'Shop Drawing Error', 6);
   }
 }
 
