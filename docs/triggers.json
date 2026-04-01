@@ -1,20 +1,20 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-01T05:01:58.462Z",
+    "lastUpdated": "2026-04-01T05:29:53.719Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
     "totalTriggers": 22
   },
   "stats": {
-    "totalFiles": 12,
-    "totalFunctions": 183,
+    "totalFiles": 13,
+    "totalFunctions": 182,
     "totalTriggers": 22,
     "totalLines": 9910,
-    "publicFunctions": 51,
+    "publicFunctions": 50,
     "helperFunctions": 168,
-    "avgFunctionsPerFile": 15,
-    "avgLinesPerFile": 826
+    "avgFunctionsPerFile": 14,
+    "avgLinesPerFile": 762
   },
   "files": [
     {
@@ -528,8 +528,8 @@
       "size": 35038
     },
     {
-      "path": "Formula restoration.gs.gs",
-      "filename": "Formula restoration.gs.gs",
+      "path": "Formula restoration.gs",
+      "filename": "Formula restoration.gs",
       "purpose": "FORMULA RESTORATION SYSTEM Version# 01/28-10:45AM by Claude Opus 4.5 PURPOSE:",
       "version": "01/28-10:45AM by Claude Opus 4.5",
       "functions": [
@@ -667,8 +667,8 @@
       "size": 4593
     },
     {
-      "path": "Lead follow up.gs.gs",
-      "filename": "Lead follow up.gs.gs",
+      "path": "Lead follow up.gs",
+      "filename": "Lead follow up.gs",
       "purpose": "Lead Follow up.gs Version: 1/16 9am EST by Claude Sonnet 4.5 PURPOSE",
       "version": "1/16 9am EST by Claude Sonnet 4.5",
       "functions": [
@@ -1357,6 +1357,51 @@
       "size": 16676
     },
     {
+      "path": "ShopDrawing.gs",
+      "filename": "ShopDrawing.gs",
+      "purpose": "Called from handleEditMove_ when col D = \"Quote Sent\" on Leads or F/U. Duplicates the Shop Drawing Slides template into the customer's Drive folder, renames it, and fills footer placeholders. Skips silently if already exists.",
+      "version": "04/01-01:00AM by Claude Sonnet 4.6",
+      "functions": [
+        {
+          "name": "m_createShopDrawing_",
+          "line": 10,
+          "description": "Called from handleEditMove_ when col D = \"Quote Sent\" on Leads or F/U. Duplicates the Shop Drawing Slides template into the customer's Drive folder, renames it, and fills footer placeholders. Skips silently if already exists.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_getFolderUrlFromCell_",
+          "line": 91,
+          "description": "Reads the hyperlink URL out of a cell. Supports: =HYPERLINK() formula, rich-text link, plain URL string.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_extractFolderIdFromUrl_",
+          "line": 116,
+          "description": "Parses a Google Drive folder ID from a Drive URL. Handles /drive/folders/ID and ?id=ID formats.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_createShopDrawingTemplate_",
+          "line": 138,
+          "description": "ACTION REQUIRED AFTER RUNNING: Open the file \"Shop Drawing Template\" in Google Slides → File → Page Setup → Custom → enter 11 × 17 in → Apply.",
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "m_createShopDrawing_",
+        "m_createShopDrawingTemplate_",
+        "m_getFolderUrlFromCell_",
+        "m_extractFolderIdFromUrl_"
+      ],
+      "lines": 253,
+      "size": 9709
+    },
+    {
       "path": "Stage Automation.gs",
       "filename": "Stage Automation.gs",
       "purpose": "STAGE AUTOMATION (standalone) Version: 1/16 9am EST by Claude Sonnet 4.5 Moves rows between sheets, creates Drive folders, writes Google Earth links,",
@@ -1571,41 +1616,6 @@
           "description": "Install daily folder check trigger (7am)",
           "isPublic": false,
           "isHelper": true
-        },
-        {
-          "name": "m_createShopDrawing_",
-          "line": 1837,
-          "description": "Called from handleEditMove_ when col D = \"Quote Sent\" on Leads or F/U. Duplicates the Shop Drawing Slides template into the customer's Drive folder, renames it, and fills footer placeholders. Skips silently if already exists.",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "m_getFolderUrlFromCell_",
-          "line": 1918,
-          "description": "Reads the hyperlink URL out of a cell. Supports: =HYPERLINK() formula, rich-text link, plain URL string.",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "m_extractFolderIdFromUrl_",
-          "line": 1943,
-          "description": "Parses a Google Drive folder ID from a Drive URL. Handles /drive/folders/ID and ?id=ID formats.",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "m_createShopDrawingTemplate_",
-          "line": 1965,
-          "description": "ACTION REQUIRED AFTER RUNNING: Open the file \"Shop Drawing Template\" in Google Slides → File → Page Setup → Custom → enter 11 × 17 in → Apply.",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "addBox",
-          "line": 1979,
-          "description": "Helper: insert a labeled placeholder box",
-          "isPublic": true,
-          "isHelper": false
         }
       ],
       "triggers": [
@@ -1782,14 +1792,11 @@
         "checkEmptyFoldersDaily_",
         "checkEmptyFoldersNow_",
         "installDailyFolderCheckTrigger_",
-        "m_createShopDrawingTemplate_",
-        "m_getFolderUrlFromCell_",
-        "m_extractFolderIdFromUrl_",
         "MOVE_CONFIG",
         "Defines: MOVE_CONFIG"
       ],
-      "lines": 2080,
-      "size": 77505
+      "lines": 1827,
+      "size": 67802
     }
   ],
   "categories": {
@@ -2367,41 +2374,6 @@
             "description": "Install daily folder check trigger (7am)",
             "isPublic": false,
             "isHelper": true
-          },
-          {
-            "name": "m_createShopDrawing_",
-            "line": 1837,
-            "description": "Called from handleEditMove_ when col D = \"Quote Sent\" on Leads or F/U. Duplicates the Shop Drawing Slides template into the customer's Drive folder, renames it, and fills footer placeholders. Skips silently if already exists.",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "m_getFolderUrlFromCell_",
-            "line": 1918,
-            "description": "Reads the hyperlink URL out of a cell. Supports: =HYPERLINK() formula, rich-text link, plain URL string.",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "m_extractFolderIdFromUrl_",
-            "line": 1943,
-            "description": "Parses a Google Drive folder ID from a Drive URL. Handles /drive/folders/ID and ?id=ID formats.",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "m_createShopDrawingTemplate_",
-            "line": 1965,
-            "description": "ACTION REQUIRED AFTER RUNNING: Open the file \"Shop Drawing Template\" in Google Slides → File → Page Setup → Custom → enter 11 × 17 in → Apply.",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "addBox",
-            "line": 1979,
-            "description": "Helper: insert a labeled placeholder box",
-            "isPublic": true,
-            "isHelper": false
           }
         ],
         "triggers": [
@@ -2578,14 +2550,11 @@
           "checkEmptyFoldersDaily_",
           "checkEmptyFoldersNow_",
           "installDailyFolderCheckTrigger_",
-          "m_createShopDrawingTemplate_",
-          "m_getFolderUrlFromCell_",
-          "m_extractFolderIdFromUrl_",
           "MOVE_CONFIG",
           "Defines: MOVE_CONFIG"
         ],
-        "lines": 2080,
-        "size": 77505
+        "lines": 1827,
+        "size": 67802
       }
     ],
     "automation": [
@@ -3127,8 +3096,8 @@
         "size": 35038
       },
       {
-        "path": "Formula restoration.gs.gs",
-        "filename": "Formula restoration.gs.gs",
+        "path": "Formula restoration.gs",
+        "filename": "Formula restoration.gs",
         "purpose": "FORMULA RESTORATION SYSTEM Version# 01/28-10:45AM by Claude Opus 4.5 PURPOSE:",
         "version": "01/28-10:45AM by Claude Opus 4.5",
         "functions": [
@@ -3266,8 +3235,8 @@
         "size": 4593
       },
       {
-        "path": "Lead follow up.gs.gs",
-        "filename": "Lead follow up.gs.gs",
+        "path": "Lead follow up.gs",
+        "filename": "Lead follow up.gs",
         "purpose": "Lead Follow up.gs Version: 1/16 9am EST by Claude Sonnet 4.5 PURPOSE",
         "version": "1/16 9am EST by Claude Sonnet 4.5",
         "functions": [
@@ -3575,6 +3544,51 @@
         ],
         "lines": 474,
         "size": 16349
+      },
+      {
+        "path": "ShopDrawing.gs",
+        "filename": "ShopDrawing.gs",
+        "purpose": "Called from handleEditMove_ when col D = \"Quote Sent\" on Leads or F/U. Duplicates the Shop Drawing Slides template into the customer's Drive folder, renames it, and fills footer placeholders. Skips silently if already exists.",
+        "version": "04/01-01:00AM by Claude Sonnet 4.6",
+        "functions": [
+          {
+            "name": "m_createShopDrawing_",
+            "line": 10,
+            "description": "Called from handleEditMove_ when col D = \"Quote Sent\" on Leads or F/U. Duplicates the Shop Drawing Slides template into the customer's Drive folder, renames it, and fills footer placeholders. Skips silently if already exists.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_getFolderUrlFromCell_",
+            "line": 91,
+            "description": "Reads the hyperlink URL out of a cell. Supports: =HYPERLINK() formula, rich-text link, plain URL string.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_extractFolderIdFromUrl_",
+            "line": 116,
+            "description": "Parses a Google Drive folder ID from a Drive URL. Handles /drive/folders/ID and ?id=ID formats.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_createShopDrawingTemplate_",
+            "line": 138,
+            "description": "ACTION REQUIRED AFTER RUNNING: Open the file \"Shop Drawing Template\" in Google Slides → File → Page Setup → Custom → enter 11 × 17 in → Apply.",
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "m_createShopDrawing_",
+          "m_createShopDrawingTemplate_",
+          "m_getFolderUrlFromCell_",
+          "m_extractFolderIdFromUrl_"
+        ],
+        "lines": 253,
+        "size": 9709
       }
     ]
   },
