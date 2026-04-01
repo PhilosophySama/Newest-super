@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-01T05:29:53.719Z",
+    "lastUpdated": "2026-04-01T18:30:50.952Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,277 +8,284 @@
   },
   "stats": {
     "totalFiles": 13,
-    "totalFunctions": 182,
+    "totalFunctions": 183,
     "totalTriggers": 22,
-    "totalLines": 9910,
+    "totalLines": 10257,
     "publicFunctions": 50,
-    "helperFunctions": 168,
+    "helperFunctions": 169,
     "avgFunctionsPerFile": 14,
-    "avgLinesPerFile": 762
+    "avgLinesPerFile": 789
   },
   "files": [
     {
       "path": "Draft Creator.gs",
       "filename": "Draft Creator.gs",
-      "purpose": "Draft Creator.gs Version: 03/16-12:00PM EST by Claude Sonnet 4.6 PURPOSE",
-      "version": "03/16-12:00PM EST by Claude Sonnet 4.6",
+      "purpose": "Draft Creator.gs Version: 04/01-10:30AM EST by Claude Opus 4.1 PURPOSE",
+      "version": "04/01-10:30AM EST by Claude Opus 4.1",
       "functions": [
         {
           "name": "installTriggerDrafts_V2",
-          "line": 190,
+          "line": 195,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "handleEditDraft_V2",
-          "line": 209,
+          "line": 214,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_searchAndLinkEmail_",
-          "line": 298,
+          "line": 321,
           "description": "Search Gmail for existing emails/drafts and link in column B",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCustomerDraft_",
-          "line": 388,
+          "line": 411,
           "description": "Create customer follow-up draft when \"Email customer\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createHandoffDraft_",
-          "line": 493,
+          "line": 516,
           "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCustomerInfoDraft_",
-          "line": 569,
+          "line": 592,
           "description": "Create customer info request draft when \"Customer Info\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createCOIDraft_",
-          "line": 776,
+          "line": 799,
           "description": "Create COI request draft when \"COI Req\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createFollowUpDraft_",
-          "line": 930,
+          "line": 953,
           "description": "Finds original sent quote email, copies its body, and creates a new draft with a follow-up message prepended and the original quoted below. Version: 03/03-12:30PM EST by Claude Sonnet 4.6",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createRoughQuote_",
-          "line": 1028,
+          "line": 1051,
           "description": "Create rough quote draft/message when \"Rough quote\" is selected",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createDraftsForAllRows_V2",
-          "line": 1141,
+          "line": 1164,
           "description": null,
           "isPublic": true,
           "isHelper": true
         },
         {
           "name": "v2_createDraftForRow_",
-          "line": 1188,
+          "line": 1211,
           "description": "Row → Draft creation ========================= */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_exportRecoverRangeAsHtml_",
-          "line": 1363,
+          "line": 1386,
           "description": "@param {Spreadsheet} ss - The spreadsheet object @param {string} rangeOverride - Optional range to export (e.g., \"A1:K14\" or \"M1:S30\") @returns {string|null} HTML table string or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_sheetsDataToHtml_",
-          "line": 1422,
+          "line": 1445,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildHtmlBody_",
-          "line": 1567,
+          "line": 1590,
           "description": "Email body builders ================ */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_buildPlainBody_",
-          "line": 1633,
+          "line": 1656,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_extractUrlFromCell_",
-          "line": 1645,
+          "line": 1668,
           "description": "Helpers ===================== */",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_looksLikeUrl_",
-          "line": 1695,
+          "line": 1718,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeString_",
-          "line": 1696,
+          "line": 1719,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_htmlEscape_",
-          "line": 1697,
+          "line": 1720,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_colLetterToIndex_",
-          "line": 1699,
+          "line": 1722,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_getSpreadsheet_",
-          "line": 1705,
+          "line": 1728,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_writeB_",
-          "line": 1712,
+          "line": 1735,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_withRetry_",
-          "line": 1723,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_specificErrorMessage_",
-          "line": 1739,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_shortErr_",
           "line": 1746,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "v2_validateConfig_",
-          "line": 1748,
+          "name": "d_specificErrorMessage_",
+          "line": 1762,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
-          "name": "d_isValidEmail_",
-          "line": 1755,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_firstLinkInRichText_",
-          "line": 1757,
-          "description": null,
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
-          "name": "d_isGmailDraftUrl_",
+          "name": "d_shortErr_",
           "line": 1769,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
+          "name": "v2_validateConfig_",
+          "line": 1771,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_isValidEmail_",
+          "line": 1778,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_firstLinkInRichText_",
+          "line": 1780,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "d_isGmailDraftUrl_",
+          "line": 1792,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
           "name": "d_templateSafe_",
-          "line": 1773,
+          "line": 1796,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_timestamp_",
-          "line": 1785,
+          "line": 1808,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_safeLogErrorToSheet_",
-          "line": 1791,
+          "line": 1814,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateRouteMapUrl_",
-          "line": 1807,
+          "line": 1830,
           "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "d_generateSimpleMapUrl_",
-          "line": 1888,
+          "line": 1911,
           "description": "Fallback: Generate simple map URL with just markers (no route line)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testMapsApiConnection",
-          "line": 1902,
+          "line": 1925,
           "description": "Test function - run this to verify Maps API works",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "d_generateSatelliteMapUrl_",
-          "line": 1919,
+          "line": 1942,
           "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "v2_createPlotMapDraft_",
-          "line": 1947,
+          "line": 1970,
           "description": "schedule trigger words, builds a satellite Static Maps image auto-fitted to all locations, fetches distance/ETA per stop, and creates a Gmail draft. Version: 03/16-12:00PM by Claude Sonnet 4.6",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "v2_createDesignReviewDraft_",
+          "line": 2565,
+          "description": "slide of \"Shop Drawing - [F]\" as a PNG, and creates a reply draft with the image embedded and the file linked below. Version: 04/01-10:30AM EST by Claude Opus 4.1",
           "isPublic": false,
           "isHelper": true
         }
@@ -344,6 +351,7 @@
         "v2_createCustomerInfoDraft_",
         "v2_createCOIDraft_",
         "v2_createFollowUpDraft_",
+        "v2_createDesignReviewDraft_",
         "v2_createDraftForRow_",
         "d_shortErr_",
         "d_safeString_",
@@ -372,8 +380,8 @@
         "typeShort_",
         "DRAFTS_V2"
       ],
-      "lines": 2535,
-      "size": 110464
+      "lines": 2671,
+      "size": 116385
     },
     {
       "path": "Email Reader.gs",
@@ -1371,21 +1379,21 @@
         },
         {
           "name": "m_getFolderUrlFromCell_",
-          "line": 91,
+          "line": 194,
           "description": "Reads the hyperlink URL out of a cell. Supports: =HYPERLINK() formula, rich-text link, plain URL string.",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_extractFolderIdFromUrl_",
-          "line": 116,
+          "line": 219,
           "description": "Parses a Google Drive folder ID from a Drive URL. Handles /drive/folders/ID and ?id=ID formats.",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_createShopDrawingTemplate_",
-          "line": 138,
+          "line": 241,
           "description": "ACTION REQUIRED AFTER RUNNING: Open the file \"Shop Drawing Template\" in Google Slides → File → Page Setup → Custom → enter 11 × 17 in → Apply.",
           "isPublic": false,
           "isHelper": true
@@ -1394,12 +1402,12 @@
       "triggers": [],
       "dependencies": [
         "m_createShopDrawing_",
-        "m_createShopDrawingTemplate_",
         "m_getFolderUrlFromCell_",
-        "m_extractFolderIdFromUrl_"
+        "m_extractFolderIdFromUrl_",
+        "m_createShopDrawingTemplate_"
       ],
-      "lines": 253,
-      "size": 9709
+      "lines": 356,
+      "size": 14936
     },
     {
       "path": "Stage Automation.gs",
@@ -1416,203 +1424,203 @@
         },
         {
           "name": "m_autoSortByStage_",
-          "line": 200,
+          "line": 205,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "updateJobDescription_",
-          "line": 240,
+          "line": 245,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleDisplayNameChange_",
-          "line": 315,
+          "line": 320,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleEmailChange_",
-          "line": 354,
+          "line": 359,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleAddressChange_",
-          "line": 388,
+          "line": 393,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createEarthLink_",
-          "line": 418,
+          "line": 423,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleQbUrlChange_",
-          "line": 451,
+          "line": 456,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleStageChange_",
-          "line": 479,
+          "line": 484,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "moveRow_",
-          "line": 619,
+          "line": 624,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_searchAndLinkSentEmail_",
-          "line": 680,
+          "line": 685,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_linkQuoteSentEmail_",
-          "line": 762,
+          "line": 767,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_createPrintPacket_",
-          "line": 878,
+          "line": 883,
           "description": "2. Google Earth satellite image (full page) 3. Google Maps route image (full page) 4. Customer photos (one per page, deduplicated)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createNextDayGinoEvent_",
-          "line": 1329,
+          "line": 1437,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testCalendarAccess_",
-          "line": 1408,
+          "line": 1516,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_handleQbPrompt_",
-          "line": 1419,
+          "line": 1527,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_stageMatches_",
-          "line": 1488,
+          "line": 1596,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_looksLikeUrl_",
-          "line": 1492,
+          "line": 1600,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_getUrlFromCell_",
-          "line": 1496,
+          "line": 1604,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_cleanAddressForGoogleEarth_",
-          "line": 1526,
+          "line": 1634,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_geocodeAddress_",
-          "line": 1543,
+          "line": 1651,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_extractCoordinates_",
-          "line": 1566,
+          "line": 1674,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_logOperation_",
-          "line": 1576,
+          "line": 1684,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testDriveAccess_",
-          "line": 1583,
+          "line": 1691,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "validateSheetStructure_",
-          "line": 1594,
+          "line": 1702,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerMove_",
-          "line": 1639,
+          "line": 1747,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersDaily_",
-          "line": 1654,
+          "line": 1762,
           "description": "Check empty folders daily at 7am (time-driven trigger)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersNow_",
-          "line": 1689,
+          "line": 1797,
           "description": "Check empty folders immediately (manual trigger from menu)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_checkEmptyFoldersInSheet_",
-          "line": 1718,
+          "line": 1826,
           "description": "Check all folders in a single sheet and highlight empty ones",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installDailyFolderCheckTrigger_",
-          "line": 1803,
+          "line": 1911,
           "description": "Install daily folder check trigger (7am)",
           "isPublic": false,
           "isHelper": true
@@ -1795,8 +1803,8 @@
         "MOVE_CONFIG",
         "Defines: MOVE_CONFIG"
       ],
-      "lines": 1827,
-      "size": 67802
+      "lines": 1935,
+      "size": 72595
     }
   ],
   "categories": {
@@ -1804,265 +1812,272 @@
       {
         "path": "Draft Creator.gs",
         "filename": "Draft Creator.gs",
-        "purpose": "Draft Creator.gs Version: 03/16-12:00PM EST by Claude Sonnet 4.6 PURPOSE",
-        "version": "03/16-12:00PM EST by Claude Sonnet 4.6",
+        "purpose": "Draft Creator.gs Version: 04/01-10:30AM EST by Claude Opus 4.1 PURPOSE",
+        "version": "04/01-10:30AM EST by Claude Opus 4.1",
         "functions": [
           {
             "name": "installTriggerDrafts_V2",
-            "line": 190,
+            "line": 195,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "handleEditDraft_V2",
-            "line": 209,
+            "line": 214,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_searchAndLinkEmail_",
-            "line": 298,
+            "line": 321,
             "description": "Search Gmail for existing emails/drafts and link in column B",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCustomerDraft_",
-            "line": 388,
+            "line": 411,
             "description": "Create customer follow-up draft when \"Email customer\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createHandoffDraft_",
-            "line": 493,
+            "line": 516,
             "description": "Create customer handoff draft when \"Cust Handoff\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCustomerInfoDraft_",
-            "line": 569,
+            "line": 592,
             "description": "Create customer info request draft when \"Customer Info\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createCOIDraft_",
-            "line": 776,
+            "line": 799,
             "description": "Create COI request draft when \"COI Req\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createFollowUpDraft_",
-            "line": 930,
+            "line": 953,
             "description": "Finds original sent quote email, copies its body, and creates a new draft with a follow-up message prepended and the original quoted below. Version: 03/03-12:30PM EST by Claude Sonnet 4.6",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createRoughQuote_",
-            "line": 1028,
+            "line": 1051,
             "description": "Create rough quote draft/message when \"Rough quote\" is selected",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createDraftsForAllRows_V2",
-            "line": 1141,
+            "line": 1164,
             "description": null,
             "isPublic": true,
             "isHelper": true
           },
           {
             "name": "v2_createDraftForRow_",
-            "line": 1188,
+            "line": 1211,
             "description": "Row → Draft creation ========================= */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_exportRecoverRangeAsHtml_",
-            "line": 1363,
+            "line": 1386,
             "description": "@param {Spreadsheet} ss - The spreadsheet object @param {string} rangeOverride - Optional range to export (e.g., \"A1:K14\" or \"M1:S30\") @returns {string|null} HTML table string or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_sheetsDataToHtml_",
-            "line": 1422,
+            "line": 1445,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildHtmlBody_",
-            "line": 1567,
+            "line": 1590,
             "description": "Email body builders ================ */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_buildPlainBody_",
-            "line": 1633,
+            "line": 1656,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_extractUrlFromCell_",
-            "line": 1645,
+            "line": 1668,
             "description": "Helpers ===================== */",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_looksLikeUrl_",
-            "line": 1695,
+            "line": 1718,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeString_",
-            "line": 1696,
+            "line": 1719,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_htmlEscape_",
-            "line": 1697,
+            "line": 1720,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_colLetterToIndex_",
-            "line": 1699,
+            "line": 1722,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_getSpreadsheet_",
-            "line": 1705,
+            "line": 1728,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_writeB_",
-            "line": 1712,
+            "line": 1735,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_withRetry_",
-            "line": 1723,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_specificErrorMessage_",
-            "line": 1739,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_shortErr_",
             "line": 1746,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "v2_validateConfig_",
-            "line": 1748,
+            "name": "d_specificErrorMessage_",
+            "line": 1762,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
-            "name": "d_isValidEmail_",
-            "line": 1755,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_firstLinkInRichText_",
-            "line": 1757,
-            "description": null,
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
-            "name": "d_isGmailDraftUrl_",
+            "name": "d_shortErr_",
             "line": 1769,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
+            "name": "v2_validateConfig_",
+            "line": 1771,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_isValidEmail_",
+            "line": 1778,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_firstLinkInRichText_",
+            "line": 1780,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "d_isGmailDraftUrl_",
+            "line": 1792,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
             "name": "d_templateSafe_",
-            "line": 1773,
+            "line": 1796,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_timestamp_",
-            "line": 1785,
+            "line": 1808,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_safeLogErrorToSheet_",
-            "line": 1791,
+            "line": 1814,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateRouteMapUrl_",
-            "line": 1807,
+            "line": 1830,
             "description": "Generate Google Maps Static API URL for route image with distance/time data Returns object: { mapUrl, distance, duration } or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "d_generateSimpleMapUrl_",
-            "line": 1888,
+            "line": 1911,
             "description": "Fallback: Generate simple map URL with just markers (no route line)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testMapsApiConnection",
-            "line": 1902,
+            "line": 1925,
             "description": "Test function - run this to verify Maps API works",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "d_generateSatelliteMapUrl_",
-            "line": 1919,
+            "line": 1942,
             "description": "Generate Google Maps Static API satellite view URL for a location Returns the satellite image URL or null on failure",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "v2_createPlotMapDraft_",
-            "line": 1947,
+            "line": 1970,
             "description": "schedule trigger words, builds a satellite Static Maps image auto-fitted to all locations, fetches distance/ETA per stop, and creates a Gmail draft. Version: 03/16-12:00PM by Claude Sonnet 4.6",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "v2_createDesignReviewDraft_",
+            "line": 2565,
+            "description": "slide of \"Shop Drawing - [F]\" as a PNG, and creates a reply draft with the image embedded and the file linked below. Version: 04/01-10:30AM EST by Claude Opus 4.1",
             "isPublic": false,
             "isHelper": true
           }
@@ -2128,6 +2143,7 @@
           "v2_createCustomerInfoDraft_",
           "v2_createCOIDraft_",
           "v2_createFollowUpDraft_",
+          "v2_createDesignReviewDraft_",
           "v2_createDraftForRow_",
           "d_shortErr_",
           "d_safeString_",
@@ -2156,8 +2172,8 @@
           "typeShort_",
           "DRAFTS_V2"
         ],
-        "lines": 2535,
-        "size": 110464
+        "lines": 2671,
+        "size": 116385
       },
       {
         "path": "Stage Automation.gs",
@@ -2174,203 +2190,203 @@
           },
           {
             "name": "m_autoSortByStage_",
-            "line": 200,
+            "line": 205,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "updateJobDescription_",
-            "line": 240,
+            "line": 245,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleDisplayNameChange_",
-            "line": 315,
+            "line": 320,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleEmailChange_",
-            "line": 354,
+            "line": 359,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleAddressChange_",
-            "line": 388,
+            "line": 393,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createEarthLink_",
-            "line": 418,
+            "line": 423,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleQbUrlChange_",
-            "line": 451,
+            "line": 456,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleStageChange_",
-            "line": 479,
+            "line": 484,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "moveRow_",
-            "line": 619,
+            "line": 624,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_searchAndLinkSentEmail_",
-            "line": 680,
+            "line": 685,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_linkQuoteSentEmail_",
-            "line": 762,
+            "line": 767,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_createPrintPacket_",
-            "line": 878,
+            "line": 883,
             "description": "2. Google Earth satellite image (full page) 3. Google Maps route image (full page) 4. Customer photos (one per page, deduplicated)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createNextDayGinoEvent_",
-            "line": 1329,
+            "line": 1437,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testCalendarAccess_",
-            "line": 1408,
+            "line": 1516,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_handleQbPrompt_",
-            "line": 1419,
+            "line": 1527,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_stageMatches_",
-            "line": 1488,
+            "line": 1596,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_looksLikeUrl_",
-            "line": 1492,
+            "line": 1600,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_getUrlFromCell_",
-            "line": 1496,
+            "line": 1604,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_cleanAddressForGoogleEarth_",
-            "line": 1526,
+            "line": 1634,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_geocodeAddress_",
-            "line": 1543,
+            "line": 1651,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_extractCoordinates_",
-            "line": 1566,
+            "line": 1674,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_logOperation_",
-            "line": 1576,
+            "line": 1684,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testDriveAccess_",
-            "line": 1583,
+            "line": 1691,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "validateSheetStructure_",
-            "line": 1594,
+            "line": 1702,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerMove_",
-            "line": 1639,
+            "line": 1747,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersDaily_",
-            "line": 1654,
+            "line": 1762,
             "description": "Check empty folders daily at 7am (time-driven trigger)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersNow_",
-            "line": 1689,
+            "line": 1797,
             "description": "Check empty folders immediately (manual trigger from menu)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_checkEmptyFoldersInSheet_",
-            "line": 1718,
+            "line": 1826,
             "description": "Check all folders in a single sheet and highlight empty ones",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installDailyFolderCheckTrigger_",
-            "line": 1803,
+            "line": 1911,
             "description": "Install daily folder check trigger (7am)",
             "isPublic": false,
             "isHelper": true
@@ -2553,8 +2569,8 @@
           "MOVE_CONFIG",
           "Defines: MOVE_CONFIG"
         ],
-        "lines": 1827,
-        "size": 67802
+        "lines": 1935,
+        "size": 72595
       }
     ],
     "automation": [
@@ -3560,21 +3576,21 @@
           },
           {
             "name": "m_getFolderUrlFromCell_",
-            "line": 91,
+            "line": 194,
             "description": "Reads the hyperlink URL out of a cell. Supports: =HYPERLINK() formula, rich-text link, plain URL string.",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_extractFolderIdFromUrl_",
-            "line": 116,
+            "line": 219,
             "description": "Parses a Google Drive folder ID from a Drive URL. Handles /drive/folders/ID and ?id=ID formats.",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_createShopDrawingTemplate_",
-            "line": 138,
+            "line": 241,
             "description": "ACTION REQUIRED AFTER RUNNING: Open the file \"Shop Drawing Template\" in Google Slides → File → Page Setup → Custom → enter 11 × 17 in → Apply.",
             "isPublic": false,
             "isHelper": true
@@ -3583,12 +3599,12 @@
         "triggers": [],
         "dependencies": [
           "m_createShopDrawing_",
-          "m_createShopDrawingTemplate_",
           "m_getFolderUrlFromCell_",
-          "m_extractFolderIdFromUrl_"
+          "m_extractFolderIdFromUrl_",
+          "m_createShopDrawingTemplate_"
         ],
-        "lines": 253,
-        "size": 9709
+        "lines": 356,
+        "size": 14936
       }
     ]
   },
