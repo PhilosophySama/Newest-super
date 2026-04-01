@@ -462,6 +462,12 @@ function onOpen() {
       .addItem('🛑 Remove Health Check', 'removeTriggerHealthCheck_')
       .addToUi();
 
+    // Job Tracker Sync menu
+    ui.createMenu('📋 Job Tracker')
+      .addItem('🔄 Sync Now', 'syncJobTracker')
+      .addItem('⏰ Install Sync Triggers (7am & 5pm)', 'installJobTrackerSyncTriggers_')
+      .addToUi();
+
     // Formula Protection menu
     ui.createMenu('🔢 Formulas')
       .addItem('Install Formula Protection', 'installTriggerFormula_')

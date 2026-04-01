@@ -627,7 +627,7 @@ function v2_createCustomerInfoDraft_(sh, row) {
     }
     
     // Create subject
-    const subject = 'Info request for awning';
+    const subject = 'Info request for awning - ' + displayName;
     
     // Build bullet list
     let bulletList = '';
@@ -1962,7 +1962,13 @@ function v2_createPlotMapDraft_() {
   const EARTH_COL      = 17;  // Q
   const ADDRESS_COL    = 10;  // J
   const JOB_TYPE_COL   = 18;  // R
-  const READ_COL       = 18;
+  const READ_COL       = 35;
+  const JOB_VAL_COL    = 33;  // AG
+  const DEPOSIT_DATE_COL = 32;  // AF
+  const LEAD_START_COL   = 34;  // AH
+  const LEAD_END_COL     = 35;  // AI
+  const PHONE_COL      = 8;   // H
+  const EMAIL_COL      = 9;   // I
   const TRIGGERS     = ['schedule', '2.sched', 'schedule instal'];
   const ENG_TRIGGERS       = ['planning & engineering', 'permitting'];
   const SCHEDULED_TRIGGERS = ['scheduled'];
@@ -1979,7 +1985,10 @@ function v2_createPlotMapDraft_() {
 
   const lastRow = sh.getLastRow();
   if (lastRow >= 2) {
-    const data = sh.getRange(2, 1, lastRow - 1, READ_COL).getValues();
+    const data            = sh.getRange(2, 1,          lastRow - 1, READ_COL).getValues();
+    const folderRichTexts = sh.getRange(2, FOLDER_COL, lastRow - 1, 1).getRichTextValues();
+    const qbRichTexts     = sh.getRange(2, QB_COL,     lastRow - 1, 1).getRichTextValues();
+    const earthRichTexts  = sh.getRange(2, EARTH_COL,  lastRow - 1, 1).getRichTextValues();
     for (let i = 0; i < data.length; i++) {
       const stage   = String(data[i][STAGE_COL   - 1] || '').trim().toLowerCase();
       const name    = String(data[i][NAME_COL    - 1] || '').trim();
@@ -1992,8 +2001,7 @@ function v2_createPlotMapDraft_() {
         const cleanAddress = address.replace(/[\r\n]+/g, ', ').replace(/,\s*,/g, ',').trim();
         const folderUrl = (() => {
           try {
-            const cell = sh.getRange(i + 2, FOLDER_COL);
-            const rtv = cell.getRichTextValue();
+            const rtv = folderRichTexts[i][0];
             if (rtv) {
               const runs = rtv.getRuns();
               for (let k = 0; k < runs.length; k++) {
@@ -2010,8 +2018,7 @@ function v2_createPlotMapDraft_() {
         const displayName = String(data[i][FOLDER_COL - 1] || '').trim() || name || cleanAddress;
         const qbUrl       = (() => {
           try {
-            const cell = sh.getRange(i + 2, QB_COL);
-            const rtv = cell.getRichTextValue();
+            const rtv = qbRichTexts[i][0];
             if (rtv) {
               const runs = rtv.getRuns();
               for (let k = 0; k < runs.length; k++) {
@@ -2021,17 +2028,17 @@ function v2_createPlotMapDraft_() {
               const whole = rtv.getLinkUrl();
               if (whole) return whole;
             }
-            const val = String(cell.getValue() || '').trim();
+            const val = String(data[i][QB_COL - 1] || '').trim();
             if (/^https?:\/\/\S+/i.test(val)) return val;
           } catch (_) {}
           return '';
         })();
-        const cityParts = cleanAddress.split(',');
-        const city      = cityParts.length > 1 ? cityParts[1].trim().replace(/\s+[A-Z]{2}\s*\d{0,5}\s*$/i, '').trim() : cleanAddress;
+        const addressLines = address.split(/[\r\n]+/).map(l => l.trim()).filter(l => l);
+        const lastLine     = addressLines.length > 0 ? addressLines[addressLines.length - 1] : cleanAddress;
+        const city         = (lastLine.split(',')[0] || '').trim();
         const earthUrl = (() => {
           try {
-            const cell = sh.getRange(i + 2, EARTH_COL);
-            const rtv = cell.getRichTextValue();
+            const rtv = earthRichTexts[i][0];
             if (rtv) {
               const runs = rtv.getRuns();
               for (let k = 0; k < runs.length; k++) {
@@ -2044,66 +2051,116 @@ function v2_createPlotMapDraft_() {
           } catch (_) {}
           return '';
         })();
+        const jobValRaw = Number(data[i][JOB_VAL_COL - 1]) || 0;
+        const jobVal = jobValRaw ? (jobValRaw >= 1000 ? '$' + Math.round(jobValRaw / 1000) + 'k' : '$' + jobValRaw) : '';
         if (isSchedule || isFix) {
-          plotRows.push({ name: displayName, address: cleanAddress, city, folderUrl, qbUrl, earthUrl, jobType, distance: null, duration: null, lat: 0, isFix: isFix });
+          const phone = String(data[i][PHONE_COL - 1] || '').trim();
+          const email = String(data[i][EMAIL_COL - 1] || '').trim();
+          const fmtLeadDate = (v) => {
+            if (!v) return '';
+            const d = v instanceof Date ? v : new Date(v);
+            if (isNaN(d)) return String(v);
+            return (d.getMonth() + 1) + '/' + d.getDate();
+          };
+          const leadStart    = fmtLeadDate(data[i][LEAD_START_COL - 1]);
+          const leadEnd      = fmtLeadDate(data[i][LEAD_END_COL   - 1]);
+          const leadTime     = leadStart && leadEnd ? leadStart + ' - ' + leadEnd : (leadStart || leadEnd || '');
+          const leadStartRaw = data[i][LEAD_START_COL - 1] ? new Date(data[i][LEAD_START_COL - 1]) : null;
+          const leadEndRaw   = data[i][LEAD_END_COL   - 1] ? new Date(data[i][LEAD_END_COL   - 1]) : null;
+          const driveLabel = String(data[i][29] || '').trim(); // AD = col 30, index 29
+          plotRows.push({ name: displayName, rawName: name, address: cleanAddress, city, folderUrl, qbUrl, earthUrl, jobType, phone, email, jobVal, leadTime, leadStartRaw, leadEndRaw, driveLabel, distance: null, duration: null, lat: 0, isFix: isFix, stage: stage });
         } else if (isEng) {
-          engRows.push({ name: displayName, address: cleanAddress, city, folderUrl, qbUrl, jobType, distance: null, duration: null, lat: 0 });
+          const depositRaw  = data[i][DEPOSIT_DATE_COL - 1] ? new Date(data[i][DEPOSIT_DATE_COL - 1]) : null;
+          const depositDate = depositRaw ? String(depositRaw.getMonth() + 1).padStart(2,'0') + '/' + String(depositRaw.getDate()).padStart(2,'0') : '';
+          const driveLabel = String(data[i][29] || '').trim(); // AD = col 30, index 29
+          engRows.push({ name: displayName, rawName: name, address: cleanAddress, city, folderUrl, qbUrl, jobType, jobVal, depositDate, depositRaw, driveLabel, distance: null, duration: null, lat: 0 });
         } else if (isScheduled) {
-          scheduledRows.push({ name: displayName, address: cleanAddress, city, folderUrl, qbUrl, jobType, distance: null, duration: null, lat: 0, scheduledDate: null });
+          scheduledRows.push({ name: displayName, rawName: name, address: cleanAddress, city, folderUrl, qbUrl, jobType, jobVal, distance: null, duration: null, lat: 0, scheduledDate: null });
         }
       }
     }
   }
 
-  // --- Fetch distance + lat for Scheduled rows ---
-  for (let i = 0; i < scheduledRows.length; i++) {
-    try {
-      const directionsUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
-        'origin=' + encodeURIComponent(SHOP_ADDRESS) +
-        '&destination=' + encodeURIComponent(scheduledRows[i].address) +
-        '&key=' + apiKey;
-      const resp = UrlFetchApp.fetch(directionsUrl, { muteHttpExceptions: true });
-      const data = JSON.parse(resp.getContentText());
-      if (data.status === 'OK' && data.routes && data.routes[0]) {
-        const leg = data.routes[0].legs[0];
-        scheduledRows[i].lat = leg.end_location ? leg.end_location.lat : 0;
-        scheduledRows[i].lng = leg.end_location ? leg.end_location.lng : 0;
-      } else {
-        scheduledRows[i].lat = 0;
-      }
-    } catch (e) {
-      console.error('Directions fetch failed for ' + scheduledRows[i].address + ': ' + e.message);
-      scheduledRows[i].lat = 0;
-    }
-  }
+  // --- Batch Gmail search: 2 searches total, matched locally ---
+  let _proposalThreads = [];
+  let _lizGinoThreads  = [];
+  try { _proposalThreads = GmailApp.search('subject:"Proposal Review:"', 0, 50); } catch (_) {}
+  try { _lizGinoThreads  = GmailApp.search('(from:liz@walkerawning.com OR to:liz@walkerawning.com) (from:gino@walkerawning.com OR to:gino@walkerawning.com)', 0, 50); } catch (_) {}
 
-  // --- Lookup calendar dates for Scheduled rows ---
+  const v2_getEmailUrl_ = (displayName, rawName) => {
+    const dnL = displayName.toLowerCase();
+    const rnL = (rawName || '').toLowerCase();
+    for (let t = 0; t < _proposalThreads.length; t++) {
+      const subj = _proposalThreads[t].getFirstMessageSubject().toLowerCase();
+      if (subj.includes(dnL) || (rnL && subj.includes(rnL))) return 'https://mail.google.com/mail/u/0/#all/' + _proposalThreads[t].getId();
+    }
+    for (let t = 0; t < _lizGinoThreads.length; t++) {
+      const subj = _lizGinoThreads[t].getFirstMessageSubject().toLowerCase();
+      if (subj.includes(dnL) || (rnL && subj.includes(rnL))) return 'https://mail.google.com/mail/u/0/#all/' + _lizGinoThreads[t].getId();
+    }
+    return 'https://mail.google.com/mail/u/0/#search/' + encodeURIComponent(displayName);
+  };
+  for (let r = 0; r < plotRows.length; r++)     plotRows[r].emailThreadUrl     = v2_getEmailUrl_(plotRows[r].name,     plotRows[r].rawName);
+  for (let r = 0; r < engRows.length; r++)       engRows[r].emailThreadUrl       = v2_getEmailUrl_(engRows[r].name,       engRows[r].rawName);
+  for (let r = 0; r < scheduledRows.length; r++) scheduledRows[r].emailThreadUrl = v2_getEmailUrl_(scheduledRows[r].name, scheduledRows[r].rawName);
+
+  // Scheduled rows lat/lng handled in batch fetch below
+
+  // --- Single unified calendar scan — 5-month window, pre-built lookup map ---
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const futureDate = new Date();
-    futureDate.setFullYear(futureDate.getFullYear() + 2);
+    const futureDate = new Date(today);
+    futureDate.setMonth(futureDate.getMonth() + 5); // 5 months is plenty for scheduling
+
+    const calClean_ = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+
+    // Pre-build lookup maps: cleaned title -> { event, isFrame }
+    // One pass through all calendars, one getEvents() call per calendar
+    const allEventMap   = [];  // { cleanTitle, event }
+    const frameEventMap = [];  // { cleanTitle, event }
+
     const allCals = CalendarApp.getAllCalendars();
-    const allEvents = [];
     for (let c = 0; c < allCals.length; c++) {
       try {
+        const isFrame = allCals[c].getName().toLowerCase().includes('frame building');
         const evs = allCals[c].getEvents(today, futureDate);
         for (let e = 0; e < evs.length; e++) {
-          if (evs[e].isAllDayEvent()) allEvents.push(evs[e]);
+          if (!evs[e].isAllDayEvent()) continue;
+          const cleanTitle = calClean_(evs[e].getTitle());
+          const entry = { cleanTitle: cleanTitle, event: evs[e] };
+          allEventMap.push(entry);
+          if (isFrame) frameEventMap.push(entry);
         }
       } catch (_) {}
     }
+
+    // Match scheduled rows
     for (let i = 0; i < scheduledRows.length; i++) {
-      const clean = scheduledRows[i].name.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-      const match = allEvents.find(ev => {
-        const title = ev.getTitle().toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-        return title.includes(clean);
-      });
+      const clean = calClean_(scheduledRows[i].name);
+      const match = allEventMap.find(en => en.cleanTitle.includes(clean));
       if (match) {
-        scheduledRows[i].scheduledDate    = Utilities.formatDate(
-          match.getStartTime(), Session.getScriptTimeZone(), 'MM/dd'
-        );
-        scheduledRows[i].scheduledDateRaw = match.getStartTime();
+        scheduledRows[i].scheduledDate    = Utilities.formatDate(match.event.getStartTime(), Session.getScriptTimeZone(), 'MM/dd');
+        scheduledRows[i].scheduledDateRaw = match.event.getStartTime();
+      }
+    }
+    // Match schedule instal plot rows
+    for (let i = 0; i < plotRows.length; i++) {
+      if (plotRows[i].stage !== 'schedule instal') continue;
+      const clean = calClean_(plotRows[i].name);
+      const match = allEventMap.find(en => en.cleanTitle.includes(clean));
+      if (match) {
+        plotRows[i].scheduledDate    = Utilities.formatDate(match.event.getStartTime(), Session.getScriptTimeZone(), 'MM/dd');
+        plotRows[i].scheduledDateRaw = match.event.getStartTime();
+      }
+    }
+    // Match eng rows against frame building calendar only
+    for (let i = 0; i < engRows.length; i++) {
+      const clean = calClean_(engRows[i].name);
+      const match = frameEventMap.find(en => en.cleanTitle.includes(clean));
+      if (match) {
+        engRows[i].frameDate    = Utilities.formatDate(match.event.getStartTime(), Session.getScriptTimeZone(), 'MM/dd');
+        engRows[i].frameDateRaw = match.event.getStartTime();
       }
     }
   } catch (calErr) {
@@ -2113,9 +2170,58 @@ function v2_createPlotMapDraft_() {
   // --- Keep only scheduled rows with a confirmed calendar match ---
   scheduledRows = scheduledRows.filter(r => r.scheduledDateRaw);
 
-  // --- Sort north to south (highest lat first) ---
-  plotRows.sort((a, b) => b.lat - a.lat);
-  engRows.sort((a, b) => b.lat - a.lat);
+  // --- Batch fetch all Directions at once: plotRows + engRows + scheduledRows ---
+  const allDirRows = [
+    ...plotRows.map(r => ({ row: r, wantDistDur: true })),
+    ...engRows.map(r => ({ row: r, wantDistDur: true })),
+    ...scheduledRows.map(r => ({ row: r, wantDistDur: false }))
+  ];
+  if (allDirRows.length > 0) {
+    const dirRequests = allDirRows.map(item => ({
+      url: 'https://maps.googleapis.com/maps/api/directions/json?' +
+        'origin=' + encodeURIComponent(SHOP_ADDRESS) +
+        '&destination=' + encodeURIComponent(item.row.address) +
+        '&key=' + apiKey,
+      muteHttpExceptions: true
+    }));
+    const dirResponses = UrlFetchApp.fetchAll(dirRequests);
+    for (let i = 0; i < dirResponses.length; i++) {
+      try {
+        const parsed = JSON.parse(dirResponses[i].getContentText());
+        const item   = allDirRows[i];
+        if (parsed.status === 'OK' && parsed.routes && parsed.routes[0]) {
+          const leg    = parsed.routes[0].legs[0];
+          item.row.lat = leg.end_location ? leg.end_location.lat : 0;
+          item.row.lng = leg.end_location ? leg.end_location.lng : 0;
+          if (item.wantDistDur) {
+            item.row.distance = leg.distance ? leg.distance.text : null;
+            item.row.duration = leg.duration ? leg.duration.text : null;
+          }
+        } else {
+          item.row.lat = 0;
+          item.row.lng = 0;
+        }
+      } catch (e) {
+        console.error('Directions parse failed: ' + e.message);
+        allDirRows[i].row.lat = 0;
+        allDirRows[i].row.lng = 0;
+      }
+    }
+  }
+
+  // --- Final sorts (after lat/lng populated) ---
+  plotRows.sort((a, b) => {
+    if (!a.leadStartRaw && !b.leadStartRaw) return 0;
+    if (!a.leadStartRaw) return 1;
+    if (!b.leadStartRaw) return -1;
+    return a.leadStartRaw - b.leadStartRaw;
+  });
+  engRows.sort((a, b) => {
+    if (!a.depositRaw && !b.depositRaw) return 0;
+    if (!a.depositRaw) return 1;
+    if (!b.depositRaw) return -1;
+    return a.depositRaw - b.depositRaw;
+  });
   scheduledRows.sort((a, b) => {
     if (!a.scheduledDateRaw && !b.scheduledDateRaw) return 0;
     if (!a.scheduledDateRaw) return 1;
@@ -2123,57 +2229,13 @@ function v2_createPlotMapDraft_() {
     return a.scheduledDateRaw - b.scheduledDateRaw;
   });
 
-  // --- Fetch distance + ETA + lat for each location ---
-  for (let i = 0; i < plotRows.length; i++) {
-    try {
-      const directionsUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
-        'origin=' + encodeURIComponent(SHOP_ADDRESS) +
-        '&destination=' + encodeURIComponent(plotRows[i].address) +
-        '&key=' + apiKey;
-      const resp = UrlFetchApp.fetch(directionsUrl, { muteHttpExceptions: true });
-      const data = JSON.parse(resp.getContentText());
-      if (data.status === 'OK' && data.routes && data.routes[0]) {
-        const leg = data.routes[0].legs[0];
-        plotRows[i].distance = leg.distance ? leg.distance.text : null;
-        plotRows[i].duration = leg.duration ? leg.duration.text : null;
-        plotRows[i].lat      = leg.end_location ? leg.end_location.lat : 0;
-        plotRows[i].lng      = leg.end_location ? leg.end_location.lng : 0;
-      } else {
-        plotRows[i].lat = 0;
-      }
-    } catch (e) {
-      console.error('Directions fetch failed for ' + plotRows[i].address + ': ' + e.message);
-      plotRows[i].lat = 0;
-    }
-  }
+  // --- Build tentativeRows: schedule instal plot rows with a calendar match ---
+  const tentativeRows = plotRows.filter(r => r.stage === 'schedule instal' && r.scheduledDateRaw);
 
-  // --- Fetch distance + ETA + lat for Planning & Engineering rows ---
-  for (let i = 0; i < engRows.length; i++) {
-    try {
-      const directionsUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
-        'origin=' + encodeURIComponent(SHOP_ADDRESS) +
-        '&destination=' + encodeURIComponent(engRows[i].address) +
-        '&key=' + apiKey;
-      const resp = UrlFetchApp.fetch(directionsUrl, { muteHttpExceptions: true });
-      const data = JSON.parse(resp.getContentText());
-      if (data.status === 'OK' && data.routes && data.routes[0]) {
-        const leg = data.routes[0].legs[0];
-        engRows[i].distance = leg.distance ? leg.distance.text : null;
-        engRows[i].duration = leg.duration ? leg.duration.text : null;
-        engRows[i].lat      = leg.end_location ? leg.end_location.lat : 0;
-        engRows[i].lng      = leg.end_location ? leg.end_location.lng : 0;
-      } else {
-        engRows[i].lat = 0;
-      }
-    } catch (e) {
-      console.error('Directions fetch failed for ' + engRows[i].address + ': ' + e.message);
-      engRows[i].lat = 0;
-    }
-  }
-
-  // --- Sort north to south (highest lat first) ---
-  plotRows.sort((a, b) => b.lat - a.lat);
-  engRows.sort((a, b) => b.lat - a.lat);
+  // --- Build frameRows from eng rows with a Frame Building calendar match ---
+  const frameRows = engRows
+    .filter(r => r.frameDateRaw)
+    .sort((a, b) => a.frameDateRaw - b.frameDateRaw);
 
   // --- Build satellite map markers (no center/zoom = API auto-fits) ---
   const LABELS     = 'ABCDEFGHIJKLMNOPQRST';
@@ -2203,66 +2265,77 @@ function v2_createPlotMapDraft_() {
     markersParam +
     '&key=' + apiKey;
 
-  // --- Fetch satellite image ---
+  // --- Parallel fetch: satellite map + route directions together ---
   let mapBlob;
+  let routeMapBlob = null;
+
+  // Build route markers string
+  let routeMarkersParam = '';
+  for (let i = 0; i < plotRows.length; i++) {
+    const label = LABELS[i];
+    const loc   = plotRows[i].lat ? `${plotRows[i].lat},${plotRows[i].lng}` : encodeURIComponent(plotRows[i].address);
+    routeMarkersParam += `&markers=size:mid%7Ccolor:blue%7Clabel:${label}%7C${loc}`;
+  }
+
+  // Build route directions URL (needed for polyline)
+  let routeDirUrl = null;
+  if (plotRows.length >= 2) {
+    const origin      = plotRows[0].lat ? `${plotRows[0].lat},${plotRows[0].lng}` : encodeURIComponent(plotRows[0].address);
+    const destination = plotRows[plotRows.length - 1].lat ? `${plotRows[plotRows.length - 1].lat},${plotRows[plotRows.length - 1].lng}` : encodeURIComponent(plotRows[plotRows.length - 1].address);
+    const waypointList = plotRows.slice(1, -1).map(r => r.lat ? `${r.lat},${r.lng}` : encodeURIComponent(r.address)).join('|');
+    routeDirUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
+      'origin=' + origin +
+      '&destination=' + destination +
+      (waypointList ? '&waypoints=' + encodeURIComponent(waypointList) : '') +
+      '&key=' + apiKey;
+  }
+
+  // Fire satellite map + route directions in parallel
   try {
-    const resp = UrlFetchApp.fetch(mapUrl, { muteHttpExceptions: true });
-    if (resp.getResponseCode() !== 200) {
-      SpreadsheetApp.getUi().alert(
-        'Maps API error (' + resp.getResponseCode() + '): ' +
-        resp.getContentText().substring(0, 300)
-      );
+    const parallelRequests = [{ url: mapUrl, muteHttpExceptions: true }];
+    if (routeDirUrl) parallelRequests.push({ url: routeDirUrl, muteHttpExceptions: true });
+
+    const parallelResponses = UrlFetchApp.fetchAll(parallelRequests);
+
+    // Satellite map
+    const mapResp = parallelResponses[0];
+    if (mapResp.getResponseCode() !== 200) {
+      SpreadsheetApp.getUi().alert('Maps API error (' + mapResp.getResponseCode() + '): ' + mapResp.getContentText().substring(0, 300));
       return;
     }
-    mapBlob = resp.getBlob().setName('schedule_map.png');
+    mapBlob = mapResp.getBlob().setName('schedule_map.png');
+
+    // Route polyline -> build route map URL -> fetch in a second parallel batch
+    if (routeDirUrl && parallelResponses[1]) {
+      try {
+        const routeData = JSON.parse(parallelResponses[1].getContentText());
+        let routeMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?size=640x400&scale=2&maptype=roadmap' + routeMarkersParam;
+        if (routeData.status === 'OK' && routeData.routes && routeData.routes[0]) {
+          routeMapUrl += '&path=color:0x1a73e8|weight:5|enc:' + routeData.routes[0].overview_polyline.points;
+        }
+        routeMapUrl += '&key=' + apiKey;
+        // fetchAll with single item — keeps pattern consistent and non-blocking relative to any future additions
+        const routeImgResps = UrlFetchApp.fetchAll([{ url: routeMapUrl, muteHttpExceptions: true }]);
+        if (routeImgResps[0].getResponseCode() === 200) {
+          routeMapBlob = routeImgResps[0].getBlob().setName('route_map.png');
+        }
+      } catch (e) {
+        console.error('Route map fetch failed: ' + e.message);
+      }
+    } else if (plotRows.length === 1) {
+      try {
+        const routeMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?size=640x400&scale=2&maptype=roadmap' + routeMarkersParam + '&key=' + apiKey;
+        const routeImgResps = UrlFetchApp.fetchAll([{ url: routeMapUrl, muteHttpExceptions: true }]);
+        if (routeImgResps[0].getResponseCode() === 200) {
+          routeMapBlob = routeImgResps[0].getBlob().setName('route_map.png');
+        }
+      } catch (e) {
+        console.error('Single-stop route map failed: ' + e.message);
+      }
+    }
   } catch (e) {
     SpreadsheetApp.getUi().alert('Failed to fetch map image: ' + e.message);
     return;
-  }
-
-  // --- Fetch full route static map image (schedule stops only) ---
-  let routeMapBlob = null;
-  if (plotRows.length > 0) {
-    try {
-      let routeMarkersParam = '';
-      for (let i = 0; i < plotRows.length; i++) {
-        const label = LABELS[i];
-        const loc   = plotRows[i].lat ? `${plotRows[i].lat},${plotRows[i].lng}` : encodeURIComponent(plotRows[i].address);
-        routeMarkersParam += `&markers=size:mid%7Ccolor:blue%7Clabel:${label}%7C${loc}`;
-      }
-
-      let routePolyline = null;
-      if (plotRows.length >= 2) {
-        const origin      = plotRows[0].lat ? `${plotRows[0].lat},${plotRows[0].lng}` : encodeURIComponent(plotRows[0].address);
-        const destination = plotRows[plotRows.length - 1].lat ? `${plotRows[plotRows.length - 1].lat},${plotRows[plotRows.length - 1].lng}` : encodeURIComponent(plotRows[plotRows.length - 1].address);
-        const waypointList = plotRows.slice(1, -1).map(r => r.lat ? `${r.lat},${r.lng}` : encodeURIComponent(r.address)).join('|');
-        const routeDirUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
-          'origin=' + origin +
-          '&destination=' + destination +
-          (waypointList ? '&waypoints=' + encodeURIComponent(waypointList) : '') +
-          '&key=' + apiKey;
-        const routeResp = UrlFetchApp.fetch(routeDirUrl, { muteHttpExceptions: true });
-        const routeData = JSON.parse(routeResp.getContentText());
-        if (routeData.status === 'OK' && routeData.routes && routeData.routes[0]) {
-          routePolyline = routeData.routes[0].overview_polyline.points;
-        }
-      }
-
-      let routeMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?' +
-        'size=640x400&scale=2&maptype=roadmap' +
-        routeMarkersParam;
-      if (routePolyline) {
-        routeMapUrl += '&path=color:0x1a73e8|weight:5|enc:' + routePolyline;
-      }
-      routeMapUrl += '&key=' + apiKey;
-
-      const routeResp2 = UrlFetchApp.fetch(routeMapUrl, { muteHttpExceptions: true });
-      if (routeResp2.getResponseCode() === 200) {
-        routeMapBlob = routeResp2.getBlob().setName('route_map.png');
-      }
-    } catch (e) {
-      console.error('Full route map fetch failed: ' + e.message);
-    }
   }
 
   // --- Calculate tomorrow's date for Schedule button label ---
@@ -2274,85 +2347,94 @@ function v2_createPlotMapDraft_() {
     tPad(tomorrow.getMonth() + 1) +
     tPad(tomorrow.getDate());
 
-  // --- Build schedule legend rows (red) ---
+  // --- Build schedule legend rows ---
+  const typeShort_ = (s) => (s && s.match(/^\S+/) ? s.match(/^\S+/)[0] : '—');
   const schedLegendRows = plotRows.map((item, i) => {
-    const label    = LABELS[i];
-    const distText = item.distance ? item.distance : '—';
-    const mapsLink = 'https://www.google.com/maps/dir/' +
-      encodeURIComponent(SHOP_ADDRESS) + '/' +
-      encodeURIComponent(item.address);
+    if (item.stage === 'schedule instal' && item.scheduledDateRaw) return '';
+    const label      = LABELS[i];
     const labelColor = item.isFix ? '#0b2158' : '#2471a3';
     const linkColor  = item.isFix ? '#0b2158' : '#1a73e8';
-    const btnColor   = item.isFix ? '#0b2158' : '#1a73e8';
-    const driveLinkText = item.isFix ? 'Fix' : (item.jobType || '—');
-    const nameCell = item.qbUrl
-      ? `<a href="${item.qbUrl}" target="_blank" style="color:${linkColor};text-decoration:none;">${item.name}</a>`
-      : item.name;
-    const typeCell = item.folderUrl
-      ? `<a href="${item.folderUrl}" target="_blank" style="color:${linkColor};text-decoration:none;">${driveLinkText}</a>`
-      : driveLinkText;
-    const cityCell = item.earthUrl
-      ? `<a href="${item.earthUrl}" target="_blank" style="color:${linkColor};text-decoration:none;">${item.city || item.address}</a>`
-      : `<a href="${mapsLink}" target="_blank" style="color:${linkColor};text-decoration:none;">${item.city || item.address}</a>`;
-    const distCell = `<a href="${mapsLink}" target="_blank" style="color:${linkColor};text-decoration:none;">${distText}</a>`;
+    const nameDisplay = item.name +
+      (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
+      (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '') +
+      (item.jobType ? ` <span style="color:#888;font-size:7pt;">${typeShort_(item.jobType)}</span>` : '');
+    const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:${linkColor};text-decoration:none;">${nameDisplay}</a>`;
     const calDescription = encodeURIComponent(
-      'Type: ' + (item.jobType || '—') + '\n' +
-      'Distance from shop: ' + (item.distance || '—') + '\n' +
-      'Drive time: ' + (item.duration || '—') + '\n' +
-      (item.folderUrl ? 'Drive Link: ' + item.folderUrl : '')
+      item.name + (item.phone ? ' - ' + item.phone : '') + '\n' +
+      (item.email ? item.email : '') + '\n\n' +
+      (item.jobType || '—') + '\n' +
+      (item.distance || '—') + ' - ' + (item.duration || '—') +
+      (item.folderUrl ? '\n\n' + item.folderUrl : '')
     );
+    const calEventTitle = item.name + (item.jobVal ? ' ' + item.jobVal : '');
     const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE` +
-      `&text=${encodeURIComponent(item.name)}` +
+      `&text=${encodeURIComponent(calEventTitle)}` +
       `&dates=${tomorrowCalDate}/${tomorrowCalDate}` +
       `&details=${calDescription}` +
       `&location=${encodeURIComponent(item.address)}` +
       `&ctz=America%2FNew_York`;
-    const scheduleBtn = `<a href="${calUrl}" target="_blank" style="display:inline-block;padding:3px 8px;background:${btnColor};color:#fff;border-radius:4px;text-decoration:none;font-size:10pt;white-space:nowrap;">${tomorrowLabel}</a>`;
+    const fmtLeadEndOnly = (v) => {
+      if (!v) return '+ Schedule';
+      const d = v instanceof Date ? v : new Date(v);
+      if (isNaN(d)) return '+ Schedule';
+      return String(d.getMonth() + 1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0');
+    };
+    const deadlineLabel = fmtLeadEndOnly(item.leadEndRaw);
+    const addToSchedCell = `<a href="${calUrl}" target="_blank" style="display:inline-block;padding:3px 8px;background:${labelColor};color:#fff;border-radius:4px;text-decoration:none;font-size:8pt;white-space:nowrap;">${deadlineLabel}</a>`;
     return `<tr>
-       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:${labelColor};">${label}</td>
-       <td style="padding:5px 12px 5px 4px;font-size:13pt;">${nameCell}</td>
-       <td style="padding:5px 8px;font-size:11pt;color:#333;">${typeCell}</td>
-       <td style="padding:5px 8px;font-size:11pt;">${cityCell}</td>
-       <td style="padding:5px 8px;font-size:11pt;color:#333;">${distCell}</td>
-       <td style="padding:5px 8px;">${scheduleBtn}</td>
+       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:${labelColor};text-align:right;">${label}</td>
+       <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
+       <td style="padding:5px 8px;text-align:left;">${addToSchedCell}</td>
      </tr>`;
   }).join('');
 
-  // --- Build planning & engineering legend rows (blue) ---
+  // --- Build planning & engineering legend rows ---
   const engLegendRows = engRows.map((item, i) => {
     const label    = LABELS[plotRows.length + i];
-    const nameCell = item.qbUrl
-      ? `<a href="${item.qbUrl}" target="_blank" style="color:#c0392b;text-decoration:none;">${item.name}</a>`
-      : `<span style="color:#c0392b;">${item.name}</span>`;
-    const typeCell = item.folderUrl
-      ? `<a href="${item.folderUrl}" target="_blank" style="color:#c0392b;text-decoration:none;">${item.jobType || '—'}</a>`
-      : `<span style="color:#c0392b;">${item.jobType || '—'}</span>`;
+    const nameDisplay = item.name +
+      (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
+      (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '') +
+      (item.jobType ? ` <span style="color:#888;font-size:7pt;">${typeShort_(item.jobType)}</span>` : '');
+    const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:#c0392b;text-decoration:none;">${nameDisplay}</a>`;
+    const depositCell = `<span style="color:#c0392b;font-size:8pt;">${item.depositDate || '—'}</span>`;
     return `<tr>
-       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#c0392b;">${label}</td>
-       <td style="padding:5px 12px 5px 4px;font-size:13pt;">${nameCell}</td>
-       <td style="padding:5px 8px;font-size:11pt;">${typeCell}</td>
+       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#c0392b;text-align:left;">${label}</td>
+       <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
+       <td style="padding:5px 8px;text-align:left;">${depositCell}</td>
      </tr>`;
   }).join('');
 
   // --- Build scheduled legend rows (green) ---
   const scheduledLegendRows = scheduledRows.map((item, i) => {
     const label    = LABELS[plotRows.length + engRows.length + i];
-    const mapsLink = 'https://www.google.com/maps/dir/' +
-      encodeURIComponent(SHOP_ADDRESS) + '/' +
-      encodeURIComponent(item.address);
-    const nameCell = item.qbUrl
-      ? `<a href="${item.qbUrl}" target="_blank" style="color:#1e8449;text-decoration:none;">${item.name}</a>`
-      : `<span style="color:#1e8449;">${item.name}</span>`;
-    const mapsCell = `<a href="${mapsLink}" target="_blank" style="color:#1e8449;text-decoration:none;">${item.city || item.address}</a>`;
+    const nameDisplay = item.name +
+      (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
+      (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '');
+    const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:#1e8449;text-decoration:none;">${nameDisplay}</a>`;
     const calSearchUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(item.name)}`;
     const dateCell = item.scheduledDate
-      ? `<a href="${calSearchUrl}" target="_blank" style="color:#1e8449;text-decoration:none;">${item.scheduledDate}</a>`
-      : `<span style="color:#1e8449;">—</span>`;
+      ? `<a href="${calSearchUrl}" target="_blank" style="color:#1e8449;font-size:8pt;text-decoration:none;">${item.scheduledDate}</a>`
+      : `<span style="color:#1e8449;font-size:8pt;">—</span>`;
     return `<tr>
-       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#1e8449;">${label}</td>
-       <td style="padding:5px 12px 5px 4px;font-size:13pt;">${nameCell}</td>
-       <td style="padding:5px 8px;font-size:11pt;">${mapsCell}</td>
-       <td style="padding:5px 8px;font-size:11pt;">${dateCell}</td>
+       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#1e8449;text-align:left;">${label}</td>
+       <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
+       <td style="padding:5px 8px;text-align:left;">${dateCell}</td>
+     </tr>`;
+  }).join('');
+
+  // --- Build frame building legend rows (purple) ---
+  const frameLegendRows = frameRows.map((item) => {
+    const label       = LABELS[plotRows.length + engRows.indexOf(item)];
+    const nameDisplay = item.name +
+      (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
+      (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '');
+    const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:#7d3c98;text-decoration:none;">${nameDisplay}</a>`;
+    const calSearchUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(item.name)}`;
+    const dateCell  = `<a href="${calSearchUrl}" target="_blank" style="color:#7d3c98;font-size:8pt;text-decoration:none;">${item.frameDate}</a>`;
+    return `<tr>
+       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#7d3c98;text-align:left;">${label}</td>
+       <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
+       <td style="padding:5px 8px;text-align:left;">${dateCell}</td>
      </tr>`;
   }).join('');
 
@@ -2367,45 +2449,61 @@ function v2_createPlotMapDraft_() {
     `<table style="border-collapse:collapse;"><tr valign="top">` +
     // Left table - Schedule (red)
     `<td style="padding-right:20px;">` +
-    `<p style="font-size:13pt;font-weight:bold;color:#2471a3;margin:0 0 6px 0;text-align:center;">Schedule</p>` +
+    `<p style="font-size:13pt;font-weight:bold;color:#2471a3;margin:0 0 6px 0;text-align:center;">Need to Schedule</p>` +
     `<table style="border-collapse:collapse;">` +
     `<tr style="font-size:11pt;color:#888;border-bottom:1px solid #ddd;">` +
     `<th style="padding:4px 12px 4px 4px;text-align:left;"></th>` +
-    `<th style="padding:4px 12px 4px 4px;text-align:left;">Estimate Link</th>` +
-    `<th style="padding:4px 8px;text-align:left;">Drive<br>Link</th>` +
-    `<th style="padding:4px 8px;text-align:left;">Earth<br>Link</th>` +
-    `<th style="padding:4px 8px;text-align:left;">Maps<br>Link</th>` +
-    `<th style="padding:4px 8px;text-align:left;">Add to<br>calendar</th>` +
+    `<th style="padding:4px 12px 4px 4px;text-align:right;">Email Chain</th>` +
+    `<th style="padding:4px 8px;text-align:left;">Deadline</th>` +
     `</tr>` +
     schedLegendRows +
-    `</table></td>` +
+    `</table>` +
+    `<div style="margin-top:12px;text-align:center;"><a href="https://www.google.com/maps/dir/${encodeURIComponent(SHOP_ADDRESS)}/${allAddresses}" target="_blank" style="display:inline-block;padding:6px 14px;background:#1a73e8;color:#fff;border-radius:4px;text-decoration:none;font-size:11pt;font-weight:bold;">Full Route in Google Maps Link</a></div>` +
+    `</td>` +
     // Divider
     `<td style="border-left:2px solid #ddd;padding:0;"></td>` +
     // Right table - Planning & Engineering (blue)
-    `<td style="padding-left:20px;padding-top:22px;">` +
-    `<p style="font-size:13pt;font-weight:bold;color:#c0392b;margin:0 0 6px 0;text-align:center;">Planning & Engineering</p>` +
+    `<td style="padding-left:20px;padding-top:0px;vertical-align:top;">` +
+    `<p style="font-size:13pt;font-weight:bold;color:#c0392b;margin:0 0 6px 0;text-align:center;">In Planning & Engineering</p>` +
     `<table style="border-collapse:collapse;">` +
     `<tr style="font-size:11pt;color:#888;border-bottom:1px solid #ddd;">` +
-    `<th style="padding:4px 12px 4px 4px;text-align:left;"></th>` +
-    `<th style="padding:4px 12px 4px 4px;text-align:left;">Estimate Link</th>` +
-    `<th style="padding:4px 8px;text-align:left;">Drive Link</th>` +
+    `<th style="padding:4px 12px 4px 4px;text-align:right;"></th>` +
+    `<th style="padding:4px 12px 4px 4px;text-align:right;">Email Chain</th>` +
+    `<th style="padding:4px 8px;text-align:left;">Deposited</th>` +
     `</tr>` +
     engLegendRows +
     `</table></td>` +
     `</tr></table>` +
-    `<div style="margin-top:12px;padding-left:250px;"><a href="https://www.google.com/maps/dir/${encodeURIComponent(SHOP_ADDRESS)}/${allAddresses}" target="_blank" style="display:inline-block;padding:6px 14px;background:#1a73e8;color:#fff;border-radius:4px;text-decoration:none;font-size:11pt;font-weight:bold;">Full Route in Google Maps Link</a></div>` +
-    (scheduledRows.length > 0 ?
+    (scheduledRows.length > 0 || tentativeRows.length > 0 || frameRows.length > 0 ?
       `<br><div style="display:inline-block;">` +
-      `<p style="font-size:13pt;font-weight:bold;color:#1e8449;margin:16px 0 6px 0;text-align:center;">Scheduled</p>` +
+      `<p style="font-size:13pt;font-weight:bold;color:#1e8449;margin:16px 0 6px 0;text-align:center;">Already on the Schedule</p>` +
       `<table style="border-collapse:collapse;">` +
       `<tr style="font-size:11pt;color:#888;border-bottom:1px solid #ddd;">` +
-      `<th style="padding:4px 12px 4px 4px;text-align:left;"></th>` +
-      `<th style="padding:4px 12px 4px 4px;text-align:left;">Estimate Link</th>` +
-      `<th style="padding:4px 8px;text-align:left;">Maps<br>Link</th>` +
-      `<th style="padding:4px 8px;text-align:left;">Scheduled<br>For</th>` +
+      `<th style="padding:4px 12px 4px 4px;text-align:right;"></th>` +
+      `<th style="padding:4px 12px 4px 4px;text-align:right;">Email Chain</th>` +
+      `<th style="padding:4px 8px;text-align:left;">Scheduled</th>` +
       `</tr>` +
       scheduledLegendRows +
-      `</table></div><br>`
+      tentativeRows.map((item) => {
+        const label = LABELS[plotRows.indexOf(item)];
+        const nameDisplay = item.name +
+          (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
+          (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '');
+        const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:#2471a3;text-decoration:none;">${nameDisplay}</a>`;
+        const calSearchUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(item.name)}`;
+        const dateCell = `<a href="${calSearchUrl}" target="_blank" style="color:#2471a3;font-size:8pt;text-decoration:none;">${item.scheduledDate}</a> <span style="color:#2471a3;font-style:italic;font-size:8pt;">Tentative</span>`;
+        return `<tr>
+           <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#2471a3;text-align:left;">${label}</td>
+           <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
+           <td style="padding:5px 8px;text-align:left;">${dateCell}</td>
+         </tr>`;
+      }).join('') +
+      frameLegendRows +
+      `</table>` +
+      (scheduledRows.length > 0 ?
+        `<div style="margin-top:12px;"><a href="https://www.google.com/maps/dir/${encodeURIComponent(SHOP_ADDRESS)}/${scheduledRows.map(r => r.lat ? `${r.lat},${r.lng}` : encodeURIComponent(r.address)).join('/')}" target="_blank" style="display:inline-block;padding:6px 14px;background:#1a73e8;color:#fff;border-radius:4px;text-decoration:none;font-size:11pt;font-weight:bold;">Full Route in Google Maps Link</a></div>`
+      : '') +
+      `</div><br>`
     : '') +
     (routeMapBlob ? `<br><a href="https://www.google.com/maps/dir/${encodeURIComponent(SHOP_ADDRESS)}/${allAddresses}" target="_blank"><img src="cid:routemap" alt="Full Route" style="max-width:640px;border:1px solid #ccc;border-radius:6px;" /></a>` : '') +
     `</div>`;
