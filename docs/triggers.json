@@ -1,20 +1,20 @@
 {
   "metadata": {
-    "lastUpdated": "2026-03-24T14:39:30.940Z",
+    "lastUpdated": "2026-04-01T05:01:58.462Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
-    "totalTriggers": 20
+    "totalTriggers": 22
   },
   "stats": {
-    "totalFiles": 11,
-    "totalFunctions": 173,
-    "totalTriggers": 20,
-    "totalLines": 9268,
-    "publicFunctions": 49,
-    "helperFunctions": 160,
-    "avgFunctionsPerFile": 16,
-    "avgLinesPerFile": 843
+    "totalFiles": 12,
+    "totalFunctions": 183,
+    "totalTriggers": 22,
+    "totalLines": 9910,
+    "publicFunctions": 51,
+    "helperFunctions": 168,
+    "avgFunctionsPerFile": 15,
+    "avgLinesPerFile": 826
   },
   "files": [
     {
@@ -367,10 +367,13 @@
         "d_safeLogErrorToSheet_",
         "d_generateSimpleMapUrl_",
         "v2_createPlotMapDraft_",
+        "v2_getEmailUrl_",
+        "calClean_",
+        "typeShort_",
         "DRAFTS_V2"
       ],
-      "lines": 2437,
-      "size": 102945
+      "lines": 2535,
+      "size": 110464
     },
     {
       "path": "Email Reader.gs",
@@ -617,6 +620,51 @@
       ],
       "lines": 607,
       "size": 21097
+    },
+    {
+      "path": "Job Tracker Checker.gs",
+      "filename": "Job Tracker Checker.gs",
+      "purpose": "No description available",
+      "version": "1.0 [03/31-07:45AM] by Claude Sonnet 4.6",
+      "functions": [
+        {
+          "name": "jts_extractStreetAddress_",
+          "line": 26,
+          "description": "----------------------------------------------------------- Helpers -----------------------------------------------------------",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "jts_fuzzyMatch_",
+          "line": 35,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "syncJobTracker",
+          "line": 44,
+          "description": "----------------------------------------------------------- Main Sync -----------------------------------------------------------",
+          "isPublic": true,
+          "isHelper": false
+        },
+        {
+          "name": "installJobTrackerSyncTriggers_",
+          "line": 118,
+          "description": "Trigger Installer Run once from the Apps Script editor, then wire into Menus.gs -----------------------------------------------------------",
+          "isPublic": false,
+          "isHelper": true
+        }
+      ],
+      "triggers": [],
+      "dependencies": [
+        "jts_extractStreetAddress_",
+        "jts_fuzzyMatch_",
+        "installJobTrackerSyncTriggers_",
+        "Defines: SYNC_CONFIG"
+      ],
+      "lines": 145,
+      "size": 4593
     },
     {
       "path": "Lead follow up.gs.gs",
@@ -923,42 +971,42 @@
         },
         {
           "name": "goToRecoverCalculations_",
-          "line": 517,
+          "line": 523,
           "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 582,
+          "line": 588,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "listAllTriggers_",
-          "line": 650,
+          "line": 656,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 671,
+          "line": 677,
           "description": "System utility: Remove all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "emailWeeklySchedulePDF_",
-          "line": 686,
+          "line": 692,
           "description": "─── Weekly Schedule PDF Emailer ──────────────────────────────────────────── version1 [03/09-4:10PM] by Claude Sonnet 4.6",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installWeeklyScheduleTrigger_",
-          "line": 726,
+          "line": 732,
           "description": null,
           "isPublic": false,
           "isHelper": true
@@ -984,8 +1032,8 @@
         "emailWeeklySchedulePDF_",
         "installWeeklyScheduleTrigger_"
       ],
-      "lines": 742,
-      "size": 24628
+      "lines": 748,
+      "size": 24848
     },
     {
       "path": "Miles Log.gs",
@@ -1316,206 +1364,248 @@
       "functions": [
         {
           "name": "handleEditMove_",
-          "line": 107,
+          "line": 109,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_autoSortByStage_",
-          "line": 193,
+          "line": 200,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "updateJobDescription_",
-          "line": 239,
+          "line": 240,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleDisplayNameChange_",
-          "line": 314,
+          "line": 315,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleEmailChange_",
-          "line": 353,
+          "line": 354,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleAddressChange_",
-          "line": 387,
+          "line": 388,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createEarthLink_",
-          "line": 417,
+          "line": 418,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleQbUrlChange_",
-          "line": 450,
+          "line": 451,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "handleStageChange_",
-          "line": 467,
+          "line": 479,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "moveRow_",
-          "line": 598,
+          "line": 619,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_searchAndLinkSentEmail_",
-          "line": 659,
+          "line": 680,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_linkQuoteSentEmail_",
-          "line": 741,
+          "line": 762,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_createPrintPacket_",
-          "line": 857,
+          "line": 878,
           "description": "2. Google Earth satellite image (full page) 3. Google Maps route image (full page) 4. Customer photos (one per page, deduplicated)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "createNextDayGinoEvent_",
-          "line": 1258,
+          "line": 1329,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testCalendarAccess_",
-          "line": 1337,
+          "line": 1408,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_handleQbPrompt_",
+          "line": 1419,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_stageMatches_",
-          "line": 1348,
+          "line": 1488,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_looksLikeUrl_",
-          "line": 1352,
+          "line": 1492,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_getUrlFromCell_",
-          "line": 1356,
+          "line": 1496,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_cleanAddressForGoogleEarth_",
-          "line": 1386,
+          "line": 1526,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_geocodeAddress_",
-          "line": 1403,
+          "line": 1543,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_extractCoordinates_",
-          "line": 1426,
+          "line": 1566,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_logOperation_",
-          "line": 1436,
+          "line": 1576,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "testDriveAccess_",
-          "line": 1443,
+          "line": 1583,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "validateSheetStructure_",
-          "line": 1454,
+          "line": 1594,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installTriggerMove_",
-          "line": 1499,
+          "line": 1639,
           "description": null,
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersDaily_",
-          "line": 1514,
+          "line": 1654,
           "description": "Check empty folders daily at 7am (time-driven trigger)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkEmptyFoldersNow_",
-          "line": 1549,
+          "line": 1689,
           "description": "Check empty folders immediately (manual trigger from menu)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "m_checkEmptyFoldersInSheet_",
-          "line": 1578,
+          "line": 1718,
           "description": "Check all folders in a single sheet and highlight empty ones",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installDailyFolderCheckTrigger_",
-          "line": 1663,
+          "line": 1803,
           "description": "Install daily folder check trigger (7am)",
           "isPublic": false,
           "isHelper": true
+        },
+        {
+          "name": "m_createShopDrawing_",
+          "line": 1837,
+          "description": "Called from handleEditMove_ when col D = \"Quote Sent\" on Leads or F/U. Duplicates the Shop Drawing Slides template into the customer's Drive folder, renames it, and fills footer placeholders. Skips silently if already exists.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_getFolderUrlFromCell_",
+          "line": 1918,
+          "description": "Reads the hyperlink URL out of a cell. Supports: =HYPERLINK() formula, rich-text link, plain URL string.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_extractFolderIdFromUrl_",
+          "line": 1943,
+          "description": "Parses a Google Drive folder ID from a Drive URL. Handles /drive/folders/ID and ?id=ID formats.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "m_createShopDrawingTemplate_",
+          "line": 1965,
+          "description": "ACTION REQUIRED AFTER RUNNING: Open the file \"Shop Drawing Template\" in Google Slides → File → Page Setup → Custom → enter 11 × 17 in → Apply.",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "addBox",
+          "line": 1979,
+          "description": "Helper: insert a labeled placeholder box",
+          "isPublic": true,
+          "isHelper": false
         }
       ],
       "triggers": [
@@ -1608,6 +1698,22 @@
           "primary": "print folder"
         },
         {
+          "type": "stage_mapping",
+          "key": "negotiating",
+          "words": [
+            "negotiating"
+          ],
+          "primary": "negotiating"
+        },
+        {
+          "type": "stage_mapping",
+          "key": "qb_prompt",
+          "words": [
+            "qb prompt"
+          ],
+          "primary": "qb prompt"
+        },
+        {
           "type": "column_trigger",
           "column": "F",
           "name": "Display Name",
@@ -1652,6 +1758,7 @@
         "handleAddressChange_",
         "updateJobDescription_",
         "handleQbUrlChange_",
+        "m_createShopDrawing_",
         "handleStageChange_",
         "m_autoSortByStage_",
         "m_checkEmptyFoldersInSheet_",
@@ -1662,6 +1769,7 @@
         "m_stageMatches_",
         "createNextDayGinoEvent_",
         "m_createPrintPacket_",
+        "m_handleQbPrompt_",
         "m_linkQuoteSentEmail_",
         "moveRow_",
         "m_searchAndLinkSentEmail_",
@@ -1674,11 +1782,14 @@
         "checkEmptyFoldersDaily_",
         "checkEmptyFoldersNow_",
         "installDailyFolderCheckTrigger_",
+        "m_createShopDrawingTemplate_",
+        "m_getFolderUrlFromCell_",
+        "m_extractFolderIdFromUrl_",
         "MOVE_CONFIG",
         "Defines: MOVE_CONFIG"
       ],
-      "lines": 1687,
-      "size": 62142
+      "lines": 2080,
+      "size": 77505
     }
   ],
   "categories": {
@@ -2033,10 +2144,13 @@
           "d_safeLogErrorToSheet_",
           "d_generateSimpleMapUrl_",
           "v2_createPlotMapDraft_",
+          "v2_getEmailUrl_",
+          "calClean_",
+          "typeShort_",
           "DRAFTS_V2"
         ],
-        "lines": 2437,
-        "size": 102945
+        "lines": 2535,
+        "size": 110464
       },
       {
         "path": "Stage Automation.gs",
@@ -2046,206 +2160,248 @@
         "functions": [
           {
             "name": "handleEditMove_",
-            "line": 107,
+            "line": 109,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_autoSortByStage_",
-            "line": 193,
+            "line": 200,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "updateJobDescription_",
-            "line": 239,
+            "line": 240,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleDisplayNameChange_",
-            "line": 314,
+            "line": 315,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleEmailChange_",
-            "line": 353,
+            "line": 354,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleAddressChange_",
-            "line": 387,
+            "line": 388,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createEarthLink_",
-            "line": 417,
+            "line": 418,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleQbUrlChange_",
-            "line": 450,
+            "line": 451,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "handleStageChange_",
-            "line": 467,
+            "line": 479,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "moveRow_",
-            "line": 598,
+            "line": 619,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_searchAndLinkSentEmail_",
-            "line": 659,
+            "line": 680,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_linkQuoteSentEmail_",
-            "line": 741,
+            "line": 762,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_createPrintPacket_",
-            "line": 857,
+            "line": 878,
             "description": "2. Google Earth satellite image (full page) 3. Google Maps route image (full page) 4. Customer photos (one per page, deduplicated)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "createNextDayGinoEvent_",
-            "line": 1258,
+            "line": 1329,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testCalendarAccess_",
-            "line": 1337,
+            "line": 1408,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_handleQbPrompt_",
+            "line": 1419,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_stageMatches_",
-            "line": 1348,
+            "line": 1488,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_looksLikeUrl_",
-            "line": 1352,
+            "line": 1492,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_getUrlFromCell_",
-            "line": 1356,
+            "line": 1496,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_cleanAddressForGoogleEarth_",
-            "line": 1386,
+            "line": 1526,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_geocodeAddress_",
-            "line": 1403,
+            "line": 1543,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_extractCoordinates_",
-            "line": 1426,
+            "line": 1566,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_logOperation_",
-            "line": 1436,
+            "line": 1576,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "testDriveAccess_",
-            "line": 1443,
+            "line": 1583,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "validateSheetStructure_",
-            "line": 1454,
+            "line": 1594,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installTriggerMove_",
-            "line": 1499,
+            "line": 1639,
             "description": null,
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersDaily_",
-            "line": 1514,
+            "line": 1654,
             "description": "Check empty folders daily at 7am (time-driven trigger)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkEmptyFoldersNow_",
-            "line": 1549,
+            "line": 1689,
             "description": "Check empty folders immediately (manual trigger from menu)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "m_checkEmptyFoldersInSheet_",
-            "line": 1578,
+            "line": 1718,
             "description": "Check all folders in a single sheet and highlight empty ones",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installDailyFolderCheckTrigger_",
-            "line": 1663,
+            "line": 1803,
             "description": "Install daily folder check trigger (7am)",
             "isPublic": false,
             "isHelper": true
+          },
+          {
+            "name": "m_createShopDrawing_",
+            "line": 1837,
+            "description": "Called from handleEditMove_ when col D = \"Quote Sent\" on Leads or F/U. Duplicates the Shop Drawing Slides template into the customer's Drive folder, renames it, and fills footer placeholders. Skips silently if already exists.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_getFolderUrlFromCell_",
+            "line": 1918,
+            "description": "Reads the hyperlink URL out of a cell. Supports: =HYPERLINK() formula, rich-text link, plain URL string.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_extractFolderIdFromUrl_",
+            "line": 1943,
+            "description": "Parses a Google Drive folder ID from a Drive URL. Handles /drive/folders/ID and ?id=ID formats.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "m_createShopDrawingTemplate_",
+            "line": 1965,
+            "description": "ACTION REQUIRED AFTER RUNNING: Open the file \"Shop Drawing Template\" in Google Slides → File → Page Setup → Custom → enter 11 × 17 in → Apply.",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "addBox",
+            "line": 1979,
+            "description": "Helper: insert a labeled placeholder box",
+            "isPublic": true,
+            "isHelper": false
           }
         ],
         "triggers": [
@@ -2338,6 +2494,22 @@
             "primary": "print folder"
           },
           {
+            "type": "stage_mapping",
+            "key": "negotiating",
+            "words": [
+              "negotiating"
+            ],
+            "primary": "negotiating"
+          },
+          {
+            "type": "stage_mapping",
+            "key": "qb_prompt",
+            "words": [
+              "qb prompt"
+            ],
+            "primary": "qb prompt"
+          },
+          {
             "type": "column_trigger",
             "column": "F",
             "name": "Display Name",
@@ -2382,6 +2554,7 @@
           "handleAddressChange_",
           "updateJobDescription_",
           "handleQbUrlChange_",
+          "m_createShopDrawing_",
           "handleStageChange_",
           "m_autoSortByStage_",
           "m_checkEmptyFoldersInSheet_",
@@ -2392,6 +2565,7 @@
           "m_stageMatches_",
           "createNextDayGinoEvent_",
           "m_createPrintPacket_",
+          "m_handleQbPrompt_",
           "m_linkQuoteSentEmail_",
           "moveRow_",
           "m_searchAndLinkSentEmail_",
@@ -2404,11 +2578,14 @@
           "checkEmptyFoldersDaily_",
           "checkEmptyFoldersNow_",
           "installDailyFolderCheckTrigger_",
+          "m_createShopDrawingTemplate_",
+          "m_getFolderUrlFromCell_",
+          "m_extractFolderIdFromUrl_",
           "MOVE_CONFIG",
           "Defines: MOVE_CONFIG"
         ],
-        "lines": 1687,
-        "size": 62142
+        "lines": 2080,
+        "size": 77505
       }
     ],
     "automation": [
@@ -2731,42 +2908,42 @@
           },
           {
             "name": "goToRecoverCalculations_",
-            "line": 517,
+            "line": 523,
             "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 582,
+            "line": 588,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "listAllTriggers_",
-            "line": 650,
+            "line": 656,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 671,
+            "line": 677,
             "description": "System utility: Remove all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "emailWeeklySchedulePDF_",
-            "line": 686,
+            "line": 692,
             "description": "─── Weekly Schedule PDF Emailer ──────────────────────────────────────────── version1 [03/09-4:10PM] by Claude Sonnet 4.6",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installWeeklyScheduleTrigger_",
-            "line": 726,
+            "line": 732,
             "description": null,
             "isPublic": false,
             "isHelper": true
@@ -2792,8 +2969,8 @@
           "emailWeeklySchedulePDF_",
           "installWeeklyScheduleTrigger_"
         ],
-        "lines": 742,
-        "size": 24628
+        "lines": 748,
+        "size": 24848
       }
     ],
     "other": [
@@ -3042,6 +3219,51 @@
         ],
         "lines": 607,
         "size": 21097
+      },
+      {
+        "path": "Job Tracker Checker.gs",
+        "filename": "Job Tracker Checker.gs",
+        "purpose": "No description available",
+        "version": "1.0 [03/31-07:45AM] by Claude Sonnet 4.6",
+        "functions": [
+          {
+            "name": "jts_extractStreetAddress_",
+            "line": 26,
+            "description": "----------------------------------------------------------- Helpers -----------------------------------------------------------",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "jts_fuzzyMatch_",
+            "line": 35,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "syncJobTracker",
+            "line": 44,
+            "description": "----------------------------------------------------------- Main Sync -----------------------------------------------------------",
+            "isPublic": true,
+            "isHelper": false
+          },
+          {
+            "name": "installJobTrackerSyncTriggers_",
+            "line": 118,
+            "description": "Trigger Installer Run once from the Apps Script editor, then wire into Menus.gs -----------------------------------------------------------",
+            "isPublic": false,
+            "isHelper": true
+          }
+        ],
+        "triggers": [],
+        "dependencies": [
+          "jts_extractStreetAddress_",
+          "jts_fuzzyMatch_",
+          "installJobTrackerSyncTriggers_",
+          "Defines: SYNC_CONFIG"
+        ],
+        "lines": 145,
+        "size": 4593
       },
       {
         "path": "Lead follow up.gs.gs",
@@ -3444,6 +3666,22 @@
         "print"
       ],
       "primary": "print folder"
+    },
+    {
+      "type": "stage_mapping",
+      "key": "negotiating",
+      "words": [
+        "negotiating"
+      ],
+      "primary": "negotiating"
+    },
+    {
+      "type": "stage_mapping",
+      "key": "qb_prompt",
+      "words": [
+        "qb prompt"
+      ],
+      "primary": "qb prompt"
     }
   ],
   "draftCreator": [
