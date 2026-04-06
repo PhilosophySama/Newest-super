@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-06T19:46:41.977Z",
+    "lastUpdated": "2026-04-06T22:45:10.796Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -18,8 +18,8 @@
   },
   "files": [
     {
-      "path": "Dialpad.gs.gs",
-      "filename": "Dialpad.gs.gs",
+      "path": "Dialpad.gs",
+      "filename": "Dialpad.gs",
       "purpose": "No description available",
       "version": null,
       "functions": [
@@ -84,7 +84,7 @@
         "dp_sendCustomMessage_"
       ],
       "lines": 283,
-      "size": 9150
+      "size": 9147
     },
     {
       "path": "Draft Creator.gs",
@@ -3031,8 +3031,8 @@
     ],
     "other": [
       {
-        "path": "Dialpad.gs.gs",
-        "filename": "Dialpad.gs.gs",
+        "path": "Dialpad.gs",
+        "filename": "Dialpad.gs",
         "purpose": "No description available",
         "version": null,
         "functions": [
@@ -3097,7 +3097,7 @@
           "dp_sendCustomMessage_"
         ],
         "lines": 283,
-        "size": 9150
+        "size": 9147
       },
       {
         "path": "Email Reader.gs",
