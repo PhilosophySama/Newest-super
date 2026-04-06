@@ -484,6 +484,14 @@ function onOpen() {
       .addItem('Remove All Triggers', 'removeAllTriggers_')
       .addToUi();
 
+    // Dialpad SMS menu
+    ui.createMenu('📱 SMS')
+      .addItem('Send Swatches',       'dp_sendSwatches_')
+      .addItem('Request Photos',      'dp_requestPhotos_')
+      .addItem('Send Proposal Link',  'dp_sendProposalLink_')
+      .addItem('Custom Message',      'dp_sendCustomMessage_')
+      .addToUi();
+
     // Weekly Schedule PDF menu
     ui.createMenu('📅 Schedule')
       .addItem('Email Weekly Schedule PDF Now', 'emailWeeklySchedulePDF_')

@@ -1,6 +1,6 @@
 /**
  * Draft Creator.gs
- * Version: 04/01-10:30AM EST by Claude Opus 4.1
+ * Version: 04/03-2:15PM EST by Claude Sonnet 4.6
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
@@ -193,21 +193,9 @@ Thanks,`,
 
 /** Install onEdit trigger (clean re-install). */
 function installTriggerDrafts_V2() {
-  v2_validateConfig_();
-  const handler = 'handleEditDraft_V2';
-  
-  // Remove existing triggers
-  ScriptApp.getProjectTriggers()
-    .filter(t => t.getHandlerFunction() === handler)
-    .forEach(t => ScriptApp.deleteTrigger(t));
-  
-  // Install onEdit trigger
-  ScriptApp.newTrigger(handler)
-    .forSpreadsheet(v2_getSpreadsheet_().getId())
-    .onEdit()
-    .create();
-  
-  SpreadsheetApp.getActive().toast('Drafts V2 trigger installed', 'Draft Creator', 4);
+  // Redirect to master trigger — do NOT install a standalone handleEditDraft_V2 trigger.
+  // The masterOnEditHandler_ in Menus.gs already calls handleEditDraft_V2 internally.
+  installMasterTrigger_();
 }
 
 /** onEdit (installable) — handles all stage-based draft creation */
