@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-08T01:48:11.761Z",
+    "lastUpdated": "2026-04-08T02:04:33.897Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,11 +8,11 @@
   },
   "stats": {
     "totalFiles": 14,
-    "totalFunctions": 191,
+    "totalFunctions": 192,
     "totalTriggers": 22,
-    "totalLines": 10580,
+    "totalLines": 10584,
     "publicFunctions": 50,
-    "helperFunctions": 177,
+    "helperFunctions": 178,
     "avgFunctionsPerFile": 14,
     "avgLinesPerFile": 756
   },
@@ -78,6 +78,13 @@
           "description": "── Use Case 4: Custom / Coordination Message ───────────────",
           "isPublic": false,
           "isHelper": true
+        },
+        {
+          "name": "dp_testApiCall_",
+          "line": 317,
+          "description": null,
+          "isPublic": false,
+          "isHelper": true
         }
       ],
       "triggers": [],
@@ -89,10 +96,11 @@
         "dp_sendSwatches_",
         "dp_requestPhotos_",
         "dp_sendProposalLink_",
-        "dp_sendCustomMessage_"
+        "dp_sendCustomMessage_",
+        "dp_testApiCall_"
       ],
-      "lines": 316,
-      "size": 10248
+      "lines": 320,
+      "size": 10392
     },
     {
       "path": "Draft Creator.gs",
@@ -3101,6 +3109,13 @@
             "description": "── Use Case 4: Custom / Coordination Message ───────────────",
             "isPublic": false,
             "isHelper": true
+          },
+          {
+            "name": "dp_testApiCall_",
+            "line": 317,
+            "description": null,
+            "isPublic": false,
+            "isHelper": true
           }
         ],
         "triggers": [],
@@ -3112,10 +3127,11 @@
           "dp_sendSwatches_",
           "dp_requestPhotos_",
           "dp_sendProposalLink_",
-          "dp_sendCustomMessage_"
+          "dp_sendCustomMessage_",
+          "dp_testApiCall_"
         ],
-        "lines": 316,
-        "size": 10248
+        "lines": 320,
+        "size": 10392
       },
       {
         "path": "Email Reader.gs",
