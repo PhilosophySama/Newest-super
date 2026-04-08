@@ -51,6 +51,17 @@ function masterOnEditHandler_(e) {
     logTriggerError_('handleEditDraft_V2', err, e);
   }
   
+  // 3. Dialpad phone hyperlink (col H auto-link)
+  try {
+    if (typeof handleEditDialpadPhone_ === 'function') {
+      handleEditDialpadPhone_(e);
+      handlerResults.push({ handler: 'Dialpad Phone', status: 'OK' });
+    }
+  } catch (err) {
+    handlerResults.push({ handler: 'Dialpad Phone', status: 'ERROR', error: err.message });
+    logTriggerError_('handleEditDialpadPhone_', err, e);
+  }
+
   // 3. Awning Ruby Generator (lean-to and A-frame)
   try {
     if (typeof handleEditAwningRuby_ === 'function') {
