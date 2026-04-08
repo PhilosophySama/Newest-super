@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-08T01:34:05.056Z",
+    "lastUpdated": "2026-04-08T01:48:11.761Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,13 +8,13 @@
   },
   "stats": {
     "totalFiles": 14,
-    "totalFunctions": 192,
+    "totalFunctions": 191,
     "totalTriggers": 22,
-    "totalLines": 10607,
+    "totalLines": 10580,
     "publicFunctions": 50,
-    "helperFunctions": 178,
+    "helperFunctions": 177,
     "avgFunctionsPerFile": 14,
-    "avgLinesPerFile": 758
+    "avgLinesPerFile": 756
   },
   "files": [
     {
@@ -31,57 +31,50 @@
           "isHelper": true
         },
         {
-          "name": "handleEditDialpadPhone_",
-          "line": 47,
-          "description": "── onEdit: auto-hyperlink phone numbers in col H ──────────",
-          "isPublic": false,
-          "isHelper": true
-        },
-        {
           "name": "dp_formatPhone_",
-          "line": 74,
+          "line": 47,
           "description": "── Core: format any phone string to E164 ──────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_sendSms_",
-          "line": 85,
+          "line": 58,
           "description": "── Core: send SMS via Dialpad API ─────────────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_getRowData_",
-          "line": 136,
+          "line": 109,
           "description": "── Helper: read active row customer data ──────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_sendSwatches_",
-          "line": 190,
+          "line": 163,
           "description": "── Use Case 1: Send Swatches ───────────────────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_requestPhotos_",
-          "line": 219,
+          "line": 192,
           "description": "── Use Case 2: Request Customer Photos ────────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_sendProposalLink_",
-          "line": 243,
+          "line": 216,
           "description": "── Use Case 3: Send Proposal Link ─────────────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_sendCustomMessage_",
-          "line": 304,
+          "line": 277,
           "description": "── Use Case 4: Custom / Coordination Message ───────────────",
           "isPublic": false,
           "isHelper": true
@@ -98,8 +91,8 @@
         "dp_sendProposalLink_",
         "dp_sendCustomMessage_"
       ],
-      "lines": 343,
-      "size": 11116
+      "lines": 316,
+      "size": 10248
     },
     {
       "path": "Draft Creator.gs",
@@ -1127,7 +1120,7 @@
         "installWeeklyScheduleTrigger_"
       ],
       "lines": 767,
-      "size": 25559
+      "size": 25560
     },
     {
       "path": "Miles Log.gs",
@@ -3043,7 +3036,7 @@
           "installWeeklyScheduleTrigger_"
         ],
         "lines": 767,
-        "size": 25559
+        "size": 25560
       }
     ],
     "other": [
@@ -3061,57 +3054,50 @@
             "isHelper": true
           },
           {
-            "name": "handleEditDialpadPhone_",
-            "line": 47,
-            "description": "── onEdit: auto-hyperlink phone numbers in col H ──────────",
-            "isPublic": false,
-            "isHelper": true
-          },
-          {
             "name": "dp_formatPhone_",
-            "line": 74,
+            "line": 47,
             "description": "── Core: format any phone string to E164 ──────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_sendSms_",
-            "line": 85,
+            "line": 58,
             "description": "── Core: send SMS via Dialpad API ─────────────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_getRowData_",
-            "line": 136,
+            "line": 109,
             "description": "── Helper: read active row customer data ──────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_sendSwatches_",
-            "line": 190,
+            "line": 163,
             "description": "── Use Case 1: Send Swatches ───────────────────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_requestPhotos_",
-            "line": 219,
+            "line": 192,
             "description": "── Use Case 2: Request Customer Photos ────────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_sendProposalLink_",
-            "line": 243,
+            "line": 216,
             "description": "── Use Case 3: Send Proposal Link ─────────────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_sendCustomMessage_",
-            "line": 304,
+            "line": 277,
             "description": "── Use Case 4: Custom / Coordination Message ───────────────",
             "isPublic": false,
             "isHelper": true
@@ -3128,8 +3114,8 @@
           "dp_sendProposalLink_",
           "dp_sendCustomMessage_"
         ],
-        "lines": 343,
-        "size": 11116
+        "lines": 316,
+        "size": 10248
       },
       {
         "path": "Email Reader.gs",
