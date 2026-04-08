@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-06T22:45:10.796Z",
+    "lastUpdated": "2026-04-08T01:34:05.056Z",
     "repoUrl": "https://github.com/PhilosophySama/Newest-super",
     "version": "2.0-complete",
     "scanType": "comprehensive",
@@ -8,13 +8,13 @@
   },
   "stats": {
     "totalFiles": 14,
-    "totalFunctions": 190,
+    "totalFunctions": 192,
     "totalTriggers": 22,
-    "totalLines": 10536,
+    "totalLines": 10607,
     "publicFunctions": 50,
-    "helperFunctions": 176,
+    "helperFunctions": 178,
     "avgFunctionsPerFile": 14,
-    "avgLinesPerFile": 753
+    "avgLinesPerFile": 758
   },
   "files": [
     {
@@ -24,50 +24,64 @@
       "version": null,
       "functions": [
         {
-          "name": "dp_formatPhone_",
+          "name": "handleEditDialpadPhone_",
           "line": 14,
+          "description": "── onEdit: auto-hyperlink phone numbers in col H ──────────",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "handleEditDialpadPhone_",
+          "line": 47,
+          "description": "── onEdit: auto-hyperlink phone numbers in col H ──────────",
+          "isPublic": false,
+          "isHelper": true
+        },
+        {
+          "name": "dp_formatPhone_",
+          "line": 74,
           "description": "── Core: format any phone string to E164 ──────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_sendSms_",
-          "line": 25,
+          "line": 85,
           "description": "── Core: send SMS via Dialpad API ─────────────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_getRowData_",
-          "line": 76,
+          "line": 136,
           "description": "── Helper: read active row customer data ──────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_sendSwatches_",
-          "line": 130,
+          "line": 190,
           "description": "── Use Case 1: Send Swatches ───────────────────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_requestPhotos_",
-          "line": 159,
+          "line": 219,
           "description": "── Use Case 2: Request Customer Photos ────────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_sendProposalLink_",
-          "line": 183,
+          "line": 243,
           "description": "── Use Case 3: Send Proposal Link ─────────────────────────",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "dp_sendCustomMessage_",
-          "line": 244,
+          "line": 304,
           "description": "── Use Case 4: Custom / Coordination Message ───────────────",
           "isPublic": false,
           "isHelper": true
@@ -75,6 +89,7 @@
       ],
       "triggers": [],
       "dependencies": [
+        "handleEditDialpadPhone_",
         "dp_formatPhone_",
         "dp_sendSms_",
         "dp_getRowData_",
@@ -83,8 +98,8 @@
         "dp_sendProposalLink_",
         "dp_sendCustomMessage_"
       ],
-      "lines": 283,
-      "size": 9147
+      "lines": 343,
+      "size": 11116
     },
     {
       "path": "Draft Creator.gs",
@@ -993,98 +1008,98 @@
         },
         {
           "name": "logTriggerError_",
-          "line": 95,
+          "line": 106,
           "description": "Log trigger errors to a hidden sheet for diagnosis",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installMasterTrigger_",
-          "line": 135,
+          "line": 146,
           "description": "Install the MASTER onEdit trigger (replaces all individual triggers) This is the RECOMMENDED way to set up triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "checkTriggerHealthMenu_",
-          "line": 176,
+          "line": 187,
           "description": "Check trigger health and report status",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "autoRepairTriggers_",
-          "line": 274,
+          "line": 285,
           "description": "Auto-repair triggers if master trigger is missing Can be run manually or scheduled",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installDailyTriggerRepair_",
-          "line": 294,
+          "line": 305,
           "description": "Install a daily trigger health check (runs at 5 AM)",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "viewTriggerErrorLog_",
-          "line": 319,
+          "line": 330,
           "description": "View the error log sheet",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "clearTriggerErrorLog_",
-          "line": 342,
+          "line": 353,
           "description": "Clear the error log",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "onOpen",
-          "line": 371,
+          "line": 382,
           "description": "============================================ MENU CREATION ============================================",
           "isPublic": true,
           "isHelper": false
         },
         {
           "name": "goToRecoverCalculations_",
-          "line": 531,
+          "line": 542,
           "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "showQuickBooksSetup_",
-          "line": 596,
+          "line": 607,
           "description": "Show QuickBooks setup instructions",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "listAllTriggers_",
-          "line": 664,
+          "line": 675,
           "description": "System utility: List all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "removeAllTriggers_",
-          "line": 685,
+          "line": 696,
           "description": "System utility: Remove all triggers",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "emailWeeklySchedulePDF_",
-          "line": 700,
+          "line": 711,
           "description": "─── Weekly Schedule PDF Emailer ──────────────────────────────────────────── version1 [03/09-4:10PM] by Claude Sonnet 4.6",
           "isPublic": false,
           "isHelper": true
         },
         {
           "name": "installWeeklyScheduleTrigger_",
-          "line": 740,
+          "line": 751,
           "description": null,
           "isPublic": false,
           "isHelper": true
@@ -1095,6 +1110,7 @@
         "masterOnEditHandler_",
         "handleEditMove_",
         "logTriggerError_",
+        "handleEditDialpadPhone_",
         "handleEditAwningRuby_",
         "handleEditFormula_",
         "installMasterTrigger_",
@@ -1110,8 +1126,8 @@
         "emailWeeklySchedulePDF_",
         "installWeeklyScheduleTrigger_"
       ],
-      "lines": 756,
-      "size": 25161
+      "lines": 767,
+      "size": 25559
     },
     {
       "path": "Miles Log.gs",
@@ -2908,98 +2924,98 @@
           },
           {
             "name": "logTriggerError_",
-            "line": 95,
+            "line": 106,
             "description": "Log trigger errors to a hidden sheet for diagnosis",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installMasterTrigger_",
-            "line": 135,
+            "line": 146,
             "description": "Install the MASTER onEdit trigger (replaces all individual triggers) This is the RECOMMENDED way to set up triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "checkTriggerHealthMenu_",
-            "line": 176,
+            "line": 187,
             "description": "Check trigger health and report status",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "autoRepairTriggers_",
-            "line": 274,
+            "line": 285,
             "description": "Auto-repair triggers if master trigger is missing Can be run manually or scheduled",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installDailyTriggerRepair_",
-            "line": 294,
+            "line": 305,
             "description": "Install a daily trigger health check (runs at 5 AM)",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "viewTriggerErrorLog_",
-            "line": 319,
+            "line": 330,
             "description": "View the error log sheet",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "clearTriggerErrorLog_",
-            "line": 342,
+            "line": 353,
             "description": "Clear the error log",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "onOpen",
-            "line": 371,
+            "line": 382,
             "description": "============================================ MENU CREATION ============================================",
             "isPublic": true,
             "isHelper": false
           },
           {
             "name": "goToRecoverCalculations_",
-            "line": 531,
+            "line": 542,
             "description": "Navigate to Re-cover sheet with the selected customer populated in K2 Works from Leads, F/U, or Awarded sheets",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "showQuickBooksSetup_",
-            "line": 596,
+            "line": 607,
             "description": "Show QuickBooks setup instructions",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "listAllTriggers_",
-            "line": 664,
+            "line": 675,
             "description": "System utility: List all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "removeAllTriggers_",
-            "line": 685,
+            "line": 696,
             "description": "System utility: Remove all triggers",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "emailWeeklySchedulePDF_",
-            "line": 700,
+            "line": 711,
             "description": "─── Weekly Schedule PDF Emailer ──────────────────────────────────────────── version1 [03/09-4:10PM] by Claude Sonnet 4.6",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "installWeeklyScheduleTrigger_",
-            "line": 740,
+            "line": 751,
             "description": null,
             "isPublic": false,
             "isHelper": true
@@ -3010,6 +3026,7 @@
           "masterOnEditHandler_",
           "handleEditMove_",
           "logTriggerError_",
+          "handleEditDialpadPhone_",
           "handleEditAwningRuby_",
           "handleEditFormula_",
           "installMasterTrigger_",
@@ -3025,8 +3042,8 @@
           "emailWeeklySchedulePDF_",
           "installWeeklyScheduleTrigger_"
         ],
-        "lines": 756,
-        "size": 25161
+        "lines": 767,
+        "size": 25559
       }
     ],
     "other": [
@@ -3037,50 +3054,64 @@
         "version": null,
         "functions": [
           {
-            "name": "dp_formatPhone_",
+            "name": "handleEditDialpadPhone_",
             "line": 14,
+            "description": "── onEdit: auto-hyperlink phone numbers in col H ──────────",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "handleEditDialpadPhone_",
+            "line": 47,
+            "description": "── onEdit: auto-hyperlink phone numbers in col H ──────────",
+            "isPublic": false,
+            "isHelper": true
+          },
+          {
+            "name": "dp_formatPhone_",
+            "line": 74,
             "description": "── Core: format any phone string to E164 ──────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_sendSms_",
-            "line": 25,
+            "line": 85,
             "description": "── Core: send SMS via Dialpad API ─────────────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_getRowData_",
-            "line": 76,
+            "line": 136,
             "description": "── Helper: read active row customer data ──────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_sendSwatches_",
-            "line": 130,
+            "line": 190,
             "description": "── Use Case 1: Send Swatches ───────────────────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_requestPhotos_",
-            "line": 159,
+            "line": 219,
             "description": "── Use Case 2: Request Customer Photos ────────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_sendProposalLink_",
-            "line": 183,
+            "line": 243,
             "description": "── Use Case 3: Send Proposal Link ─────────────────────────",
             "isPublic": false,
             "isHelper": true
           },
           {
             "name": "dp_sendCustomMessage_",
-            "line": 244,
+            "line": 304,
             "description": "── Use Case 4: Custom / Coordination Message ───────────────",
             "isPublic": false,
             "isHelper": true
@@ -3088,6 +3119,7 @@
         ],
         "triggers": [],
         "dependencies": [
+          "handleEditDialpadPhone_",
           "dp_formatPhone_",
           "dp_sendSms_",
           "dp_getRowData_",
@@ -3096,8 +3128,8 @@
           "dp_sendProposalLink_",
           "dp_sendCustomMessage_"
         ],
-        "lines": 283,
-        "size": 9147
+        "lines": 343,
+        "size": 11116
       },
       {
         "path": "Email Reader.gs",
