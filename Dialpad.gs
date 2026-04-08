@@ -314,3 +314,7 @@ function dp_sendCustomMessage_() {
   var sent = dp_sendSms_(customer.phone, message);
   if (sent) ui.alert('✅ Message sent to ' + customer.name + '!');
 }
+function dp_testApiCall_() {
+  var result = dp_sendSms_('+19542710686', 'Test from Apps Script - ignore');
+  Logger.log('Result: ' + result);
+}
