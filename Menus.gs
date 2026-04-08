@@ -51,7 +51,7 @@ function masterOnEditHandler_(e) {
     logTriggerError_('handleEditDraft_V2', err, e);
   }
   
-  // 3. Dialpad phone hyperlink (col H auto-link)
+  // 2b. Dialpad phone hyperlink (col H auto-link)
   try {
     if (typeof handleEditDialpadPhone_ === 'function') {
       handleEditDialpadPhone_(e);

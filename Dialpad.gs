@@ -43,33 +43,6 @@ function handleEditDialpadPhone_(e) {
   e.range.setFormula('=HYPERLINK("' + url + '","' + display + '")');
 }
 
-// ── onEdit: auto-hyperlink phone numbers in col H ──────────
-function handleEditDialpadPhone_(e) {
-  if (!e || !e.range) return;
-
-  var sheet     = e.range.getSheet();
-  var col       = e.range.getColumn();
-  var row       = e.range.getRow();
-  var sheetName = sheet.getName();
-
-  var allowed = ['Leads', 'F/U', 'Awarded'];
-  if (allowed.indexOf(sheetName) === -1) return;
-  if (col !== 8) return;
-  if (row <= 1) return;
-
-  var raw = e.range.getValue();
-  if (!raw) return;
-
-  var digits = String(raw).replace(/\D/g, '');
-  if (digits.length === 10) digits = '1' + digits;
-  if (digits.length !== 11 || digits.charAt(0) !== '1') return;
-
-  var display = '(' + digits.substr(1,3) + ') ' + digits.substr(4,3) + '-' + digits.substr(7,4);
-  var url = 'https://dialpad.com/main/sms/%2B' + digits;
-
-  e.range.setFormula('=HYPERLINK("' + url + '","' + display + '")');
-}
-
 // ── Core: format any phone string to E164 ──────────────────
 function dp_formatPhone_(raw) {
   if (!raw) return null;
