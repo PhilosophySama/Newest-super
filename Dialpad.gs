@@ -1,159 +1,323 @@
-// ============================================================
-// Dialpad
-// version2 [04/08-12:00AM] by Claude Sonnet 4.6
-// Handles outbound SMS via Dialpad API v2
-// ============================================================
+// Dialpad.gs
+// version1 [04/08-02:45PM] by Claude Sonnet 4.6
 
+// ─── CONFIG ────────────────────────────────────────────────────────────────
 var DIALPAD_CONFIG = {
-  API_BASE:     'https://dialpad.com/api/v2',
-  FROM_NUMBER:  '+19542710686',
-  API_KEY_PROP: 'DIALPAD_API_KEY'
+  PHONE_COL:       8,
+  STAGE_COL:       4,
+  HEADER_ROW:      1,
+  SHEETS:          ['Leads', 'F/U', 'Awarded', 'Heaven', 'Re-cover'],
+  API_KEY_PROP:    'Dialpad_Walker_Awning',
+  USER_ID_PROP:    'DIALPAD_USER_ID',
+  FROM_NUM_PROP:   'DIALPAD_FROM_NUMBER',
+  API_BASE:        'https://dialpad.com/api/v2',
+  URL_SCHEME:      'dialpad://'
 };
 
-function handleEditDialpadPhone_(e) {
-  if (!e || !e.range) return;
-  var sheet     = e.range.getSheet();
-  var col       = e.range.getColumn();
-  var row       = e.range.getRow();
-  var sheetName = sheet.getName();
-  var allowed   = ['Leads', 'F/U', 'Awarded'];
-  if (allowed.indexOf(sheetName) === -1) return;
-  if (col !== 8) return;
-  if (row <= 1) return;
-  var raw = e.range.getValue();
-  if (!raw) return;
-  var digits = String(raw).replace(/\D/g, '');
-  if (digits.length === 10) digits = '1' + digits;
-  if (digits.length !== 11 || digits.charAt(0) !== '1') return;
-  var display = '(' + digits.substr(1,3) + ') ' + digits.substr(4,3) + '-' + digits.substr(7,4);
-  var url = 'https://dialpad.com/main/sms/%2B' + digits;
-  e.range.setFormula('=HYPERLINK("' + url + '","' + display + '")');
+// ─── API HELPER ────────────────────────────────────────────────────────────
+
+function dp_getApiKey_() {
+  var key = PropertiesService.getScriptProperties().getProperty(DIALPAD_CONFIG.API_KEY_PROP);
+  if (!key) throw new Error('Dialpad API key not found in Script Properties under "' + DIALPAD_CONFIG.API_KEY_PROP + '"');
+  return key;
 }
 
-function dp_formatPhone_(raw) {
-  if (!raw) return null;
-  var digits = String(raw).replace(/\D/g, '');
-  if (digits.length === 10) digits = '1' + digits;
-  if (digits.length === 11 && digits.charAt(0) === '1') return '+' + digits;
-  return null;
-}
+function dp_apiRequest_(method, endpoint, payload) {
+  var separator = endpoint.indexOf('?') === -1 ? '?' : '&';
+  var url = DIALPAD_CONFIG.API_BASE + endpoint + separator + 'apikey=' + dp_getApiKey_();
 
-function dp_sendSms_(toNumber, messageText) {
-  var apiKey = PropertiesService.getScriptProperties().getProperty(DIALPAD_CONFIG.API_KEY_PROP);
-  if (!apiKey) { SpreadsheetApp.getUi().alert('DIALPAD_API_KEY not found in Script Properties.'); return false; }
-  var formattedTo = dp_formatPhone_(toNumber);
-  if (!formattedTo) { SpreadsheetApp.getUi().alert('Could not parse phone number: ' + toNumber); return false; }
-  var payload = { from_number: DIALPAD_CONFIG.FROM_NUMBER, to_numbers: [formattedTo], text: messageText };
   var options = {
-    method: 'post', contentType: 'application/json',
-    headers: { 'Authorization': 'Bearer ' + apiKey, 'Accept': 'application/json' },
-    payload: JSON.stringify(payload), muteHttpExceptions: true
+    method:             method,
+    headers:            { 'Content-Type': 'application/json' },
+    muteHttpExceptions: true
   };
+  if (payload) options.payload = JSON.stringify(payload);
+
+  var response = UrlFetchApp.fetch(url, options);
+  var code     = response.getResponseCode();
+  var body     = response.getContentText();
+
+  if (code < 200 || code >= 300) {
+    throw new Error('Dialpad API error ' + code + ': ' + body);
+  }
+  return JSON.parse(body);
+}
+
+// ─── PHONE HELPERS ─────────────────────────────────────────────────────────
+
+function dp_normalisePhone_(raw) {
+  var digits = String(raw).replace(/\D/g, '');
+  if (digits.length === 10) digits = '1' + digits;
+  if (digits.length < 11)   return null;
+  return '+' + digits;
+}
+
+function dp_linkCell_(cell) {
+  var val     = cell.getValue();
+  var formula = cell.getFormula();
+
+  // If already a Dialpad hyperlink, extract the display text from it
+  if (formula && formula.indexOf('HYPERLINK') !== -1 && (formula.indexOf('dialpad.com') !== -1 || formula.indexOf('dialpad://') !== -1)) {
+    var match = formula.match(/,"(.+?)"\)/);
+    val = match ? match[1] : val;
+  } else if (formula) {
+    return; // Don't touch non-Dialpad formulas
+  }
+
+  if (!val) return;
+  var e164 = dp_normalisePhone_(val);
+  if (!e164) return;
+  var url = DIALPAD_CONFIG.URL_SCHEME + e164;
+  cell.setFormula('=HYPERLINK("' + url + '","' + val + '")');
+}
+// ─── SMS SENDING (API) ─────────────────────────────────────────────────────
+
+/**
+ * Send an SMS via Dialpad API.
+ * @param {string} toNumber  - raw phone string (will be normalised)
+ * @param {string} message   - text body
+ */
+function dp_sendSms(toNumber, message) {
+  var e164 = dp_normalisePhone_(toNumber);
+  if (!e164) throw new Error('Invalid phone number: ' + toNumber);
+  var props      = PropertiesService.getScriptProperties();
+  var userId     = props.getProperty(DIALPAD_CONFIG.USER_ID_PROP);
+  var fromNumber = props.getProperty(DIALPAD_CONFIG.FROM_NUM_PROP);
+  if (!userId || !fromNumber) throw new Error('DIALPAD_USER_ID or DIALPAD_FROM_NUMBER missing from Script Properties.');
+  return dp_apiRequest_('post', '/sms', {
+    to_numbers:      [e164],
+    text:            message,
+    user_id:         userId,
+    from_number:     fromNumber
+  });
+}
+
+/**
+ * Send SMS to the customer in the currently selected row.
+ * Prompts for a message first.
+ */
+function dp_sendCustomMessage_() {
+  var ui      = SpreadsheetApp.getUi();
+  var sheet   = SpreadsheetApp.getActiveSheet();
+  var row     = sheet.getActiveCell().getRow();
+
+  if (row <= DIALPAD_CONFIG.HEADER_ROW) {
+    ui.alert('Please select a data row first.'); return;
+  }
+  if (DIALPAD_CONFIG.SHEETS.indexOf(sheet.getName()) === -1) {
+    ui.alert('Please run this from one of the project sheets.'); return;
+  }
+
+  var phone = sheet.getRange(row, DIALPAD_CONFIG.PHONE_COL).getValue();
+  var name  = sheet.getRange(row, 5).getValue(); // col E = Customer Name
+
+  if (!phone) { ui.alert('No phone number in this row.'); return; }
+
+  var result = ui.prompt(
+    'Send SMS to ' + name,
+    'Enter your message:',
+    ui.ButtonSet.OK_CANCEL
+  );
+  if (result.getSelectedButton() !== ui.Button.OK) return;
+
   try {
-    var response = UrlFetchApp.fetch(DIALPAD_CONFIG.API_BASE + '/sms', options);
-    var code = response.getResponseCode();
-    var body = JSON.parse(response.getContentText());
-    if (code === 200 || code === 201) return true;
-    SpreadsheetApp.getUi().alert('Dialpad API error ' + code + ':\n' + JSON.stringify(body, null, 2));
-    return false;
-  } catch (e) {
-    SpreadsheetApp.getUi().alert('Request failed: ' + e.message);
-    return false;
+    dp_sendSms(phone, result.getResponseText());
+    ui.alert('✅ Message sent to ' + name + ' (' + phone + ')');
+  } catch (err) {
+    ui.alert('❌ Failed to send: ' + err.message);
   }
 }
 
-function dp_getRowData_() {
-  var sheet  = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var row    = sheet.getActiveCell().getRow();
-  if (row <= 1) { SpreadsheetApp.getUi().alert('Please click on a customer row first.'); return null; }
-  var values = sheet.getRange(row, 1, 1, 42).getValues()[0];
-  var data = {
-    row: row, stage: values[3], name: values[4], phone: values[7],
-    email: values[8], address: values[9], quotePrice: values[13],
-    qbLink: values[15], folderLink: ''
+// ─── PRESET MESSAGE SENDERS ────────────────────────────────────────────────
+
+function dp_getRowContext_() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var row   = sheet.getActiveCell().getRow();
+  if (row <= DIALPAD_CONFIG.HEADER_ROW) throw new Error('Please select a data row first.');
+  if (DIALPAD_CONFIG.SHEETS.indexOf(sheet.getName()) === -1) throw new Error('Wrong sheet.');
+  return {
+    name:    sheet.getRange(row, 5).getValue(),   // col E
+    phone:   sheet.getRange(row, 8).getValue(),   // col H
+    address: sheet.getRange(row, 10).getValue(),  // col J
+    price:   sheet.getRange(row, 14).getValue()   // col N
   };
-  var fCell = sheet.getRange(row, 6);
-  var formula = fCell.getFormula();
-  if (formula && formula.toUpperCase().indexOf('HYPERLINK') !== -1) {
-    var match = formula.match(/HYPERLINK\("([^"]+)"/i);
-    data.folderLink = match ? match[1] : '';
-  } else {
-    var rt = fCell.getRichTextValue();
-    if (rt) {
-      var runs = rt.getRuns();
-      for (var i = 0; i < runs.length; i++) {
-        var url = runs[i].getLinkUrl();
-        if (url) { data.folderLink = url; break; }
-      }
-    }
-    if (!data.folderLink) data.folderLink = fCell.getValue();
-  }
-  if (!data.phone) { SpreadsheetApp.getUi().alert('No phone number found in col H.'); return null; }
-  if (!data.name)  { SpreadsheetApp.getUi().alert('No customer name found in col E.'); return null; }
-  return data;
 }
 
 function dp_sendSwatches_() {
-  var customer = dp_getRowData_(); if (!customer) return;
-  var ui = SpreadsheetApp.getUi();
-  var response = ui.prompt('Send Swatches to ' + customer.name, 'Paste the Google Drive swatch link:', ui.ButtonSet.OK_CANCEL);
-  if (response.getSelectedButton() !== ui.Button.OK) return;
-  var link = response.getResponseText().trim();
-  if (!link) { ui.alert('No link entered.'); return; }
-  var message = 'Hi ' + customer.name.split(' ')[0] + '! Here are some fabric swatch options for your awning project: ' + link + '\n\nLet us know if you have any questions! \u2013 Walker Awning';
-  if (ui.alert('Confirm Send', 'Sending to ' + customer.phone + ':\n\n' + message, ui.ButtonSet.OK_CANCEL) !== ui.Button.OK) return;
-  if (dp_sendSms_(customer.phone, message)) ui.alert('\u2705 Swatches sent to ' + customer.name + '!');
+  try {
+    var ctx = dp_getRowContext_();
+    dp_sendSms(ctx.phone,
+      'Hi ' + ctx.name + ', this is Walker Awning! We\'d love to send you some fabric swatches to help you choose the perfect look for your project. Just confirm your address and we\'ll get them out to you.');
+    SpreadsheetApp.getActiveSpreadsheet().toast('✅ Swatches message sent to ' + ctx.name, 'SMS Sent', 4);
+  } catch(err) { SpreadsheetApp.getUi().alert('❌ ' + err.message); }
 }
 
 function dp_requestPhotos_() {
-  var customer = dp_getRowData_(); if (!customer) return;
-  var ui = SpreadsheetApp.getUi();
-  var message = 'Hi ' + customer.name.split(' ')[0] + '! Could you please send us some photos of your existing awning/space? This will help us finalize your project. Thank you! \u2013 Walker Awning';
-  if (customer.folderLink && customer.folderLink.indexOf('http') === 0) message += '\n\nYou can upload them here: ' + customer.folderLink;
-  if (ui.alert('Confirm Send', 'Sending to ' + customer.phone + ':\n\n' + message, ui.ButtonSet.OK_CANCEL) !== ui.Button.OK) return;
-  if (dp_sendSms_(customer.phone, message)) ui.alert('\u2705 Photo request sent to ' + customer.name + '!');
+  try {
+    var ctx = dp_getRowContext_();
+    dp_sendSms(ctx.phone,
+      'Hi ' + ctx.name + ', it\'s Walker Awning! Could you send us a few photos of the area where the awning will be installed? It helps us give you the most accurate quote. Thank you!');
+    SpreadsheetApp.getActiveSpreadsheet().toast('✅ Photo request sent to ' + ctx.name, 'SMS Sent', 4);
+  } catch(err) { SpreadsheetApp.getUi().alert('❌ ' + err.message); }
 }
 
 function dp_sendProposalLink_() {
-  var customer = dp_getRowData_(); if (!customer) return;
-  var ui = SpreadsheetApp.getUi();
-  var proposalLink = '';
   try {
-    var threads = GmailApp.search('in:sent subject:"awning proposal" ' + customer.name.split(' ')[0], 0, 5);
-    for (var t = 0; t < threads.length; t++) {
-      var msgs = threads[t].getMessages();
-      for (var m = 0; m < msgs.length; m++) {
-        var match = msgs[m].getBody().match(/href="(https:\/\/[^"]+)"/i);
-        if (match) { proposalLink = match[1]; break; }
-      }
-      if (proposalLink) break;
+    var ctx   = dp_getRowContext_();
+    var sheet = SpreadsheetApp.getActiveSheet();
+    var row   = sheet.getActiveCell().getRow();
+    var qbUrl = sheet.getRange(row, 16).getValue(); // col P = QB URL
+    if (!qbUrl) { SpreadsheetApp.getUi().alert('No QuickBooks URL found in column P for this row.'); return; }
+    dp_sendSms(ctx.phone,
+      'Hi ' + ctx.name + ', your proposal from Walker Awning is ready! You can view it here: ' + qbUrl + ' — feel free to call or text us with any questions.');
+    SpreadsheetApp.getActiveSpreadsheet().toast('✅ Proposal link sent to ' + ctx.name, 'SMS Sent', 4);
+  } catch(err) { SpreadsheetApp.getUi().alert('❌ ' + err.message); }
+}
+
+// ─── CALL LOG LOOKUP ───────────────────────────────────────────────────────
+
+/**
+ * Pull recent call/SMS history for the selected row's phone number.
+ */
+function dp_viewContactHistory_() {
+  try {
+    var ctx  = dp_getRowContext_();
+    var e164 = dp_normalisePhone_(ctx.phone);
+    if (!e164) { SpreadsheetApp.getUi().alert('Invalid phone number.'); return; }
+
+    var result = dp_apiRequest_('get', '/contacts?phone=' + encodeURIComponent(e164));
+    SpreadsheetApp.getUi().alert(
+      'Contact History: ' + ctx.name,
+      JSON.stringify(result, null, 2).substring(0, 1000),
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
+  } catch(err) { SpreadsheetApp.getUi().alert('❌ ' + err.message); }
+}
+
+// ─── BULK HYPERLINK APPLY ──────────────────────────────────────────────────
+
+function dp_applyAllDialpadLinks() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  DIALPAD_CONFIG.SHEETS.forEach(function(name) {
+    var sheet = ss.getSheetByName(name);
+    if (!sheet) return;
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= DIALPAD_CONFIG.HEADER_ROW) return;
+    var numRows = lastRow - DIALPAD_CONFIG.HEADER_ROW;
+    var cells   = sheet.getRange(DIALPAD_CONFIG.HEADER_ROW + 1, DIALPAD_CONFIG.PHONE_COL, numRows, 1);
+    for (var r = 1; r <= numRows; r++) {
+      dp_linkCell_(cells.getCell(r, 1));
     }
-  } catch(e) { Logger.log('Gmail search error: ' + e.message); }
-  var response = ui.prompt('Proposal Link for ' + customer.name, proposalLink ? 'Found link. Confirm or replace:' : 'No link found. Paste manually:', ui.ButtonSet.OK_CANCEL);
-  if (response.getSelectedButton() !== ui.Button.OK) return;
-  var finalLink = response.getResponseText().trim() || proposalLink;
-  if (!finalLink) { ui.alert('No link provided.'); return; }
-  var message = 'Hi ' + customer.name.split(' ')[0] + '! Here is your awning proposal from Walker Awning: ' + finalLink + '\n\nPlease review and feel free to reach out with any questions!';
-  if (ui.alert('Confirm Send', 'Sending to ' + customer.phone + ':\n\n' + message, ui.ButtonSet.OK_CANCEL) !== ui.Button.OK) return;
-  if (dp_sendSms_(customer.phone, message)) ui.alert('\u2705 Proposal link sent to ' + customer.name + '!');
+  });
+  SpreadsheetApp.getUi().alert('✅ Dialpad links applied to all sheets.');
 }
 
-function dp_sendCustomMessage_() {
-  var customer = dp_getRowData_(); if (!customer) return;
-  var ui = SpreadsheetApp.getUi();
-  var templateChoice = ui.alert('Message Type for ' + customer.name, 'Choose a starting template:\n\n[OK] = Walkthrough / Site Visit\n[Cancel] = Write my own', ui.ButtonSet.OK_CANCEL);
-  var defaultText = templateChoice === ui.Button.OK
-    ? 'Hi ' + customer.name.split(' ')[0] + '! We\'d like to schedule a walkthrough for your awning project. What days/times work best for you? \u2013 Walker Awning'
-    : '';
-  var response = ui.prompt('Message to ' + customer.name + ' (' + customer.phone + ')', defaultText || 'Write your message here:', ui.ButtonSet.OK_CANCEL);
-  if (response.getSelectedButton() !== ui.Button.OK) return;
-  var message = response.getResponseText().trim();
-  if (!message) { ui.alert('No message entered.'); return; }
-  if (ui.alert('Confirm Send', 'Sending to ' + customer.phone + ':\n\n' + message, ui.ButtonSet.OK_CANCEL) !== ui.Button.OK) return;
-  if (dp_sendSms_(customer.phone, message)) ui.alert('\u2705 Message sent to ' + customer.name + '!');
+// ─── ON-EDIT (auto-link new phone numbers as typed) ────────────────────────
+
+function dp_handleEdit_(e) {
+  if (!e) return;
+  var range = e.range;
+  if (range.getNumRows() !== 1 || range.getNumColumns() !== 1) return;
+  if (range.getRow() <= DIALPAD_CONFIG.HEADER_ROW)             return;
+
+  var sheet     = range.getSheet();
+  var sheetName = sheet.getName();
+  var row       = range.getRow();
+  var col       = range.getColumn();
+
+  if (DIALPAD_CONFIG.SHEETS.indexOf(sheetName) === -1) return;
+
+  // Auto-link phone numbers as typed
+  if (col === DIALPAD_CONFIG.PHONE_COL) {
+    dp_linkCell_(range);
+  }
+
+  // Text Customer SMS prompt (col D = 4, Leads sheet only)
+  Logger.log('dp_handleEdit_ col=' + col + ' sheet=' + sheetName + ' value=' + e.value);
+  if (col === 4 && sheetName === 'Leads' && e.value === 'Text Customer') {
+    Logger.log('Text Customer detected - firing SMS prompt');
+    dp_promptTextCustomerSms_(sheet, row);
+  }
 }
 
-function dp_testApiCall_() {
-  var result = dp_sendSms_('+19542710686', 'Test from Apps Script - ignore');
-  Logger.log('Result: ' + result);
+// ─── TRIGGER INSTALLER ─────────────────────────────────────────────────────
+
+function dp_installTrigger() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  ScriptApp.getProjectTriggers().forEach(function(t) {
+    if (t.getHandlerFunction() === 'dp_handleEdit_') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('dp_handleEdit_').forSpreadsheet(ss).onEdit().create();
+  Logger.log('Dialpad onEdit trigger installed.');
+}
+
+// ─── Text Customer SMS PROMPT ──────────────────────────────────────────────
+
+function dp_promptTextCustomerSms_(sheet, row) {
+  var name      = sheet.getRange(row, 5).getDisplayValue();
+  var phoneCell = sheet.getRange(row, 8);
+  var phone     = phoneCell.getDisplayValue() || String(phoneCell.getValue());
+
+  Logger.log('dp_promptTextCustomerSms_ row=' + row + ' name=' + name + ' phone=' + phone);
+
+  if (!phone || phone.trim() === '') {
+    Logger.log('No phone number found - skipping');
+    return;
+  }
+
+  var msg =
+    'Hi ' + name + ', this is Gino from Walker Awning! ' +
+    'I\'d love to learn more about your project and get you a quote. ' +
+    'When is a good time to connect?';
+
+  try {
+    dp_sendSms(phone, msg);
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      '✅ SMS sent to ' + name + ' (' + phone + ')',
+      'SMS Sent', 5
+    );
+  } catch (err) {
+    Logger.log('SMS failed: ' + err.message);
+  }
+}
+
+// ─── CONNECTION TEST ───────────────────────────────────────────────────────
+function dp_testSend() {
+  try {
+    var result = dp_sendSms('+19548265915', 'Test from Walker Awning automation');
+    SpreadsheetApp.getUi().alert('✅ API response:\n\n' + JSON.stringify(result, null, 2).substring(0, 800));
+  } catch(err) {
+    SpreadsheetApp.getUi().alert('❌ ' + err.message);
+  }
+}
+function dp_removeAllDialpadLinks() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  ['Leads', 'F/U', 'Awarded', 'Heaven', 'Re-cover'].forEach(function(name) {
+    var sheet = ss.getSheetByName(name);
+    if (!sheet) return;
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return;
+    var cells = sheet.getRange(2, 8, lastRow - 1, 1);
+    for (var r = 1; r <= lastRow - 1; r++) {
+      var cell = cells.getCell(r, 1);
+      var formula = cell.getFormula();
+      if (formula && formula.indexOf('HYPERLINK') !== -1 && formula.indexOf('dialpad') !== -1) {
+        var match = formula.match(/,"(.+?)"\)/);
+        var display = match ? match[1] : cell.getValue();
+        cell.setValue(display);
+      }
+    }
+  });
+  SpreadsheetApp.getUi().alert('✅ Dialpad hyperlinks removed from all sheets.');
+}
+function dp_debugPhoneCell() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Leads');
+  var row   = sheet.getActiveCell().getRow();
+  var cell  = sheet.getRange(row, 8);
+  SpreadsheetApp.getUi().alert(
+    'Row: '          + row                  + '\n' +
+    'getValue: '     + cell.getValue()       + '\n' +
+    'getDisplayValue: ' + cell.getDisplayValue() + '\n' +
+    'getFormula: '   + cell.getFormula()
+  );
 }

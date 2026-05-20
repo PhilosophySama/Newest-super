@@ -203,28 +203,17 @@ function handleEditMove_(e) {
 
 /*** FEATURE: Auto-sort sheet by Stage column (A to Z) + Apply formatting ***/
 function m_autoSortByStage_(sheet) {
-  const S = MOVE_CONFIG;
+  var S = MOVE_CONFIG;
   
   try {
-    const lastRow = sheet.getLastRow();
-    if (lastRow <= 2) return; // Need at least 2 data rows to sort
-    
-    // Get the full data range (excluding header row 1)
-    const dataRange = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn());
-    
-    // Apply formatting to all data rows
-    dataRange
-      .setHorizontalAlignment('center')
-      .setFontFamily('Roboto')
-      .setFontSize(10)
-      .setVerticalAlignment('middle')
-      .setBackground(null); // Clear background (no fill)
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 2) return;
     
     // Check for empty folders and highlight them red
     m_checkEmptyFoldersInSheet_(sheet);
     
     if (S.ENABLE_LOGGING) {
-      m_logOperation_('Auto-sorted and formatted', {
+      m_logOperation_('Auto-sort ran (formatting handled by Formula Restoration)', {
         sheet: sheet.getName(),
         rows: lastRow - 1
       });
@@ -232,12 +221,11 @@ function m_autoSortByStage_(sheet) {
     
   } catch (err) {
     if (S.ENABLE_LOGGING) {
-      m_logOperation_('Auto-sort/format error', {
+      m_logOperation_('Auto-sort error', {
         sheet: sheet.getName(),
         error: err.message
       });
     }
-    // Don't throw - sorting failure shouldn't break other functionality
   }
 }
 
@@ -699,7 +687,7 @@ function m_searchAndLinkSentEmail_(sheet, displayName) {
       // No email found - update column B with message
       const lastRow = sheet.getLastRow();
       const logCell = sheet.getRange(lastRow, 2); // Column B
-      logCell.setValue(`📧 No sent email found for: "${searchSubject}"`);
+      logCell.setValue(`📧🚫: "${searchSubject}"`);
       if (S.ENABLE_LOGGING) {
         m_logOperation_('Email search - not found', {displayName, searchSubject});
       }
@@ -723,7 +711,7 @@ function m_searchAndLinkSentEmail_(sheet, displayName) {
     const gmailUrl = `https://mail.google.com/mail/u/0/#sent/${messageId}`;
     
     // Create rich text link for column B
-    const linkText = '✉️ Sent: ' + searchSubject;
+    const linkText = '✉️ ✅ ';
     const richText = SpreadsheetApp.newRichTextValue()
       .setText(linkText)
       .setLinkUrl(0, linkText.length, gmailUrl)

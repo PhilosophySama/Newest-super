@@ -54,6 +54,15 @@ const EMAIL_READER_CONFIG = {
       }
     },
     {
+      name: 'Proposal Sent to Liz',
+      query: 'from:me to:Liz@WalkerAwning.com (in:sent OR in:scheduled) subject:"Proposal Review" -label:ProposalSentToLiz',
+      enabled: true,
+      sourceType: 'proposalsentliz',
+      settings: {
+        stage: 'Liz'
+      }
+    },
+    {
       name: 'Quote Sent Detection',
       query: 'from:me (in:sent OR in:scheduled) subject:"Your awning quote from Walker Awning" -label:QuoteSent',
       enabled: true,
@@ -454,6 +463,119 @@ function er_processQuoteSentEmail_(message, processedLabel) {
     throw err;
   }
 }
+/**
+ * Process proposal emails sent to Liz - updates customer stage to "Liz"
+ * Detects when you send/schedule a "Proposal Review [Display Name]" email to Liz
+ * Version: 04/09-03:45PM EST by Claude Opus 4.1
+ */
+function er_processProposalSentToLiz_(message, processedLabel) {
+  var C = EMAIL_READER_CONFIG;
+  
+  try {
+    var thread = message.getThread();
+    
+    // Check if already processed
+    var labels = thread.getLabels();
+    if (labels.some(function(l) { return l.getName() === 'ProposalSentToLiz'; })) {
+      er_log_('Proposal to Liz already processed - skipping', { messageId: message.getId() });
+      return false;
+    }
+    
+    var subject = message.getSubject();
+    
+    // Parse subject: "Proposal Review [Display Name]" or "Proposal Review Display Name"
+    // Support both bracket and non-bracket formats
+    var match = subject.match(/Proposal Review\s*[\[\(]?\s*(.+?)\s*[\]\)]?\s*$/i);
+    
+    if (!match) {
+      er_log_('Proposal to Liz subject does not match expected format', { 
+        subject: subject,
+        messageId: message.getId() 
+      });
+      var proposalLabel = GmailApp.getUserLabelByName('ProposalSentToLiz');
+      if (!proposalLabel) proposalLabel = GmailApp.createLabel('ProposalSentToLiz');
+      thread.addLabel(proposalLabel);
+      return false;
+    }
+    
+    var displayName = match[1].trim();
+    
+    er_log_('Processing proposal sent to Liz', { displayName: displayName, subject: subject });
+    
+    // Find customer in Leads sheet
+    var ss = SpreadsheetApp.getActive();
+    var sheet = ss.getSheetByName(C.TARGET_SHEET);
+    
+    if (!sheet) {
+      throw new Error('Sheet "' + C.TARGET_SHEET + '" not found');
+    }
+    
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) {
+      er_log_('No data rows in Leads sheet', {});
+      var proposalLabel = GmailApp.getUserLabelByName('ProposalSentToLiz');
+      if (!proposalLabel) proposalLabel = GmailApp.createLabel('ProposalSentToLiz');
+      thread.addLabel(proposalLabel);
+      return false;
+    }
+    
+    // Get Display Name column (F)
+    var displayNames = sheet.getRange(2, C.COLS.DISPLAY, lastRow - 1, 1).getValues();
+    
+    // Find matching row (case-insensitive)
+    var matchRow = -1;
+    for (var i = 0; i < displayNames.length; i++) {
+      var rowDisplay = String(displayNames[i][0]).trim();
+      
+      if (rowDisplay.toLowerCase() === displayName.toLowerCase()) {
+        matchRow = i + 2;
+        break;
+      }
+    }
+    
+    if (matchRow === -1) {
+      er_log_('No matching customer found for proposal sent to Liz', { displayName: displayName });
+      var proposalLabel = GmailApp.getUserLabelByName('ProposalSentToLiz');
+      if (!proposalLabel) proposalLabel = GmailApp.createLabel('ProposalSentToLiz');
+      thread.addLabel(proposalLabel);
+      return false;
+    }
+    
+    // Update Stage column to "Liz"
+    sheet.getRange(matchRow, C.COLS.STAGE).setValue('Liz');
+    SpreadsheetApp.flush();
+    
+    er_log_('Updated customer stage to Liz', { 
+      row: matchRow,
+      displayName: displayName
+    });
+    
+    // Add ProposalSentToLiz label to prevent reprocessing
+    var proposalLabel = GmailApp.getUserLabelByName('ProposalSentToLiz');
+    if (!proposalLabel) {
+      proposalLabel = GmailApp.createLabel('ProposalSentToLiz');
+    }
+    thread.addLabel(proposalLabel);
+    
+    er_log_('Added ProposalSentToLiz label', { messageId: message.getId() });
+    
+    SpreadsheetApp.getActive().toast(
+      '✅ Proposal sent to Liz: ' + displayName + '\n→ Stage: Liz',
+      'Proposal Tracked',
+      5
+    );
+    
+    return true;
+    
+  } catch (err) {
+    er_log_('Proposal sent to Liz processing error', { 
+      error: err.toString(),
+      stack: err.stack 
+    });
+    throw err;
+  }
+}
+
 /**
  * Process a single email - writes CSV to column A
  * Stage Automation will split it across columns
@@ -903,6 +1025,16 @@ function er_processNewEmails() {
           // Handle "Quote sent" emails differently
           if (search.sourceType === 'quotesent') {
             success = er_processQuoteSentEmail_(message, processedLabel);
+            if (success) {
+              totalProcessed++;
+              addLeadProcessed++;
+            }
+            continue;
+          }
+          
+          // Handle "Proposal sent to Liz" emails
+          if (search.sourceType === 'proposalsentliz') {
+            success = er_processProposalSentToLiz_(message, processedLabel);
             if (success) {
               totalProcessed++;
               addLeadProcessed++;

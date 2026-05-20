@@ -72,16 +72,32 @@ function syncJobTracker() {
 
   var numRows = awardedLastRow - SYNC_CONFIG.AWARDED_DATA_START_ROW + 1;
 
+  var stageRange   = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, 4, numRows, 1); // D
   var statusRange  = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, SYNC_CONFIG.AWARDED_STATUS_COL,  numRows, 1);
   var addressRange = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, SYNC_CONFIG.AWARDED_ADDRESS_COL, numRows, 1);
 
+  var stageValues   = stageRange.getValues();
   var statusValues  = statusRange.getValues();
   var addressValues = addressRange.getValues();
+
+  var waitingStages = [
+    'Waiting on Deposit',
+    'COI Request',
+    'Liz Design Review',
+    'Design Review'
+  ];
 
   var updates = [];
 
   for (var i = 0; i < numRows; i++) {
+    var currentStage  = String(stageValues[i][0]).trim();
     var currentStatus = String(statusValues[i][0]).trim();
+
+    // Waiting stages override Tracker / Not in Tracker
+    if (waitingStages.indexOf(currentStage) !== -1) {
+      updates.push(['Waiting']);
+      continue;
+    }
 
     // Already reconciled -- leave it alone
     if (currentStatus === SYNC_CONFIG.STATUS_MATCHED) {

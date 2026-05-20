@@ -45,6 +45,7 @@ const DRAFTS_V2 = {
   FOLLOWUP_STAGE: 'F/U',               // Follow-up reply trigger
   DESIGN_REVIEW_STAGE: 'Design Review',       // Design review reply trigger
   LIZ_DESIGN_REVIEW_STAGE: 'Liz Design Review', // Awarded-only email search trigger
+  SAMPLES_STAGE: 'Send Samples',
 
   COLS: {
     LOG_B: 'B',
@@ -289,6 +290,13 @@ function handleEditDraft_V2(e) {
       }
       const result = v2_searchAndLinkEmail_(sh, row);
       SpreadsheetApp.getActive().toast(result.message, 'Liz Design Review', 5);
+      return;
+    }
+
+    // Handle "Send Samples" stage - create Trivantage samples PO draft
+    if (newValLower === String(DRAFTS_V2.SAMPLES_STAGE).toLowerCase()) {
+      const result = d_createSendSamplesDraft_(sh, row);
+      SpreadsheetApp.getActive().toast(result.toast, 'Send Samples', 5);
       return;
     }
 
@@ -638,7 +646,8 @@ function v2_createCustomerInfoDraft_(sh, row) {
     }
     
     // Create subject
-    const subject = 'Info request for awning - ' + displayName;
+    const subjectName = displayName || name;
+    const subject = 'Info request for awning - ' + subjectName;
     
     // Build bullet list
     let bulletList = '';
@@ -2195,7 +2204,7 @@ function v2_createPlotMapDraft_() {
         '&key=' + apiKey,
       muteHttpExceptions: true
     }));
-    const dirResponses = UrlFetchApp.fetchAll(dirRequests);
+    const dirResponses = fetchAllThrottled_(dirRequests, 5, 1200);
     for (let i = 0; i < dirResponses.length; i++) {
       try {
         const parsed = JSON.parse(dirResponses[i].getContentText());
@@ -2306,7 +2315,7 @@ function v2_createPlotMapDraft_() {
     const parallelRequests = [{ url: mapUrl, muteHttpExceptions: true }];
     if (routeDirUrl) parallelRequests.push({ url: routeDirUrl, muteHttpExceptions: true });
 
-    const parallelResponses = UrlFetchApp.fetchAll(parallelRequests);
+    const parallelResponses = fetchAllThrottled_(parallelRequests, 2, 1200);
 
     // Satellite map
     const mapResp = parallelResponses[0];
@@ -2326,6 +2335,7 @@ function v2_createPlotMapDraft_() {
         }
         routeMapUrl += '&key=' + apiKey;
         // fetchAll with single item — keeps pattern consistent and non-blocking relative to any future additions
+        Utilities.sleep(1200);
         const routeImgResps = UrlFetchApp.fetchAll([{ url: routeMapUrl, muteHttpExceptions: true }]);
         if (routeImgResps[0].getResponseCode() === 200) {
           routeMapBlob = routeImgResps[0].getBlob().setName('route_map.png');
@@ -2336,6 +2346,7 @@ function v2_createPlotMapDraft_() {
     } else if (plotRows.length === 1) {
       try {
         const routeMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?size=640x400&scale=2&maptype=roadmap' + routeMarkersParam + '&key=' + apiKey;
+        Utilities.sleep(1200);
         const routeImgResps = UrlFetchApp.fetchAll([{ url: routeMapUrl, muteHttpExceptions: true }]);
         if (routeImgResps[0].getResponseCode() === 200) {
           routeMapBlob = routeImgResps[0].getBlob().setName('route_map.png');
@@ -2543,6 +2554,23 @@ function v2_createPlotMapDraft_() {
 
   SpreadsheetApp.getActive().toast(`Draft created — ${plotRows.length} schedule + ${engRows.length} planning + ${scheduledRows.length} scheduled location(s).`, 'Plot Map', 5);
 }
+function fetchAllThrottled_(requests, batchSize, sleepMs) {
+  const out = [];
+
+  for (let i = 0; i < requests.length; i++) {
+    const res = UrlFetchApp.fetch(requests[i].url, {
+      muteHttpExceptions: requests[i].muteHttpExceptions === true
+    });
+
+    out.push(res);
+
+    if (i < requests.length - 1) {
+      Utilities.sleep(sleepMs || 1500);
+    }
+  }
+
+  return out;
+}
 /**
  * Create a design review reply draft on the existing Proposal Review thread.
  * Finds the Gmail thread by subject "Proposal Review: [F]", exports the first
@@ -2653,6 +2681,84 @@ function v2_createDesignReviewDraft_(sh, row) {
     const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
     logCell.setValue('Error creating design review draft: ' + d_shortErr_(err));
     return { toast: 'Error creating design review draft: ' + d_shortErr_(err) };
+  }
+}
+// version# [05/04-2:45PM] by Claude Opus 4.7
+/** Creates a Gmail draft to Ron at Trivantage requesting samples be shipped to a customer's project address. Triggered when Column D = "Send Samples". */
+function d_createSendSamplesDraft_(sh, row) {
+  try {
+    var esc = function(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    };
+
+    var customerName = String(sh.getRange(row, d_colLetterToIndex_('E')).getValue() || '').trim();
+    var displayName  = String(sh.getRange(row, d_colLetterToIndex_('F')).getValue() || '').trim();
+    var address      = String(sh.getRange(row, d_colLetterToIndex_('J')).getValue() || '').trim();
+
+    if (!displayName) {
+      return { toast: 'Missing Quote Display Name (col F). Draft not created.' };
+    }
+    if (!address) {
+      return { toast: 'Missing project address (col J). Draft not created.' };
+    }
+
+    var to      = 'rparatore@trivantage.com';
+    var subject = 'PO: Samples for ' + displayName;
+
+    // Plain-text fallback
+    var plain = [
+      'Hello Ron,',
+      '',
+      '      Please send the following samples to:',
+      customerName,
+      address,
+      '',
+      'Samples: ______________________',
+      '',
+      'Thank you,',
+      'Gino',
+      '954.826.5915',
+      'Gino@WalkerAwning.com'
+    ].join('\n');
+
+    // Modern signature (pure typography, gold accent line)
+    var sig =
+      '<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;">' +
+        '<tr><td style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;color:#1a1a1a;padding:0 0 2px 0;letter-spacing:0.2px;">Gino Carneiro</td></tr>' +
+        '<tr><td style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:11px;color:#888;padding:0 0 10px 0;letter-spacing:1.2px;text-transform:uppercase;">Walker Awning</td></tr>' +
+        '<tr><td style="border-top:2px solid #c8a25b;width:32px;line-height:0;font-size:0;padding:0 0 10px 0;">&nbsp;</td></tr>' +
+        '<tr><td style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:13px;color:#4a4a4a;padding:0 0 2px 0;">' +
+          '<a href="tel:+19548265915" style="color:#4a4a4a;text-decoration:none;">954.826.5915</a>' +
+        '</td></tr>' +
+        '<tr><td style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:13px;color:#4a4a4a;">' +
+          '<a href="mailto:Gino@WalkerAwning.com" style="color:#4a4a4a;text-decoration:none;">Gino@WalkerAwning.com</a>' +
+        '</td></tr>' +
+      '</table>';
+
+    var html =
+      '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5;">' +
+        '<p style="margin:0 0 12px 0;">Hello Ron,</p>' +
+        '<p style="margin:0 0 4px 0;padding-left:24px;">Please send the following samples to:</p>' +
+        '<p style="margin:0 0 16px 0;padding-left:24px;">' +
+          esc(customerName) + '<br>' +
+          esc(address) +
+        '</p>' +
+        '<p style="margin:0 0 24px 0;">Samples: ______________________</p>' +
+        '<p style="margin:0 0 4px 0;">Thank you,</p>' +
+        sig +
+      '</div>';
+
+    GmailApp.createDraft(to, subject, plain, { htmlBody: html });
+
+    return { toast: 'Samples PO draft created for ' + displayName };
+  } catch (err) {
+    console.error('d_createSendSamplesDraft_ error:', err);
+    return { toast: 'Error: ' + d_shortErr_(err) };
   }
 }
 

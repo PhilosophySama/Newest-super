@@ -2,7 +2,7 @@
  * ============================================================================
  * FORMULA RESTORATION SYSTEM
  * ============================================================================
- * Version# 01/28-10:45AM by Claude Opus 4.5
+ * Version# 04/08-04:25PM by Claude Opus 4.1
  * 
  * PURPOSE:
  * Monitors protected formula cells and automatically restores them after 5 
@@ -138,6 +138,114 @@ const FORMULA_CONFIG = {
 
 /* ****************************************************************************
  * ============================================================================
+ * FORMATTING ENFORCEMENT
+ * ============================================================================
+ * Applies standard formatting (center, Roboto 10pt, middle-aligned, no fill)
+ * to all data rows on specified sheets. Called from the master onEdit handler
+ * whenever a cell is edited on an enforced sheet.
+ * ****************************************************************************/
+
+var FORMAT_CONFIG = {
+  SHEETS: ['Leads', 'F/U', 'Awarded', 'Heaven'],
+  FONT_FAMILY: 'Roboto',
+  FONT_SIZE: 10,
+  H_ALIGN: 'center',
+  V_ALIGN: 'middle'
+};
+
+/**
+ * Hourly formatting enforcement (time-driven trigger).
+ * Applies standard formatting to all data rows on enforced sheets.
+ */
+function fr_hourlyFormatting_() {
+  var ss = SpreadsheetApp.getActive();
+  var totalRows = 0;
+  
+  FORMAT_CONFIG.SHEETS.forEach(function(sheetName) {
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return;
+    
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return;
+    
+    var lastCol = sheet.getLastColumn();
+    if (lastCol < 1) return;
+    
+    var dataRange = sheet.getRange(2, 1, lastRow - 1, lastCol);
+    dataRange
+      .setHorizontalAlignment(FORMAT_CONFIG.H_ALIGN)
+      .setFontFamily(FORMAT_CONFIG.FONT_FAMILY)
+      .setFontSize(FORMAT_CONFIG.FONT_SIZE)
+      .setVerticalAlignment(FORMAT_CONFIG.V_ALIGN)
+      .setBackground(null);
+    
+    totalRows += (lastRow - 1);
+  });
+  
+  if (FORMULA_CONFIG.ENABLE_LOGGING) {
+    fr_logOperation_('Hourly formatting applied', {totalRows: totalRows, sheets: FORMAT_CONFIG.SHEETS.length});
+  }
+}
+
+/**
+ * Install hourly formatting trigger.
+ */
+function installHourlyFormattingTrigger_() {
+  ScriptApp.getProjectTriggers().forEach(function(t) {
+    if (t.getHandlerFunction() === 'fr_hourlyFormatting_') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+  
+  ScriptApp.newTrigger('fr_hourlyFormatting_')
+    .timeBased()
+    .everyHours(1)
+    .create();
+  
+  SpreadsheetApp.getActive().toast(
+    'Hourly formatting trigger installed',
+    'Setup Complete',
+    3
+  );
+}
+
+/**
+ * Menu function: Apply standard formatting to ALL data rows on enforced sheets.
+ */
+function fr_formatAllSheets_() {
+  var ss = SpreadsheetApp.getActive();
+  var totalRows = 0;
+  
+  FORMAT_CONFIG.SHEETS.forEach(function(sheetName) {
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return;
+    
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return;
+    
+    var lastCol = sheet.getLastColumn();
+    if (lastCol < 1) return;
+    
+    var dataRange = sheet.getRange(2, 1, lastRow - 1, lastCol);
+    dataRange
+      .setHorizontalAlignment(FORMAT_CONFIG.H_ALIGN)
+      .setFontFamily(FORMAT_CONFIG.FONT_FAMILY)
+      .setFontSize(FORMAT_CONFIG.FONT_SIZE)
+      .setVerticalAlignment(FORMAT_CONFIG.V_ALIGN)
+      .setBackground(null);
+    
+    totalRows += (lastRow - 1);
+  });
+  
+  SpreadsheetApp.getActive().toast(
+    'Formatted ' + totalRows + ' rows across ' + FORMAT_CONFIG.SHEETS.length + ' sheets',
+    'Formatting Complete',
+    3
+  );
+}
+
+/* ****************************************************************************
+ * ============================================================================
  * CORE FUNCTIONS - Edit Handler & Restoration Logic
  * ============================================================================
  * These functions handle the automatic detection and restoration of formulas.
@@ -151,7 +259,7 @@ const FORMULA_CONFIG = {
 function handleEditFormula_(e) {
   if (!e || !e.source || !e.range) return;
   
-  const sheet = e.source.getActiveSheet();
+  const sheet = e.range.getSheet();
   const sheetName = sheet.getName();
   
   // Check if this sheet has protected formulas
@@ -184,9 +292,6 @@ function handleEditFormula_(e) {
     });
   }
   
-  // Delete any existing restoration trigger for this cell
-  fr_deleteRestoreTrigger_(cellA1);
-  
   // Store restoration info
   const props = PropertiesService.getScriptProperties();
   const restoreKey = `FR_RESTORE_${sheetName}_${cellA1}`;
@@ -194,12 +299,9 @@ function handleEditFormula_(e) {
   
   props.setProperty(restoreKey, expectedFormula);
   props.setProperty(timeKey, new Date().getTime().toString());
-  
-  // Create time-based trigger to restore after delay
-  ScriptApp.newTrigger('fr_restoreScheduled_')
-    .timeBased()
-    .after(FORMULA_CONFIG.RESTORE_DELAY_MS)
-    .create();
+
+  // Ensure only one restore trigger exists
+  fr_ensureRestoreTrigger_();
   
   if (FORMULA_CONFIG.ENABLE_LOGGING) {
     fr_logOperation_('Restoration scheduled', {
@@ -449,7 +551,7 @@ function fr_viewPendingRestorations_() {
     const scheduledTime = parseInt(allProps[timeKey] || '0');
     const restoreTime = scheduledTime + FORMULA_CONFIG.RESTORE_DELAY_MS;
     const remainingMs = restoreTime - now;
-    const remainingMin = Math.ceil(remainingMs / 60000);
+    const remainingMin = Math.max(0, Math.ceil(remainingMs / 60000));
     
     pending.push(`• ${sheetName}!${cellA1}: ~${remainingMin} minute(s) remaining`);
   }
@@ -475,10 +577,17 @@ function fr_viewPendingRestorations_() {
 /**
  * Delete restoration trigger for specific cell (placeholder for future enhancement)
  */
-function fr_deleteRestoreTrigger_(cellA1) {
-  // Currently just cleans up old triggers
-  // Future: could target specific cells if needed
-  fr_cleanupTriggers_();
+function fr_ensureRestoreTrigger_() {
+  const exists = ScriptApp.getProjectTriggers().some(t =>
+    t.getHandlerFunction() === 'fr_restoreScheduled_'
+  );
+
+  if (!exists) {
+    ScriptApp.newTrigger('fr_restoreScheduled_')
+      .timeBased()
+      .after(FORMULA_CONFIG.RESTORE_DELAY_MS)
+      .create();
+  }
 }
 
 /**
@@ -529,26 +638,10 @@ function fr_logOperation_(operation, details) {
  * ****************************************************************************/
 
 /**
- * Install the formula protection edit trigger
- * Call this from the menu after adding new formulas or on initial setup
+ * Enable formula protection.
+ * Formula protection runs through the MASTER onEdit trigger.
  */
-function installTriggerFormula_() {
-  const ssId = SpreadsheetApp.getActive().getId();
-  
-  // Remove existing formula triggers
-  ScriptApp.getProjectTriggers().forEach(t => {
-    if (t.getHandlerFunction() === 'handleEditFormula_') {
-      ScriptApp.deleteTrigger(t);
-    }
-  });
-  
-  // Create new trigger
-  ScriptApp.newTrigger('handleEditFormula_')
-    .forSpreadsheet(ssId)
-    .onEdit()
-    .create();
-  
-  // Count total formulas being protected
+function installTriggerFormula() {
   let totalFormulas = 0;
   let sheetCount = 0;
   for (const sheetName in FORMULA_CONFIG.FORMULAS) {
@@ -557,13 +650,13 @@ function installTriggerFormula_() {
   }
   
   SpreadsheetApp.getActive().toast(
-    `Formula protection installed!\nMonitoring ${totalFormulas} formula(s) across ${sheetCount} sheet(s)`,
+    `Formula protection enabled.\nMonitoring ${totalFormulas} formula(s) across ${sheetCount} sheet(s)\nUses Master Trigger.`,
     'Setup Complete',
     5
   );
   
   if (FORMULA_CONFIG.ENABLE_LOGGING) {
-    fr_logOperation_('Trigger installed', { 
+    fr_logOperation_('Formula protection enabled', { 
       totalFormulas, 
       sheetCount,
       sheets: Object.keys(FORMULA_CONFIG.FORMULAS)
@@ -572,15 +665,14 @@ function installTriggerFormula_() {
 }
 
 /**
- * Remove the formula protection trigger
- * Use this if you need to temporarily disable formula protection
+ * Disable formula protection.
+ * This clears pending restorations and removes scheduled restore triggers.
  */
-function uninstallTriggerFormula_() {
+function uninstallTriggerFormula() {
   let removed = 0;
   
   ScriptApp.getProjectTriggers().forEach(t => {
-    if (t.getHandlerFunction() === 'handleEditFormula_' || 
-        t.getHandlerFunction() === 'fr_restoreScheduled_') {
+    if (t.getHandlerFunction() === 'fr_restoreScheduled_') {
       ScriptApp.deleteTrigger(t);
       removed++;
     }
@@ -596,12 +688,35 @@ function uninstallTriggerFormula_() {
   }
   
   SpreadsheetApp.getActive().toast(
-    `Formula protection disabled.\nRemoved ${removed} trigger(s).`,
+    `Formula protection disabled.\nRemoved ${removed} scheduled restore trigger(s).`,
     'Protection Disabled',
     5
   );
   
   if (FORMULA_CONFIG.ENABLE_LOGGING) {
-    fr_logOperation_('Trigger uninstalled', { triggersRemoved: removed });
+    fr_logOperation_('Formula protection disabled', { triggersRemoved: removed });
   }
+}
+/**
+ * PUBLIC WRAPPERS
+ * These show up better in the Apps Script editor and can be used in menus.
+ */
+function installFormulaProtection() {
+  installTriggerFormula();
+}
+
+function uninstallFormulaProtection() {
+  uninstallTriggerFormula();
+}
+
+function restoreAllFormulasNow() {
+  fr_restoreAllFormulasNow_();
+}
+
+function viewProtectedFormulas() {
+  fr_viewProtectedFormulas_();
+}
+
+function viewPendingRestorations() {
+  fr_viewPendingRestorations_();
 }
