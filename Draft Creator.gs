@@ -46,6 +46,7 @@ const DRAFTS_V2 = {
   DESIGN_REVIEW_STAGE: 'Design Review',       // Design review reply trigger
   LIZ_DESIGN_REVIEW_STAGE: 'Liz Design Review', // Awarded-only email search trigger
   SAMPLES_STAGE: 'Send Samples',
+  DEPOSIT_STAGE: 'Waiting on Deposit',  // 50% deposit invoice trigger
 
   COLS: {
     LOG_B: 'B',
@@ -297,6 +298,13 @@ function handleEditDraft_V2(e) {
     if (newValLower === String(DRAFTS_V2.SAMPLES_STAGE).toLowerCase()) {
       const result = d_createSendSamplesDraft_(sh, row);
       SpreadsheetApp.getActive().toast(result.toast, 'Send Samples', 5);
+      return;
+    }
+
+    // Handle "Waiting on Deposit" stage - create 50% deposit invoice draft
+    if (newValLower === String(DRAFTS_V2.DEPOSIT_STAGE).toLowerCase()) {
+      const result = d_draftWaitingOnDeposit_(sh, row);
+      SpreadsheetApp.getActive().toast(result.toast, 'Deposit Invoice', 5);
       return;
     }
 
@@ -2707,7 +2715,7 @@ function d_createSendSamplesDraft_(sh, row) {
       return { toast: 'Missing project address (col J). Draft not created.' };
     }
 
-    var to      = 'rparatore@trivantage.com';
+    var to      = 'rparatore@trivantage.com, customerservice@trivantage.com';
     var subject = 'PO: Samples for ' + displayName;
 
     // Plain-text fallback
@@ -2758,6 +2766,85 @@ function d_createSendSamplesDraft_(sh, row) {
     return { toast: 'Samples PO draft created for ' + displayName };
   } catch (err) {
     console.error('d_createSendSamplesDraft_ error:', err);
+    return { toast: 'Error: ' + d_shortErr_(err) };
+  }
+}
+
+// version# [06/08-12:00PM] by Claude Opus 4.8
+/** Creates a 50% deposit invoice draft to the customer when Column D = "Waiting on Deposit".
+ *  Invoice button links to the estimate/invoice URL in column P (swap to the true invoice link later). */
+function d_draftWaitingOnDeposit_(sh, row) {
+  try {
+    var customerName  = String(sh.getRange(row, d_colLetterToIndex_('E')).getValue() || '').trim();
+    var displayName   = String(sh.getRange(row, d_colLetterToIndex_('F')).getValue() || '').trim() || 'your project';
+    var customerEmail = String(sh.getRange(row, d_colLetterToIndex_('I')).getValue() || '').trim();
+    var firstName     = customerName ? customerName.split(' ')[0] : 'there';
+
+    // Pull the estimate/invoice URL from column P (supports HYPERLINK, rich-text, or plain URL)
+    var rawP = sh.getRange(row, d_colLetterToIndex_('P')).getValue();
+    var invoiceUrl = d_extractUrlFromCell_(rawP, null, sh, row, 'P');
+
+    if (!customerEmail || !d_isValidEmail_(customerEmail)) {
+      var msg = 'No valid customer email in column I — deposit draft not created.';
+      sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B)).setValue(msg);
+      return { toast: msg };
+    }
+
+    var subject = 'Invoice — Walker Awning (50% Deposit)';
+
+    // Plain-text fallback
+    var plain = [
+      'Hi ' + firstName + ',',
+      '',
+      'We appreciate your business! Please find your invoice details for ' + displayName + ' here.',
+      '',
+      'We ask for a 50% material deposit for us to begin production.',
+      '',
+      'Free payment options: Check or Zelle to "walker-awning-fl". CC is 3% additional.',
+      '',
+      'Please feel free to reach out by text or call — we\'re glad to help.',
+      (invoiceUrl ? '\nView Invoice: ' + invoiceUrl : ''),
+      '',
+      'Best regards,',
+      'Gino Carneiro',
+      'Walker Awning'
+    ].join('\n');
+
+    // Invoice button (or a note if P is empty)
+    var buttonHtml = invoiceUrl
+      ? '<p><a href="' + d_htmlEscape_(invoiceUrl) + '" target="_blank" style="background-color:#c8a25b;color:#ffffff;padding:12px 28px;text-decoration:none;display:inline-block;border-radius:4px;font-weight:bold;font-family:Arial,sans-serif;">View Invoice</a></p>'
+      : '<p style="color:#888;font-style:italic;">(No invoice link found in column P — add the link, then re-trigger.)</p>';
+
+    var html =
+      '<div style="font-family:Arial,sans-serif;color:#333;line-height:1.5;">' +
+        '<p>Hi ' + d_htmlEscape_(firstName) + ',</p>' +
+        '<p>We appreciate your business! Please find your invoice details for <strong>' + d_htmlEscape_(displayName) + '</strong> here.</p>' +
+        '<p>We ask for a 50% material deposit for us to begin production.</p>' +
+        '<p>Free payment options: Check or Zelle to <strong>walker-awning-fl</strong>. CC is 3% additional.</p>' +
+        '<p>Please feel free to reach out by text or call — we\'re glad to help.</p>' +
+        buttonHtml +
+        '<p>Best regards,<br>Gino Carneiro<br>Walker Awning</p>' +
+      '</div>';
+
+    var draft = d_withRetry_(function() {
+      return GmailApp.createDraft(customerEmail, subject, plain, { htmlBody: html });
+    });
+    var draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' +
+      encodeURIComponent(draft.getMessage().getId());
+
+    var linkText = '💰 Deposit Invoice';
+    var richText = SpreadsheetApp.newRichTextValue()
+      .setText(linkText)
+      .setLinkUrl(0, linkText.length, draftUrl)
+      .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+      .build();
+    sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B)).setRichTextValue(richText);
+
+    return { toast: invoiceUrl ? 'Deposit invoice draft created & linked in column B' : 'Deposit draft created (no P link) & linked in column B' };
+
+  } catch (err) {
+    console.error('d_draftWaitingOnDeposit_ error:', err);
+    sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B)).setValue('Error creating deposit draft: ' + d_shortErr_(err));
     return { toast: 'Error: ' + d_shortErr_(err) };
   }
 }

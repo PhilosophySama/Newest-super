@@ -80,7 +80,7 @@ const MOVE_CONFIG = {
     heaven:     ['heaven', 'installed', 'complete', 'completed', 'done', 'pending review'],
     revise:     ['revise', 'revision', 'needs revision'],
     schedule:   ['2. sched', 'schedule', 'sched'],
-    print_folder: ['print folder', 'print packet', 'print'],
+    print_folder: ['print folder', 'print packet', 'print', 'give to richard'],
     negotiating:  ['negotiating'],
     qb_prompt:    ['qb prompt']
   },
@@ -174,13 +174,27 @@ function handleEditMove_(e) {
     const isDraftCreatorStage = DRAFT_CREATOR_STAGES.includes(stageValueLower);
 
     // ── Shop Drawing — triggered by "Quote Sent" on Leads or F/U ──
+    // Wrapped so a shop-drawing failure (e.g. no folder linked in F) does NOT
+    // block the stage move + email link below.
     if ((isLeads || isFU) && stageValueLower === 'quote sent') {
-      m_createShopDrawing_(sheet, row);
+      try {
+        m_createShopDrawing_(sheet, row);
+      } catch (sdErr) {
+        if (S.ENABLE_LOGGING) {
+          m_logOperation_('Shop drawing skipped (Quote Sent)', {row, sheet: sheetName, error: sdErr.message});
+        }
+      }
     }
 
     // ── Shop Drawing — triggered by "Shop Drawing" on Awarded ──
     if (isAwarded && stageValueLower === 'shop drawing') {
-      m_createShopDrawing_(sheet, row);
+      try {
+        m_createShopDrawing_(sheet, row);
+      } catch (sdErr) {
+        if (S.ENABLE_LOGGING) {
+          m_logOperation_('Shop drawing skipped (Awarded)', {row, sheet: sheetName, error: sdErr.message});
+        }
+      }
     }
 
     const handled = handleStageChange_(e, sheet, row, r.getValue());
@@ -684,10 +698,11 @@ function m_searchAndLinkSentEmail_(sheet, displayName) {
     const threads = GmailApp.search(searchQuery, 0, 1);
     
     if (threads.length === 0) {
-      // No email found - update column B with message
+      // No email found - mark column B with a dated miss
       const lastRow = sheet.getLastRow();
       const logCell = sheet.getRange(lastRow, 2); // Column B
-      logCell.setValue(`📧🚫: "${searchSubject}"`);
+      const attemptDate = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'M/yy');
+      logCell.setValue('❌  no Email ' + attemptDate);
       if (S.ENABLE_LOGGING) {
         m_logOperation_('Email search - not found', {displayName, searchSubject});
       }
@@ -709,9 +724,12 @@ function m_searchAndLinkSentEmail_(sheet, displayName) {
     
     // Construct Gmail URL to the sent email
     const gmailUrl = `https://mail.google.com/mail/u/0/#sent/${messageId}`;
-    
+
+    // Format the linked email's date (yy/MM/dd so the column sorts chronologically as text)
+    const emailDate = Utilities.formatDate(message.getDate(), Session.getScriptTimeZone(), 'yy/MM/dd');
+
     // Create rich text link for column B
-    const linkText = '✉️ ✅ ';
+    const linkText = '✅ ' + emailDate;
     const richText = SpreadsheetApp.newRichTextValue()
       .setText(linkText)
       .setLinkUrl(0, linkText.length, gmailUrl)
@@ -784,10 +802,8 @@ function m_linkQuoteSentEmail_(sheet, row, displayName) {
     }
     
     if (threads.length === 0) {
-      const msg = customerEmail 
-        ? `📧 No email found. Tried:\n1) "${primarySubject}"\n2) "Awning Proposal" with ${customerEmail}\n3) Any email from Gino to ${customerEmail}`
-        : `📧 No email found: "${primarySubject}"`;
-      logCell.setValue(msg);
+      const attemptDate = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'M/yy');
+      logCell.setValue('❌  no Email ' + attemptDate);
       if (S.ENABLE_LOGGING) {
         m_logOperation_('Quote sent email - not found', {displayName, customerEmail, row});
       }
@@ -816,18 +832,10 @@ function m_linkQuoteSentEmail_(sheet, row, displayName) {
     // Construct Gmail URL
     const gmailUrl = `https://mail.google.com/mail/u/0/#${folder}/${messageId}`;
     
-    // Create rich text link for column B with search method indicator
-    let subjectText;
-    if (searchMethod === 'primary') {
-      subjectText = primarySubject;
-    } else if (searchMethod === 'secondary') {
-      subjectText = `Awning Proposal (${customerEmail})`;
-    } else {
-      // Tertiary - show actual email subject
-      subjectText = emailSubject || `Latest email to ${customerEmail}`;
-    }
-    
-    const linkText = '✉️ Quote Email: ' + subjectText;
+    // Format the linked email's date (yy/MM/dd so the column sorts chronologically as text)
+    const emailDate = Utilities.formatDate(message.getDate(), Session.getScriptTimeZone(), 'yy/MM/dd');
+
+    const linkText = '✅ ' + emailDate;
     const richText = SpreadsheetApp.newRichTextValue()
       .setText(linkText)
       .setLinkUrl(0, linkText.length, gmailUrl)
@@ -1460,7 +1468,42 @@ function createNextDayGinoEvent_(sheet, row) {
     // Build event description
     let description = '';
     if (phone) description += `Phone: ${phone}\n`;
-    if (address) description += `Address: ${address}`;
+    if (address) description += `Address: ${address}\n`;
+
+    // Pull the Google Drive folder URL hyperlinked in column F
+    var folderUrl = '';
+    try {
+      var fCell = sheet.getRange(row, 6); // column F
+      // 1) Rich-text link (plain display text with an embedded link)
+      var rtv = fCell.getRichTextValue();
+      if (rtv) {
+        folderUrl = rtv.getLinkUrl() || '';
+        if (!folderUrl) {
+          var runs = rtv.getRuns();
+          for (var i = 0; i < runs.length; i++) {
+            var u = runs[i].getLinkUrl();
+            if (u) { folderUrl = u; break; }
+          }
+        }
+      }
+      // 2) HYPERLINK() formula
+      if (!folderUrl) {
+        var formula = fCell.getFormula();
+        if (formula) {
+          var match = formula.match(/HYPERLINK\(\s*"([^"]+)"/i);
+          if (match && match[1]) folderUrl = match[1];
+        }
+      }
+      // 3) Plain URL typed into the cell
+      if (!folderUrl) {
+        var raw = String(fCell.getDisplayValue() || '').trim();
+        if (/^https?:\/\//i.test(raw)) folderUrl = raw;
+      }
+    } catch (e) {
+      // folder link is optional - ignore if missing
+    }
+
+    if (folderUrl) description += `Photos folder: ${folderUrl}`;
 
     // Set tomorrow at 8:00 AM
     tomorrow.setHours(8, 0, 0, 0);

@@ -1,13 +1,14 @@
 // ============================================================
 // JobTrackerSync.gs
 // Reconciles Awarded sheet rows against Liz's Job Tracker
-// version 1.0 [03/31-07:45AM] by Claude Sonnet 4.6
+// version 1.1 [06/08-time] by Claude Opus 4.8
 // ============================================================
 
 const SYNC_CONFIG = {
   AWARDED_SHEET_ID: '1H9A-5kdSAzmsxjpsuOhTmGLwLQye7XZRLcFDizpR-F4',
   AWARDED_TAB_NAME: 'Awarded',
-  AWARDED_ADDRESS_COL: 31,        // AE
+  AWARDED_ADDRESS_COL: 31,          // AE (primary)
+  AWARDED_ADDRESS_COL_FALLBACK: 10, // J  (used when AE is blank)
   AWARDED_STATUS_COL:  19,        // S
   AWARDED_DATA_START_ROW: 2,
 
@@ -72,13 +73,15 @@ function syncJobTracker() {
 
   var numRows = awardedLastRow - SYNC_CONFIG.AWARDED_DATA_START_ROW + 1;
 
-  var stageRange   = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, 4, numRows, 1); // D
-  var statusRange  = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, SYNC_CONFIG.AWARDED_STATUS_COL,  numRows, 1);
-  var addressRange = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, SYNC_CONFIG.AWARDED_ADDRESS_COL, numRows, 1);
+  var stageRange    = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, 4, numRows, 1); // D
+  var statusRange   = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, SYNC_CONFIG.AWARDED_STATUS_COL,  numRows, 1);
+  var addressRange  = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, SYNC_CONFIG.AWARDED_ADDRESS_COL, numRows, 1);
+  var addressRangeFb = awardedSheet.getRange(SYNC_CONFIG.AWARDED_DATA_START_ROW, SYNC_CONFIG.AWARDED_ADDRESS_COL_FALLBACK, numRows, 1);
 
-  var stageValues   = stageRange.getValues();
-  var statusValues  = statusRange.getValues();
-  var addressValues = addressRange.getValues();
+  var stageValues       = stageRange.getValues();
+  var statusValues      = statusRange.getValues();
+  var addressValues     = addressRange.getValues();
+  var addressValuesFb   = addressRangeFb.getValues();
 
   var waitingStages = [
     'Waiting on Deposit',
@@ -99,15 +102,14 @@ function syncJobTracker() {
       continue;
     }
 
-    // Already reconciled -- leave it alone
-    if (currentStatus === SYNC_CONFIG.STATUS_MATCHED) {
-      updates.push([currentStatus]);
-      continue;
-    }
-
     var rawAddress = addressValues[i][0];
 
-    // No address -- skip without changing status
+    // Fall back to J if AE is blank for this row
+    if (!rawAddress || String(rawAddress).trim() === '') {
+      rawAddress = addressValuesFb[i][0];
+    }
+
+    // Still no address in either column -- skip without changing status
     if (!rawAddress || String(rawAddress).trim() === '') {
       updates.push([currentStatus]);
       continue;
