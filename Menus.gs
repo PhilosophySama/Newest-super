@@ -438,10 +438,8 @@ function onOpen() {
       .addSeparator()
       // Gino's Diary (Activity Log)
       .addItem('📔 Open Log', 'al_openLog')
-      .addItem('📔 Setup Activity Log', 'al_setupLog')
-      .addItem('📔 Install Log Triggers', 'al_installLogTriggers')
+      .addItem('📈 See Visuals', 'al_openVisuals')
       .addToUi();
-
     // ====== SETUP / TROUBLESHOOTING ======
     ui.createMenu('⚙️ Setup')
       // Move / Stage Automation
@@ -474,6 +472,11 @@ function onOpen() {
       .addItem('🛑 Remove Health Check', 'removeTriggerHealthCheck_')
       .addItem('📋 View Error Log', 'viewTriggerErrorLog_')
       .addItem('🗑️ Clear Error Log', 'clearTriggerErrorLog_')
+      .addSeparator()
+      // Diary setup (one-time)
+      .addItem('📔 Setup Activity Log', 'al_setupLog')
+      .addItem('📔 Install Log Triggers', 'al_installLogTriggers')
+      .addItem('📔 Backfill: Sent Emails', 'al_backfillSentMail')
       .addToUi();
 
     console.log('Menus created successfully');

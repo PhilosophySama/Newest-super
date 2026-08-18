@@ -339,7 +339,7 @@ function handleDisplayNameChange_(sheet, row, displayName) {
     target.setRichTextValue(rich);
 
     if (S.ENABLE_LOGGING) m_logOperation_('Display name linked to folder', {name, url, row, sheet: sheet.getName()});
-    try { al_logActivity_(sheet.getName(), 'Automation', sheet.getRange(row, S.COLS.NAME).getDisplayValue(), name, 'Folder created/linked', ''); } catch (_) {}
+    try { al_logActivity_(sheet.getName(), 'Automation', sheet.getRange(row, S.COLS.NAME).getDisplayValue(), name, 'Folder', 'Created/linked', ''); } catch (_) {}
 
   } catch (err) {
     sheet.getRange(row, S.COLS.DISPLAY).setValue(`Error: ${err.message || err}`);
@@ -602,7 +602,7 @@ function handleStageChange_(e, sheet, row, newStage) {
           customer: customerName, stage, from: sheet.getName(), to: dest.getName(), originalRow: row
         });
       }
-      try { al_logActivity_(dest.getName(), 'Automation', customerName, displayName, 'Moved to ' + dest.getName(), 'from ' + sheet.getName()); } catch (_) {}
+      try { al_logActivity_(dest.getName(), 'Automation', customerName, displayName, 'Move', sheet.getName() + ' → ' + dest.getName(), ''); } catch (_) {}
       
       // If moved to F/U, search for and link the sent email (unless this came from a Rough Quote draft)
       if (dest.getName() === S.SHEETS.FU && displayName) {
