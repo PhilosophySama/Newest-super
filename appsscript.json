@@ -23,6 +23,10 @@
       "menuName": "Copy Ruby",
       "functionName": "CopyRuby",
       "defaultShortcut": "Ctrl+Alt+Shift+1"
+    }, {
+      "menuName": "copyRubyMacro",
+      "functionName": "copyRubyMacro",
+      "defaultShortcut": "Ctrl+Alt+Shift+1"
     }]
   }
 }

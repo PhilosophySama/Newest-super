@@ -3,6 +3,7 @@
  * FORMULA RESTORATION SYSTEM
  * ============================================================================
  * Version# 04/08-04:25PM by Claude Opus 4.1
+ * Version# 06/24-[hh:mm]PM EST by Claude Opus 4.8 (formatting now every 10 min, gated 8am-5pm Mon-Fri)
  * 
  * PURPOSE:
  * Monitors protected formula cells and automatically restores them after 5 
@@ -154,10 +155,19 @@ var FORMAT_CONFIG = {
 };
 
 /**
- * Hourly formatting enforcement (time-driven trigger).
+ * Business-hours formatting enforcement (time-driven trigger).
+ * Fires every 10 minutes, but only acts Mon-Fri, 8:00AM-4:59PM Eastern.
  * Applies standard formatting to all data rows on enforced sheets.
  */
 function fr_hourlyFormatting_() {
+  // Business-hours gate: Mon-Fri, 8am-5pm Eastern (South Florida).
+  var tz = 'America/New_York';
+  var now = new Date();
+  var dow = Utilities.formatDate(now, tz, 'u');               // 1=Mon ... 7=Sun
+  var hour = parseInt(Utilities.formatDate(now, tz, 'H'), 10); // 0-23
+  if (dow === '6' || dow === '7') return;                     // Skip Sat/Sun
+  if (hour < 8 || hour >= 17) return;                         // Only 8:00am-4:59pm
+
   var ss = SpreadsheetApp.getActive();
   var totalRows = 0;
   
@@ -199,11 +209,11 @@ function installHourlyFormattingTrigger_() {
   
   ScriptApp.newTrigger('fr_hourlyFormatting_')
     .timeBased()
-    .everyHours(1)
+    .everyMinutes(10)
     .create();
   
   SpreadsheetApp.getActive().toast(
-    'Hourly formatting trigger installed',
+    'Formatting trigger installed (every 10 min; gated to 8am-5pm Mon-Fri)',
     'Setup Complete',
     3
   );
@@ -718,5 +728,11 @@ function viewProtectedFormulas() {
 }
 
 function viewPendingRestorations() {
+  fr_viewPendingRestorations_();
+}
+
+function installFormattingTrigger() {
+  installHourlyFormattingTrigger_();
+}function viewPendingRestorations() {
   fr_viewPendingRestorations_();
 }

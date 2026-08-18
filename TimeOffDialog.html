@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; margin: 16px; color: #222; }
+  label { display: block; font-weight: bold; margin: 12px 0 4px; }
+  select, textarea, input[type=text], input[type=date] {
+    width: 100%; padding: 7px; border: 1px solid #b9c2cf; border-radius: 5px;
+    font-size: 13px; box-sizing: border-box;
+  }
+  textarea { height: 60px; resize: vertical; }
+  #calwrap { display: flex; justify-content: center; margin-top: 4px; }
+  .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+    background: #1f3a5f; border-color: #1f3a5f;
+  }
+  .flatpickr-day.inRange {
+    background: #dce6f5; border-color: #dce6f5; box-shadow: -5px 0 0 #dce6f5, 5px 0 0 #dce6f5;
+  }
+  #rangeinfo { color: #1f3a5f; font-weight: bold; margin-top: 8px; min-height: 18px; text-align: center; }
+  #fallback { display: none; }
+  #otherwrap { display: none; margin-top: 6px; }
+  button {
+    margin-top: 14px; width: 100%; padding: 10px; background: #2e7d32; color: #fff;
+    font-size: 14px; font-weight: bold; border: 0; border-radius: 6px; cursor: pointer;
+  }
+  button:disabled { background: #9e9e9e; cursor: default; }
+  #status { margin-top: 10px; min-height: 18px; }
+  .ok { color: #2e7d32; font-weight: bold; }
+  .err { color: #c62828; font-weight: bold; }
+  .note { color: #777; font-size: 11px; margin-top: 2px; text-align: center; }
+</style>
+</head>
+<body>
+
+  <label style="margin-top:0;">Select Your Days Off</label>
+  <div class="note">Click your first day, then your last day — the range highlights.</div>
+  <div id="calwrap"><div id="cal"></div></div>
+  <div id="rangeinfo">No dates selected</div>
+
+  <!-- Fallback if the calendar library fails to load -->
+  <div id="fallback">
+    <label for="start">Start Date</label>
+    <input type="date" id="start">
+    <label for="end">End Date</label>
+    <input type="date" id="end">
+  </div>
+
+  <label for="type">Type of Request</label>
+  <select id="type">
+    <option value="">— Leave blank —</option>
+    <option>Vacation</option>
+    <option>Sick</option>
+    <option>Jury Duty</option>
+    <option>Bereavement Leave</option>
+    <option>Leave Without Pay</option>
+    <option>Family Emergency</option>
+    <option>Other</option>
+  </select>
+  <div id="otherwrap">
+    <input type="text" id="othertext" placeholder="Please specify…">
+  </div>
+
+  <label for="comments">Comments</label>
+  <textarea id="comments" placeholder="Optional"></textarea>
+
+  <button id="go" onclick="submitForm()">Create Draft to Liz</button>
+  <div id="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script>
+  var selStart = '', selEnd = '';
+
+  function ymd(d) {
+    var m = d.getMonth() + 1, day = d.getDate();
+    return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;
+  }
+
+  function dow(d) {
+    return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+  }
+
+  function weekdayCount(a, b) {
+    var n = 0, d = new Date(a);
+    while (d <= b) {
+      if (d.getDay() !== 0 && d.getDay() !== 6) n++;
+      d.setDate(d.getDate() + 1);
+    }
+    return n;
+  }
+
+  function updateInfo(dates) {
+    var info = document.getElementById('rangeinfo');
+    if (dates.length === 0) {
+      selStart = ''; selEnd = '';
+      info.textContent = 'No dates selected';
+    } else if (dates.length === 1) {
+      selStart = ymd(dates[0]); selEnd = '';
+      info.textContent = dow(dates[0]) + ' ' + (dates[0].getMonth()+1) + '/' + dates[0].getDate() +
+                         ' — now click your last day';
+    } else {
+      selStart = ymd(dates[0]); selEnd = ymd(dates[1]);
+      var n = weekdayCount(dates[0], dates[1]);
+      info.textContent = dow(dates[0]) + ' ' + (dates[0].getMonth()+1) + '/' + dates[0].getDate() +
+                         ' to ' + dow(dates[1]) + ' ' + (dates[1].getMonth()+1) + '/' + dates[1].getDate() +
+                         '  (~' + n + ' weekday' + (n === 1 ? '' : 's') + ')';
+    }
+  }
+
+  // Init calendar; fall back to plain date inputs if the library didn't load
+  if (typeof flatpickr === 'function') {
+    flatpickr('#cal', {
+      mode: 'range',
+      inline: true,
+      minDate: 'today',
+      onChange: function (selectedDates) { updateInfo(selectedDates); }
+    });
+  } else {
+    document.getElementById('calwrap').style.display = 'none';
+    document.getElementById('rangeinfo').style.display = 'none';
+    document.getElementById('fallback').style.display = 'block';
+  }
+
+  var typeSel = document.getElementById('type');
+  typeSel.addEventListener('change', function () {
+    document.getElementById('otherwrap').style.display =
+      (typeSel.value === 'Other') ? 'block' : 'none';
+  });
+
+  function submitForm() {
+    var btn = document.getElementById('go');
+    var status = document.getElementById('status');
+
+    // Range calendar values, or fallback inputs if the calendar didn't load
+    var startVal = selStart || document.getElementById('start').value;
+    var endVal = selEnd || document.getElementById('end').value;
+    // Single-day request: one click on the calendar = same start & end
+    if (startVal && !endVal && selStart) endVal = startVal;
+
+    var data = {
+      startDate: startVal,
+      endDate: endVal,
+      type: typeSel.value,
+      otherText: document.getElementById('othertext').value,
+      comments: document.getElementById('comments').value
+    };
+    if (!data.startDate || !data.endDate) {
+      status.className = 'err';
+      status.textContent = 'Please select your days on the calendar.';
+      return;
+    }
+    btn.disabled = true;
+    status.className = '';
+    status.textContent = 'Building form and creating draft…';
+
+    google.script.run
+      .withSuccessHandler(function (res) {
+        status.className = 'ok';
+        if (res && res.url) {
+          status.innerHTML = res.message +
+            '<br><a href="' + res.url + '" target="_blank" ' +
+            'style="color:#1f3a5f;font-weight:bold;">📧 Open the draft in Gmail</a>';
+        } else {
+          status.textContent = (res && res.message) || String(res);
+        }
+        btn.textContent = 'Done — you can close this';
+      })
+      .withFailureHandler(function (err) {
+        btn.disabled = false;
+        status.className = 'err';
+        status.textContent = err.message || String(err);
+      })
+      .submitTimeOffRequest(data);
+  }
+</script>
+</body>
+</html>

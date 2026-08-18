@@ -1,6 +1,6 @@
 /**
  * STAGE AUTOMATION (standalone)
- * Version: 1/16 9am EST by Claude Sonnet 4.5
+ * version# 07/14-12:00PM EST by Claude Opus 4.1
  * Moves rows between sheets, creates Drive folders, writes Google Earth links,
  * formats hyperlink cells, PRESERVES rich links/notes on row moves,
  * includes column M formula automation, expanded link generation, email linking,
@@ -126,11 +126,6 @@ function handleEditMove_(e) {
   const isFU      = sheetName === S.SHEETS.FU;
   const isAwarded = sheetName === S.SHEETS.AWARDED;
 
-  // Track if we should auto-sort at the end
-  const shouldAutoSort = S.AUTO_SORT.ENABLED && 
-                         col === S.COLS.STAGE && 
-                         S.AUTO_SORT.SHEETS.includes(sheetName);
-
   // Split-to-columns: Leads!A only
   if (isLeads && S.SPLIT.ENABLED && col === S.SPLIT.COLUMN) {
     const val = String(r.getValue() || '').trim();
@@ -163,11 +158,14 @@ function handleEditMove_(e) {
   // QB URL formatting: ALL allowed sheets (Leads, F/U, Awarded, Heaven, Purgatory)
   if (col === S.COLS.QB_URL) { handleQbUrlChange_(sheet, row, r.getValue()); return; }
 
+  // Stamp today's date in column A whenever Stage (D) changes - any allowed sheet
+  if (col === S.COLS.STAGE) m_stampStageDate_(sheet, row);
+
   // Stage moves: allowed on Leads, F/U, and Awarded only
   if ((isLeads || isFU || isAwarded) && col === S.COLS.STAGE) {
     // List of stages handled by Draft Creator - DO NOT auto-sort these
     const DRAFT_CREATOR_STAGES = [
-      'qdraft', 'liz', 'revise', 'email customer', 'cust handoff', 
+      'qdraft', 'liz', 'email customer', 'cust handoff', 
       'rough quote', 'customer info', 'coi req'
     ];
     const stageValueLower = String(r.getValue() || '').trim().toLowerCase();
@@ -198,14 +196,6 @@ function handleEditMove_(e) {
     }
 
     const handled = handleStageChange_(e, sheet, row, r.getValue());
-    
-    // Auto-sort after stage change ONLY if:
-    // 1. This handler processed it (handled = true), OR
-    // 2. It's NOT a Draft Creator stage (let Draft Creator finish first)
-    if (shouldAutoSort && handled && !isDraftCreatorStage) {
-      Utilities.sleep(2000);
-      m_autoSortByStage_(sheet);
-    }
     
     // If this handler processed it, we're done
     if (handled) return;
@@ -349,6 +339,7 @@ function handleDisplayNameChange_(sheet, row, displayName) {
     target.setRichTextValue(rich);
 
     if (S.ENABLE_LOGGING) m_logOperation_('Display name linked to folder', {name, url, row, sheet: sheet.getName()});
+    try { al_logActivity_(sheet.getName(), 'Automation', sheet.getRange(row, S.COLS.NAME).getDisplayValue(), name, 'Folder created/linked', ''); } catch (_) {}
 
   } catch (err) {
     sheet.getRange(row, S.COLS.DISPLAY).setValue(`Error: ${err.message || err}`);
@@ -533,11 +524,25 @@ function handleStageChange_(e, sheet, row, newStage) {
     return true; // Handled - no row move
   }
 
+  // Special case: "Schedule Install" (Awarded only) writes an Add-to-Calendar link in col B
+  if (isAwarded && stage === 'schedule install') {
+    m_writeScheduleInstalCalLink_(sheet, row);
+    return true; // Handled - no row move
+  }
+
+  // Detect if this "Quote sent" originated from a Rough Quote draft (col B marker)
+  const isRoughQuoteFlow = m_stageMatches_(stage, S.STAGE_MAPPINGS.quote_sent) &&
+    String(sheet.getRange(row, 2).getDisplayValue() || '').indexOf('💬 Rough: ') === 0;
+
   // Special case: "Quote sent" links sent email in column B (works on all sheets)
   if (m_stageMatches_(stage, S.STAGE_MAPPINGS.quote_sent)) {
-    const displayName = sheet.getRange(row, S.COLS.DISPLAY).getDisplayValue() || '';
-    if (displayName) {
-      m_linkQuoteSentEmail_(sheet, row, displayName);
+    if (!isRoughQuoteFlow) {
+      const displayName = sheet.getRange(row, S.COLS.DISPLAY).getDisplayValue() || '';
+      if (displayName) {
+        m_linkQuoteSentEmail_(sheet, row, displayName);
+      }
+    } else if (S.ENABLE_LOGGING) {
+      m_logOperation_('Quote sent - Rough Quote flow detected, preserving col B link', {row, sheet: sheet.getName()});
     }
     
     // Only move to F/U from Leads or Awarded, NOT from F/U itself
@@ -597,16 +602,24 @@ function handleStageChange_(e, sheet, row, newStage) {
           customer: customerName, stage, from: sheet.getName(), to: dest.getName(), originalRow: row
         });
       }
+      try { al_logActivity_(dest.getName(), 'Automation', customerName, displayName, 'Moved to ' + dest.getName(), 'from ' + sheet.getName()); } catch (_) {}
       
-      // If moved to F/U, search for and link the sent email
+      // If moved to F/U, search for and link the sent email (unless this came from a Rough Quote draft)
       if (dest.getName() === S.SHEETS.FU && displayName) {
-        m_searchAndLinkSentEmail_(dest, displayName);
+        if (isRoughQuoteFlow) {
+          // Preserve the existing "💬 Rough: " draft link in col B; just relabel the stage
+          dest.getRange(dest.getLastRow(), S.COLS.STAGE).setValue('Rough Quote sent');
+          if (S.ENABLE_LOGGING) {
+            m_logOperation_('Rough Quote sent - stage relabeled', {row: dest.getLastRow(), displayName});
+          }
+        } else {
+          m_searchAndLinkSentEmail_(dest, displayName);
+        }
       }
       
-      // Auto-sort destination sheet if it's in the auto-sort list
-      if (S.AUTO_SORT.ENABLED && S.AUTO_SORT.SHEETS.includes(dest.getName())) {
-        Utilities.sleep(2000);
-        m_autoSortByStage_(dest);
+      // If moved back to Leads via Revise, link the original Proposal Review email
+      if (dest.getName() === S.SHEETS.LEADS && displayName && m_stageMatches_(stage, S.STAGE_MAPPINGS.revise)) {
+        m_linkProposalReviewEmail_(dest, displayName);
       }
       
       return true; // Handled successfully
@@ -729,7 +742,7 @@ function m_searchAndLinkSentEmail_(sheet, displayName) {
     const emailDate = Utilities.formatDate(message.getDate(), Session.getScriptTimeZone(), 'yy/MM/dd');
 
     // Create rich text link for column B
-    const linkText = '✅ ' + emailDate;
+    const linkText = emailDate + '✅ ';
     const richText = SpreadsheetApp.newRichTextValue()
       .setText(linkText)
       .setLinkUrl(0, linkText.length, gmailUrl)
@@ -766,6 +779,48 @@ function m_searchAndLinkSentEmail_(sheet, displayName) {
     } catch (_) {
       // Ignore if we can't even write the error
     }
+  }
+}
+
+/*** FEATURE: Link "Proposal Review" email in col B of the moved row (Revise → Leads) ***/
+/*** version# 07/14-1:30PM EST by Claude Opus 4.1 ***/
+function m_linkProposalReviewEmail_(sheet, displayName) {
+  const S = MOVE_CONFIG;
+  const lastRow = sheet.getLastRow();
+  const logCell = sheet.getRange(lastRow, 2); // Column B of the newly moved row
+  
+  try {
+    const searchQuery = `subject:"Proposal Review: ${displayName}"`;
+    const threads = GmailApp.search(searchQuery, 0, 1);
+    
+    if (threads.length === 0) {
+      const attemptDate = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'M/yy');
+      logCell.setValue('❌  no Email ' + attemptDate);
+      if (S.ENABLE_LOGGING) m_logOperation_('Proposal Review email - not found', {displayName});
+      return;
+    }
+    
+    const messages = threads[0].getMessages();
+    if (messages.length === 0) return;
+    
+    const message = messages[messages.length - 1];
+    const gmailUrl = 'https://mail.google.com/mail/u/0/#search/' + 
+      encodeURIComponent('subject:"Proposal Review: ' + displayName + '"');
+    const emailDate = Utilities.formatDate(message.getDate(), Session.getScriptTimeZone(), 'yy/MM/dd');
+    
+    const linkText = emailDate + ' ✅';
+    const richText = SpreadsheetApp.newRichTextValue()
+      .setText(linkText)
+      .setLinkUrl(0, linkText.length, gmailUrl)
+      .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+      .build();
+    logCell.setRichTextValue(richText);
+    
+    if (S.ENABLE_LOGGING) m_logOperation_('Proposal Review email linked (Revise)', {displayName, row: lastRow});
+    
+  } catch (err) {
+    try { logCell.setValue('Error linking Proposal Review email: ' + (err.message || err)); } catch (_) {}
+    if (S.ENABLE_LOGGING) m_logOperation_('Proposal Review link error', {displayName, error: err.message});
   }
 }
 
@@ -835,7 +890,7 @@ function m_linkQuoteSentEmail_(sheet, row, displayName) {
     // Format the linked email's date (yy/MM/dd so the column sorts chronologically as text)
     const emailDate = Utilities.formatDate(message.getDate(), Session.getScriptTimeZone(), 'yy/MM/dd');
 
-    const linkText = '✅ ' + emailDate;
+    const linkText = emailDate + ' ✅';
     const richText = SpreadsheetApp.newRichTextValue()
       .setText(linkText)
       .setLinkUrl(0, linkText.length, gmailUrl)
@@ -859,7 +914,7 @@ function m_linkQuoteSentEmail_(sheet, row, displayName) {
     }
     
   } catch (err) {
-    logCell.setValue('Error linking quote email: ' + (err.message || err.toString()));
+    sheet.getRange(row, 2).setValue('Error linking quote email: ' + (err.message || err.toString()));
     if (S.ENABLE_LOGGING) {
       m_logOperation_('Quote sent email link error', {displayName, error: err.message, row});
     }
@@ -1505,6 +1560,12 @@ function createNextDayGinoEvent_(sheet, row) {
 
     if (folderUrl) description += `Photos folder: ${folderUrl}`;
 
+    // Append 7-day rain outlook for the jobsite (best-effort; blank on failure)
+    if (address) {
+      const weather = m_getWeatherOutlook_(address);
+      if (weather) description += `\n\n${weather}`;
+    }
+
     // Set tomorrow at 8:00 AM
     tomorrow.setHours(8, 0, 0, 0);
 
@@ -1551,6 +1612,98 @@ function testCalendarAccess_() {
     SpreadsheetApp.getActive().toast(`Found ${calendars.length} calendars`, 'Calendar OK', 3);
   } catch (err) {
     SpreadsheetApp.getActive().toast(`Calendar error: ${err.message}`, 'Error', 5);
+  }
+}
+
+/*** FEATURE: Write an "Add to Calendar" TEMPLATE link in col B when Awarded stage = "Schedule Install" ***/
+/*** Mirrors the per-row calendar button format from v2_createPlotMapDraft_ (all-day, next day) ***/
+function m_writeScheduleInstalCalLink_(sheet, row) {
+  var S = MOVE_CONFIG;
+  try {
+    // Gather row data (same sources as v2_createPlotMapDraft_ "schedule install" rows)
+    var name        = String(sheet.getRange(row, S.COLS.NAME).getDisplayValue() || '').trim();      // E
+    var displayName = String(sheet.getRange(row, S.COLS.DISPLAY).getDisplayValue() || '').trim();   // F
+    var rawAddress  = String(sheet.getRange(row, S.COLS.ADDRESS).getDisplayValue() || '').trim();   // J
+    var phone       = String(sheet.getRange(row, S.COLS.PHONE).getDisplayValue() || '').trim();     // H
+    var email       = String(sheet.getRange(row, S.COLS.EMAIL).getDisplayValue() || '').trim();     // I
+    var jobType     = String(sheet.getRange(row, S.COLS.JOB_TYPE).getDisplayValue() || '').trim();  // R
+    var jobValRaw   = Number(sheet.getRange(row, 33).getValue()) || 0;                              // AG
+
+    // Cleaned address + display-name fallback chain (matches map draft)
+    var cleanAddress = rawAddress.replace(/[\r\n]+/g, ', ').replace(/,\s*,/g, ',').trim();
+    var eventName    = displayName || name || cleanAddress;
+
+    // Folder URL hyperlinked in col F (handles rich-text, HYPERLINK formula, plain URL)
+    var folderUrl = m_getUrlFromCell_(sheet, row, S.COLS.DISPLAY);
+
+    // Job value format: $12k for >=1000, else $X
+    var jobVal = jobValRaw ? (jobValRaw >= 1000 ? '$' + Math.round(jobValRaw / 1000) + 'k' : '$' + jobValRaw) : '';
+
+    // Distance + duration from shop to jobsite (best-effort; falls back to em-dash)
+    var distance = '—', duration = '—';
+    try {
+      var SHOP_ADDRESS = 'Walker Awning, 5190 NW 10th Terrace, Fort Lauderdale, FL 33309';
+      var directions = Maps.newDirectionFinder()
+        .setOrigin(SHOP_ADDRESS)
+        .setDestination(cleanAddress)
+        .setMode(Maps.DirectionFinder.Mode.DRIVING)
+        .getDirections();
+      if (directions.routes && directions.routes.length > 0) {
+        var leg = directions.routes[0].legs[0];
+        if (leg && leg.distance && leg.distance.text) distance = leg.distance.text;
+        if (leg && leg.duration && leg.duration.text) duration = leg.duration.text;
+      }
+    } catch (dirErr) {
+      // leave as em-dash
+    }
+
+    // Tomorrow as all-day date (YYYYMMDD) - identical to map draft
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    var tPad = function(n) { return String(n).padStart(2, '0'); };
+    var tomorrowCalDate = tomorrow.getFullYear() + tPad(tomorrow.getMonth() + 1) + tPad(tomorrow.getDate());
+
+    // Build calendar TEMPLATE url (same structure/fields as v2_createPlotMapDraft_)
+    // 7-day rain outlook for the jobsite (best-effort; blank on failure)
+    var weatherOutlook = '';
+    try { weatherOutlook = m_getWeatherOutlook_(cleanAddress); } catch (_) {}
+
+    var calDescription = encodeURIComponent(
+      eventName + (phone ? ' - ' + phone : '') + '\n' +
+      (email ? email : '') + '\n\n' +
+      (jobType || '—') + '\n' +
+      (distance || '—') + ' - ' + (duration || '—') +
+      (folderUrl ? '\n\n' + folderUrl : '') +
+      (weatherOutlook ? '\n\n' + weatherOutlook : '')
+    );
+    var calEventTitle = eventName + (jobVal ? ' ' + jobVal : '');
+    var calUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent(calEventTitle) +
+      '&dates=' + tomorrowCalDate + '/' + tomorrowCalDate +
+      '&details=' + calDescription +
+      '&location=' + encodeURIComponent(cleanAddress) +
+      '&ctz=America%2FNew_York';
+
+    // Write hyperlink into col B
+    var linkText = '📅';
+    var rich = SpreadsheetApp.newRichTextValue()
+      .setText(linkText)
+      .setLinkUrl(0, linkText.length, calUrl)
+      .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+      .build();
+    sheet.getRange(row, 2).setRichTextValue(rich); // Column B
+
+    if (S.ENABLE_LOGGING) {
+      m_logOperation_('Schedule Install calendar link written', { row: row, eventName: eventName, url: calUrl });
+    }
+
+  } catch (err) {
+    if (S.ENABLE_LOGGING) {
+      m_logOperation_('Schedule Install calendar link error', { row: row, error: err.message });
+    }
+    try {
+      sheet.getRange(row, 2).setValue('Error creating calendar link: ' + (err.message || err));
+    } catch (_) {}
   }
 }
 
@@ -1623,7 +1776,144 @@ function m_handleQbPrompt_(ss, sheet, row) {
   }
 }
 
+/*** FEATURE: 7-day rain outlook for the jobsite address (used in calendar events) ***/
+/*** version# 07/14-3:15PM EST by Claude Fable 5 — NWS primary, Open-Meteo fallback, cached ***/
+function m_getWeatherOutlook_(address) {
+  try {
+    const flatAddr = String(address || '').replace(/[\r\n]+/g, ', ').replace(/\s+/g, ' ').trim();
+    m_logOperation_('Weather: starting', {input: address, flattened: flatAddr});
+
+    const coords = m_geocodeAddress_(flatAddr);
+    if (!coords) {
+      m_logOperation_('Weather: geocode returned null', {address: flatAddr});
+      return '';
+    }
+
+    // Cache by rounded coords (~1km grid) — forecasts don't change block-to-block
+    const cacheKey = 'wx_' + coords.lat.toFixed(2) + '_' + coords.lng.toFixed(2);
+    const cache = CacheService.getScriptCache();
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      m_logOperation_('Weather: served from cache', {key: cacheKey});
+      return cached;
+    }
+
+    // PRIMARY: National Weather Service (no key, no shared-IP rate limit issues)
+    let outlook = m_fetchNwsOutlook_(coords);
+    if (!outlook) {
+      // FALLBACK: Open-Meteo (may hit shared-IP 429s from Apps Script)
+      m_logOperation_('Weather: NWS failed, trying Open-Meteo', {});
+      outlook = m_fetchOpenMeteoOutlook_(coords);
+    }
+
+    if (outlook) {
+      cache.put(cacheKey, outlook, 21600); // cache 6 hours
+      m_logOperation_('Weather: outlook built OK', {source: outlook ? 'ok' : 'none'});
+    } else {
+      m_logOperation_('Weather: all providers failed', {});
+    }
+    return outlook || '';
+
+  } catch (err) {
+    m_logOperation_('Weather outlook error', {address: address, error: err.message});
+    return '';
+  }
+}
+
+/*** NWS: two-step — points endpoint gives the forecast URL for that grid cell ***/
+function m_fetchNwsOutlook_(coords) {
+  try {
+    const opts = {
+      muteHttpExceptions: true,
+      headers: { 'User-Agent': 'WalkerAwningScheduler (gino@walkerawning.com)' } // NWS requires a UA
+    };
+    const ptResp = UrlFetchApp.fetch(
+      'https://api.weather.gov/points/' + coords.lat.toFixed(4) + ',' + coords.lng.toFixed(4), opts);
+    if (ptResp.getResponseCode() !== 200) {
+      m_logOperation_('Weather: NWS points non-200', {code: ptResp.getResponseCode()});
+      return '';
+    }
+    const forecastUrl = JSON.parse(ptResp.getContentText()).properties.forecast;
+    if (!forecastUrl) return '';
+
+    const fResp = UrlFetchApp.fetch(forecastUrl, opts);
+    if (fResp.getResponseCode() !== 200) {
+      m_logOperation_('Weather: NWS forecast non-200', {code: fResp.getResponseCode()});
+      return '';
+    }
+    const periods = JSON.parse(fResp.getContentText()).properties.periods;
+    if (!periods || !periods.length) return '';
+
+    // NWS gives day/night periods; take daytime ones (or all-day), up to 7 days
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const lines = ['7-Day Outlook (jobsite):'];
+    let count = 0;
+    for (let i = 0; i < periods.length && count < 7; i++) {
+      const p = periods[i];
+      if (p.isDaytime === false) continue; // skip night periods
+      const d = new Date(p.startTime);
+      const pct = (p.probabilityOfPrecipitation && p.probabilityOfPrecipitation.value != null)
+        ? Number(p.probabilityOfPrecipitation.value) : null;
+      const icon = (pct == null) ? '❔' : (pct >= 60 ? '🌧️' : (pct >= 30 ? '🌦️' : '☀️'));
+      const pctText = (pct == null) ? '?' : pct + '%';
+      lines.push(dayNames[d.getDay()] + ' ' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + icon + ' ' + pctText);
+      count++;
+    }
+    return (count > 0) ? lines.join('\n') : '';
+  } catch (err) {
+    m_logOperation_('Weather: NWS error', {error: err.message});
+    return '';
+  }
+}
+
+/*** Open-Meteo fallback (unchanged logic from previous version) ***/
+function m_fetchOpenMeteoOutlook_(coords) {
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast' +
+      '?latitude=' + coords.lat + '&longitude=' + coords.lng +
+      '&daily=precipitation_probability_max&forecast_days=7&timezone=America%2FNew_York';
+    const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (resp.getResponseCode() !== 200) {
+      m_logOperation_('Weather: Open-Meteo non-200', {code: resp.getResponseCode()});
+      return '';
+    }
+    const data = JSON.parse(resp.getContentText());
+    if (!data.daily || !data.daily.time || !data.daily.precipitation_probability_max) return '';
+
+    const days = data.daily.time, rain = data.daily.precipitation_probability_max;
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const lines = ['7-Day Outlook (jobsite):'];
+    for (let i = 0; i < days.length; i++) {
+      const parts = days[i].split('-');
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      const pct = (rain[i] == null) ? null : Number(rain[i]);
+      const icon = (pct == null) ? '❔' : (pct >= 60 ? '🌧️' : (pct >= 30 ? '🌦️' : '☀️'));
+      lines.push(dayNames[d.getDay()] + ' ' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + icon + ' ' + ((pct == null) ? '?' : pct + '%'));
+    }
+    return lines.join('\n');
+  } catch (err) {
+    m_logOperation_('Weather: Open-Meteo error', {error: err.message});
+    return '';
+  }
+}
+
 /*** HELPERS ***/
+/*** FEATURE: Stamp today's date in column A when Stage changes ***/
+function m_stampStageDate_(sheet, row) {
+  try {
+    const cell = sheet.getRange(row, 1); // Column A
+    cell.setValue(new Date());
+    cell.setNumberFormat('M/d');
+    if (MOVE_CONFIG.ENABLE_LOGGING) {
+      m_logOperation_('Stage date stamped', {row, sheet: sheet.getName()});
+    }
+  } catch (err) {
+    if (MOVE_CONFIG.ENABLE_LOGGING) {
+      m_logOperation_('Stage date stamp error', {row, error: err.message});
+    }
+  }
+}
+
 function m_stageMatches_(stage, options) {
   return options ? options.some(opt => stage === opt) : false;
 }
@@ -1775,13 +2065,15 @@ function validateSheetStructure_() {
 }
 
 /*** TRIGGER INSTALLER (called from Menus.gs) ***/
+/*** version# 07/14-12:15PM EST by Claude Opus 4.1 ***/
 function installTriggerMove_() {
-  const ssId = SpreadsheetApp.getActive().getId();
+  // All edits route through masterOnEditHandler_ in Menus.gs.
+  // Delete any standalone handleEditMove_ triggers to prevent double-firing.
   ScriptApp.getProjectTriggers().forEach(t => {
     if (t.getHandlerFunction() === 'handleEditMove_') ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger('handleEditMove_').forSpreadsheet(ssId).onEdit().create();
-  SpreadsheetApp.getActive().toast('Stage automation trigger installed!', 'Setup Complete', 3);
+  installMasterTrigger_();
+  SpreadsheetApp.getActive().toast('Stage automation routed through master trigger!', 'Setup Complete', 3);
   validateSheetStructure_();
 }
 
@@ -1963,4 +2255,10 @@ function installDailyFolderCheckTrigger_() {
   if (MOVE_CONFIG.ENABLE_LOGGING) {
     m_logOperation_('Daily folder check trigger installed', { time: new Date().toISOString() });
   }
+}
+function testWeather() {
+  const addr = '5190 NW 10th Terrace, Fort Lauderdale, FL 33309';
+  const coords = m_geocodeAddress_(addr);
+  Logger.log('Coords: ' + JSON.stringify(coords));
+  Logger.log('Weather:\n' + m_getWeatherOutlook_(addr));
 }

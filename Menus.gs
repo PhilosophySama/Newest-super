@@ -1,8 +1,10 @@
 /**
  * Menus.gs
- * Version: 01/26-11:52AM EST by Claude Opus 4.1
+ * Version: 06/22-03:15PM EST by Claude Opus 4.8
  *
  * CHANGES:
+ * - Added handler #6 to masterOnEditHandler_: dp_handleEditText_ (Dialpad
+ *   stage-triggered texts; opens review dialog, never moves/sorts rows)
  * - Added robust trigger management system to prevent trigger loss
  * - Added master trigger handler that routes to all sub-handlers safely
  * - Added trigger health check and auto-repair functionality
@@ -28,6 +30,19 @@ function masterOnEditHandler_(e) {
   }
   
   const handlerResults = [];
+  
+  // 0. Activity Log (Gino's Diary) - MUST run first to capture row data
+  //    before Stage Automation moves/deletes the source row. Fully
+  //    self-contained try/catch inside; never blocks other handlers.
+  try {
+    if (typeof al_handleEditLog_ === 'function') {
+      al_handleEditLog_(e);
+      handlerResults.push({ handler: 'Activity Log', status: 'OK' });
+    }
+  } catch (err) {
+    handlerResults.push({ handler: 'Activity Log', status: 'ERROR', error: err.message });
+    logTriggerError_('al_handleEditLog_', err, e);
+  }
   
   // 1. Stage Automation (move rows, create folders, format links)
   try {
@@ -82,6 +97,17 @@ function masterOnEditHandler_(e) {
   } catch (err) {
     handlerResults.push({ handler: 'Follow-up Draft', status: 'ERROR', error: err.message });
     logTriggerError_('handleEditDraft_FU', err, e);
+  }
+
+  // 6. Dialpad stage-triggered texts (opens review dialog; never moves/sorts)
+  try {
+    if (typeof dp_handleEditText_ === 'function') {
+      dp_handleEditText_(e);
+      handlerResults.push({ handler: 'Dialpad Text', status: 'OK' });
+    }
+  } catch (err) {
+    handlerResults.push({ handler: 'Dialpad Text', status: 'ERROR', error: err.message });
+    logTriggerError_('dp_handleEditText_', err, e);
   }
   
   // Log summary if any errors occurred
@@ -406,6 +432,14 @@ function onOpen() {
       // Schedule
       .addItem('📅 Email Weekly Schedule PDF', 'emailWeeklySchedulePDF_')
       .addItem('📅 Install Monday Auto-Email', 'installWeeklyScheduleTrigger_')
+      .addSeparator()
+      // Time-Off
+      .addItem('🏖️ New Time-Off Request', 'showTimeOffDialog')
+      .addSeparator()
+      // Gino's Diary (Activity Log)
+      .addItem('📔 Open Log', 'al_openLog')
+      .addItem('📔 Setup Activity Log', 'al_setupLog')
+      .addItem('📔 Install Log Triggers', 'al_installLogTriggers')
       .addToUi();
 
     // ====== SETUP / TROUBLESHOOTING ======

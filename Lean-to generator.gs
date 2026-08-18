@@ -1,22 +1,21 @@
 /**
  * LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export
- * Version: 1/16 9am EST by Claude Sonnet 4.5
+ * version# [07/21-04:05PM EST] by Claude Fable 5
+ *
+ * CHANGES THIS VERSION:
+ *  - Renders now save to the customer's Drive folder (from the hyperlink in col F).
+ *    Falls back to central "SketchUp Renders" folder if F has no folder link.
+ *  - Revision tracking: if a finished render exists, next one is "(rev 2)", "(rev 3)"...
+ *    Multiple edits before rendering reuse the same pending revision (no spam).
+ *  - .rb files now carry a "# RENDER_SUBPATH:" header line the SketchUp watcher reads.
+ *  - r_writeRubyToDrive_ signature changed: (rubyScript, filename).
+ *  - Removed r_getRenderPlaceholder_ (replaced by r_ensurePlaceholder_).
  *
  * Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:
  *   - "Lean-to" or "Sloped L" → generates Lean-to Ruby
  *   - "A-frame" or "A frame" → generates A-frame Ruby
  *
- * Generates plain-text .rb files in Drive with parameters:
- *   - AWNING_MATERIAL (AB)
- *   - LENGTH (T)
- *   - PROJECTION (U)
- *   - HEIGHT (X)
- *   - FRONT_BAR_HEIGHT (V)
- *   - HAS_WINGS (Y > 0 → true, else false)
- *   - HAS_POSTS (AD == "Yes" → true; checkbox TRUE → true; otherwise false)
- *
- * Column S shows a hyperlink "Ruby (.rb)". If Drive write fails, falls back to writing into S.
- *
+ * Column S shows "Ruby (.rb) | Render (.png)" links. If Drive write fails, falls back to writing into S.
  * Helper names prefixed r_ to avoid collisions.
  */
 
@@ -41,6 +40,10 @@ function handleEditAwningRuby_(e) {
   // Only react to T–AD (20–30)
   if (col < 20 || col > 30) return;
 
+  // version# [07/21-05:30PM EST] by Claude Fable 5
+  // Skip deletions/clears — only regenerate when a value (including 0) is entered
+  if (e.range.getValue() === '' && e.range.getFormula() === '') return;
+
   const COLS = {
     RUBY_OUT: 19,      // S
     LENGTH: 20,        // T
@@ -51,11 +54,11 @@ function handleEditAwningRuby_(e) {
     TYPE: 27,          // AA
     FABRIC: 28,        // AB
     POSTS: 30,         // AD  ("Yes" or checkbox TRUE → true; else false)
-    DISPLAY: 6         // F - optional for nicer filenames
+    DISPLAY: 6         // F - display name + customer folder hyperlink
   };
 
   const type = String(sheet.getRange(row, COLS.TYPE).getDisplayValue() || '').trim().toLowerCase();
-  
+
   // Determine awning type
   let awningType = null;
   if (type && (type.includes('lean') || type === 'sloped l')) {
@@ -78,6 +81,10 @@ function handleEditAwningRuby_(e) {
   const postsVal  = sheet.getRange(row, COLS.POSTS).getValue();    // could be text/checkbox boolean
   const dispName  = String(sheet.getRange(row, COLS.DISPLAY).getDisplayValue() || '').trim();
 
+  // version# [07/21-08:00PM EST] by Claude Fable 5 — Re-Cover: omit rafters & front bar verticals
+  const jobTypeR  = String(sheet.getRange(row, 18).getDisplayValue() || '').trim(); // column R
+  const isRecover = /re-?cover/i.test(jobTypeR);
+
   const hasWings   = wingsNum > 0;
   const fabricType = (typeof fabricRaw === 'string' && /vinyl/i.test(fabricRaw)) ? 'Vinyl' : 'Sunbrella';
 
@@ -95,7 +102,7 @@ function handleEditAwningRuby_(e) {
   // Build the Ruby script based on awning type
   let rubyExact;
   let typeName;
-  
+
   if (awningType === 'LEAN_TO') {
     rubyExact = r_buildRubyFromLeanToTemplate_({
       fabric:     fabricType,
@@ -104,7 +111,8 @@ function handleEditAwningRuby_(e) {
       height:     height,
       frontBar:   frontBar,
       hasWings:   hasWings,
-      hasPosts:   hasPosts
+      hasPosts:   hasPosts,
+      isRecover:  isRecover
     });
     typeName = 'Lean-to';
   } else if (awningType === 'A_FRAME') {
@@ -115,26 +123,156 @@ function handleEditAwningRuby_(e) {
       height:     height,
       frontBar:   frontBar,
       hasWings:   hasWings,
-      hasPosts:   hasPosts
+      hasPosts:   hasPosts,
+      isRecover:  isRecover
     });
     typeName = 'A-Frame';
   }
 
   try {
-    const file = r_writeRubyToDrive_(rubyExact, row, dispName, typeName);
+    const lock = LockService.getDocumentLock();
+    lock.waitLock(15000);
+    try {
+    const safeName = r_safeName_(dispName, row);
+
+    // Customer folder (from col F hyperlink) or central fallback
+    const cust = r_getCustomerRenderFolder_(sheet, row);
+
+    // Next render name w/ revision logic; reuse pending placeholder if not yet rendered
+    const info = r_nextRenderInfo_(cust.folder, typeName, safeName);
+    const renderFile = info.file || r_ensurePlaceholder_(cust.folder, info.name);
+    const renderUrl  = renderFile.getUrl();
+
+    // Ruby filename mirrors the render name; header tells the watcher where to save
+    const rbName = info.name.replace(' Render - ', ' Ruby - ').replace(/\.png$/, '.rb');
+    const rubyWithHeader = '# RENDER_SUBPATH: ' + cust.subpath + '\n' + rubyExact;
+
+    const file = r_writeRubyToDrive_(rubyWithHeader, rbName);
     const url  = file.getUrl();
 
+    const linkText = 'Ruby (.rb) | Render (.png)';
     const rich = SpreadsheetApp.newRichTextValue()
-      .setText(AWNING_RUBY_EXPORT.LINK_TEXT)
-      .setLinkUrl(url)
+      .setText(linkText)
+      .setLinkUrl(0, 10, url)
+      .setLinkUrl(13, linkText.length, renderUrl)
       .build();
     sheet.getRange(row, COLS.RUBY_OUT).setRichTextValue(rich);
 
-    SpreadsheetApp.getActive().toast('Ruby export ready for row ' + row, 'Success', 3);
+    SpreadsheetApp.getActive().toast('Ready: ' + info.name, 'Success', 3);
+    } finally {
+      lock.releaseLock();
+    }
   } catch (err) {
     sheet.getRange(row, COLS.RUBY_OUT).setValue(rubyExact); // fallback
     SpreadsheetApp.getActive().toast('Drive write failed, wrote to S instead: ' + err.message, 'Warning', 5);
   }
+}
+
+/** Sanitized customer name for filenames. */
+function r_safeName_(dispName, row) {
+  const s = (dispName || ('Row ' + row))
+    .replace(/[\\/:*?"<>|#\[\]\r\n]+/g, ' ')
+    .trim()
+    .substring(0, 80);
+  return s || ('Row ' + row);
+}
+
+/** Customer folder from the hyperlink in column F; falls back to central Renders folder. */
+function r_getCustomerRenderFolder_(sheet, row) {
+  try {
+    const url = r_getCellLinkUrl_(sheet.getRange(row, 6));
+    if (url) {
+      const m = url.match(/folders\/([-\w]{25,})/);
+      if (m) {
+        const folder = DriveApp.getFolderById(m[1]);
+        return { folder: folder, subpath: r_folderSubpath_(folder) };
+      }
+    }
+  } catch (_) { /* fall through to central */ }
+  return { folder: r_getRendersFolder_(), subpath: 'SketchUp Renders' };
+}
+
+/** Extract a link URL from a cell: rich-text link, HYPERLINK() formula, or plain URL. */
+function r_getCellLinkUrl_(range) {
+  const rich = range.getRichTextValue();
+  if (rich) {
+    const runs = rich.getRuns();
+    for (let i = 0; i < runs.length; i++) {
+      const u = runs[i].getLinkUrl();
+      if (u) return u;
+    }
+    if (rich.getLinkUrl()) return rich.getLinkUrl();
+  }
+  const f = range.getFormula();
+  const fm = f && f.match(/HYPERLINK\s*\(\s*"([^"]+)"/i);
+  if (fm) return fm[1];
+  const v = String(range.getValue() || '');
+  return /^https?:\/\//.test(v) ? v : '';
+}
+
+/** Folder path relative to My Drive root, e.g. "Customers/Smith". */
+function r_folderSubpath_(folder) {
+  const rootId = DriveApp.getRootFolder().getId();
+  const parts = [folder.getName()];
+  let f = folder;
+  for (let i = 0; i < 10; i++) {
+    const parents = f.getParents();
+    if (!parents.hasNext()) break;
+    f = parents.next();
+    if (f.getId() === rootId) break;
+    parts.unshift(f.getName());
+  }
+  return parts.join('/');
+}
+
+/**
+ * Decide the render filename for this row.
+ * - No renders yet → "Type Render - Name.png"
+ * - Latest matching file is still a tiny placeholder (not rendered yet) → reuse it (same revision)
+ * - Latest is a real render → bump to "(rev N+1)"
+ */
+function r_nextRenderInfo_(folder, typeName, safeName) {
+  const base = typeName + ' Render - ' + safeName;
+  let maxRev = 0;
+  let latestFile = null;
+
+  const files = folder.getFilesByType(MimeType.PNG);
+  while (files.hasNext()) {
+    const f = files.next();
+    const n = f.getName();
+    if (n.indexOf(base) !== 0) continue;
+    const m = n.match(/\(rev (\d+)\)\.png$/i);
+    const rev = m ? Number(m[1]) : 1;
+    if (rev >= maxRev) { maxRev = rev; latestFile = f; }
+  }
+
+  if (latestFile && latestFile.getSize() < 2048) {
+    return { name: latestFile.getName(), file: latestFile }; // pending → same revision
+  }
+
+  const nextRev = maxRev + 1;
+  const name = (nextRev === 1) ? (base + '.png') : (base + ' (rev ' + nextRev + ').png');
+  return { name: name, file: null };
+}
+
+/** Create the placeholder PNG (stable URL) if it doesn't already exist. */
+function r_ensurePlaceholder_(folder, pngName) {
+  const existing = folder.getFilesByName(pngName);
+  if (existing.hasNext()) return existing.next();
+  const png1x1 = Utilities.base64Decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+  return folder.createFile(Utilities.newBlob(png1x1, 'image/png', pngName));
+}
+
+/** Get/create the central SketchUp Renders folder (cached). */
+function r_getRendersFolder_() {
+  const prop = PropertiesService.getScriptProperties();
+  const cached = prop.getProperty('AWNING_RENDERS_FOLDER_ID');
+  if (cached) {
+    try { return DriveApp.getFolderById(cached); } catch (_) { /* recreate below */ }
+  }
+  const folder = DriveApp.createFolder('SketchUp Renders');
+  prop.setProperty('AWNING_RENDERS_FOLDER_ID', folder.getId());
+  return folder;
 }
 
 /**
@@ -184,6 +322,12 @@ function r_buildRubyFromLeanToTemplate_(p) {
   txt = txt.replace(
     /^(HAS_POSTS\s*=\s*)(true|false)(\s*#.*)$/m,
     `$1${p.hasPosts}$3`
+  );
+
+  // IS_RECOVER (true/false)
+  txt = txt.replace(
+    /^(IS_RECOVER\s*=\s*)(true|false)(\s*#.*)$/m,
+    `$1${p.isRecover}$3`
   );
 
   return txt;
@@ -239,6 +383,12 @@ function r_buildRubyFromAFrameTemplate_(p) {
     `$1${p.hasPosts}$3`
   );
 
+  // IS_RECOVER (true/false)
+  txt = txt.replace(
+    /^(IS_RECOVER\s*=\s*)(true|false)(\s*#.*)$/m,
+    `$1${p.isRecover}$3`
+  );
+
   return txt;
 }
 
@@ -253,7 +403,7 @@ function r_getLeanToRubyTemplate_() {
 AWNING_TYPE          = "Lean-to"    # Label for awning type
 AWNING_MATERIAL      = "Sunbrella"  # Options: "Sunbrella" or "Vinyl"
 LENGTH               = 50           # Length (along x) in feet
-PROJECTION           = 11           # Width / Projection (along y) in feet  
+PROJECTION           = 11           # Width / Projection (along y) in feet
 HEIGHT               = 5            # Wall side height (z) in feet
 FRONT_BAR_HEIGHT     = 1            # Front bar height (z) in feet
 HAS_WINGS            = true         # true = left/right wings, false = no wings
@@ -261,6 +411,7 @@ HAS_DIAGONAL_BRACING = true         # true = diagonal bracing inside wings
 HAS_POSTS            = false        # true = add vertical posts, false = no posts
 COLUMN_HEIGHT        = 7            # column height in feet (default 7')
 POST_SIZE            = 2.0          # post size in inches (square cross-section)
+IS_RECOVER           = false        # true = re-cover: omit rafters & front bar verticals
 
 # === SCRIPT BEGINS - DO NOT MODIFY BELOW ===
 model = Sketchup.active_model
@@ -299,17 +450,21 @@ front_right = [length, projection, front_bar_height]
 
 awning_face = group_entities.add_face(back_left, back_right, front_right, front_left)
 
-# === RAFTERS ===
-(0...num_supports).each do |i|
-  x_pos = [i * spacing, length].min
-  group_entities.add_line([x_pos, 0, height], [x_pos, projection, front_bar_height])
+# === RAFTERS (omitted on Re-Cover) ===
+unless IS_RECOVER
+  (0...num_supports).each do |i|
+    x_pos = [i * spacing, length].min
+    group_entities.add_line([x_pos, 0, height], [x_pos, projection, front_bar_height])
+  end
 end
 
-# === FRONT BAR VERTICALS ===
-num_verticals = (num_spans * 2) + 1
-(0...num_verticals).each do |i|
-  x_pos = [i * (spacing / 2), length].min
-  group_entities.add_line([x_pos, projection, front_bar_height], [x_pos, projection, 0])
+# === FRONT BAR VERTICALS (omitted on Re-Cover) ===
+unless IS_RECOVER
+  num_verticals = (num_spans * 2) + 1
+  (0...num_verticals).each do |i|
+    x_pos = [i * (spacing / 2), length].min
+    group_entities.add_line([x_pos, projection, front_bar_height], [x_pos, projection, 0])
+  end
 end
 
 # === FRONT BAR RECTANGLE ===
@@ -332,7 +487,7 @@ if HAS_POSTS
   # Create a sub-group for posts
   posts_group = group_entities.add_group
   posts_entities = posts_group.entities
-  
+
   col_height = COLUMN_HEIGHT * 12
   post_spacing_sections = (length / (15.0 * 12)).ceil  # number of ~15' sections
   num_posts = post_spacing_sections + 1
@@ -360,7 +515,7 @@ if HAS_POSTS
     # Extrude downwards by column height
     face.pushpull(-col_height)
   end
-  
+
   posts_group.name = "Support Posts"
 end
 
@@ -374,12 +529,13 @@ if HAS_WINGS
   # LEFT WING (x = length)
   left_mid_y = projection / 2.0
   left_mid_z = height - ((height - front_bar_height) * (left_mid_y / projection))
-  group_entities.add_line([length, left_mid_y, left_mid_z], [length, left_mid_y, 0])
-  group_entities.add_line([length, 0, 0], [length, projection, 0])  # base line
-
-  if HAS_DIAGONAL_BRACING
-    group_entities.add_line([length, 0, 0], [length, left_mid_y, left_mid_z])
+  unless IS_RECOVER
+    group_entities.add_line([length, left_mid_y, left_mid_z], [length, left_mid_y, 0])
+    if HAS_DIAGONAL_BRACING
+      group_entities.add_line([length, 0, 0], [length, left_mid_y, left_mid_z])
+    end
   end
+  group_entities.add_line([length, 0, 0], [length, projection, 0])  # base line
 
   group_entities.add_face(
     [length, 0, height],
@@ -391,12 +547,13 @@ if HAS_WINGS
   # RIGHT WING (x = 0)
   right_mid_y = projection / 2.0
   right_mid_z = height - ((height - front_bar_height) * (right_mid_y / projection))
-  group_entities.add_line([0, right_mid_y, right_mid_z], [0, right_mid_y, 0])
-  group_entities.add_line([0, 0, 0], [0, projection, 0])  # base line
-
-  if HAS_DIAGONAL_BRACING
-    group_entities.add_line([0, 0, 0], [0, right_mid_y, right_mid_z])
+  unless IS_RECOVER
+    group_entities.add_line([0, right_mid_y, right_mid_z], [0, right_mid_y, 0])
+    if HAS_DIAGONAL_BRACING
+      group_entities.add_line([0, 0, 0], [0, right_mid_y, right_mid_z])
+    end
   end
+  group_entities.add_line([0, 0, 0], [0, projection, 0])  # base line
 
   group_entities.add_face(
     [0, 0, height],
@@ -406,27 +563,27 @@ if HAS_WINGS
   )
 end
 
-# === DIMENSIONS (inside group) ===
+# === DIMENSIONS (outside group) ===
 # Length x
-group_entities.add_dimension_linear(
+entities.add_dimension_linear(
   Geom::Point3d.new(0, 0, height),
   Geom::Point3d.new(length, 0, height),
   Geom::Vector3d.new(0,0,24)
 )
 # Projection y
-group_entities.add_dimension_linear(
+entities.add_dimension_linear(
   Geom::Point3d.new(length, 0, 0),
   Geom::Point3d.new(length, projection, 0),
   Geom::Vector3d.new(0,0,-24)
 )
 # Height z
-group_entities.add_dimension_linear(
+entities.add_dimension_linear(
   Geom::Point3d.new(length, 0, 0),
   Geom::Point3d.new(length, 0, height),
   Geom::Vector3d.new(24,0,0)
 )
 # Front bar height
-group_entities.add_dimension_linear(
+entities.add_dimension_linear(
   Geom::Point3d.new(0, projection, 0),
   Geom::Point3d.new(0, projection, front_bar_height),
   Geom::Vector3d.new(0,24,0)
@@ -449,13 +606,14 @@ function r_getAFrameRubyTemplate_() {
 AWNING_TYPE          = "A-Frame"    # Label for awning type
 AWNING_MATERIAL      = "Sunbrella"  # Options: "Sunbrella" or "Vinyl"
 LENGTH               = 20           # Length (along x) in feet
-PROJECTION           = 5            # Width / Projection per side (along y) in feet  
+PROJECTION           = 5            # Width / Projection per side (along y) in feet
 PEAK_HEIGHT          = 4            # Peak height (z) in feet
 FRONT_BAR_HEIGHT     = 1            # Front bar height (z) in feet
 NUM_WINGS            = 2            # Wings on both ends (0 or 2)
 HAS_POSTS            = false        # true = add vertical posts, false = no posts
 COLUMN_HEIGHT        = 7            # column height in feet (default 7')
 POST_SIZE            = 2.0          # post size in inches (square cross-section)
+IS_RECOVER           = false        # true = re-cover: omit rafters & front bar verticals
 
 # === SCRIPT BEGINS - DO NOT MODIFY BELOW ===
 model = Sketchup.active_model
@@ -509,29 +667,31 @@ right_face = group_entities.add_face(
 )
 right_face.reverse! if right_face.normal.y < 0
 
-# === TRUSSES (RAFTERS) ===
-(0...num_trusses).each do |i|
-  x_pos = [i * truss_spacing, length].min
-  # Left rafter
-  group_entities.add_line([x_pos, 0, peak_height], [x_pos, -projection, front_bar_height])
-  # Right rafter
-  group_entities.add_line([x_pos, 0, peak_height], [x_pos, projection, front_bar_height])
+# === TRUSSES (RAFTERS, omitted on Re-Cover) ===
+unless IS_RECOVER
+  (0...num_trusses).each do |i|
+    x_pos = [i * truss_spacing, length].min
+    # Left rafter
+    group_entities.add_line([x_pos, 0, peak_height], [x_pos, -projection, front_bar_height])
+    # Right rafter
+    group_entities.add_line([x_pos, 0, peak_height], [x_pos, projection, front_bar_height])
+  end
 end
 
 # Peak line
 group_entities.add_line(peak_left, peak_right)
 
-# === FRONT BAR VERTICALS (LEFT SIDE) ===
-num_verticals = (num_spans * 2) + 1
-(0...num_verticals).each do |i|
-  x_pos = [i * (truss_spacing / 2), length].min
-  group_entities.add_line([x_pos, -projection, front_bar_height], [x_pos, -projection, 0])
-end
-
-# === FRONT BAR VERTICALS (RIGHT SIDE) ===
-(0...num_verticals).each do |i|
-  x_pos = [i * (truss_spacing / 2), length].min
-  group_entities.add_line([x_pos, projection, front_bar_height], [x_pos, projection, 0])
+# === FRONT BAR VERTICALS (omitted on Re-Cover) ===
+unless IS_RECOVER
+  num_verticals = (num_spans * 2) + 1
+  (0...num_verticals).each do |i|
+    x_pos = [i * (truss_spacing / 2), length].min
+    group_entities.add_line([x_pos, -projection, front_bar_height], [x_pos, -projection, 0])
+  end
+  (0...num_verticals).each do |i|
+    x_pos = [i * (truss_spacing / 2), length].min
+    group_entities.add_line([x_pos, projection, front_bar_height], [x_pos, projection, 0])
+  end
 end
 
 # === FRONT BAR RECTANGLES ===
@@ -568,10 +728,10 @@ if HAS_POSTS
   # Create sub-groups for posts
   posts_group_left = group_entities.add_group
   posts_entities_left = posts_group_left.entities
-  
+
   posts_group_right = group_entities.add_group
   posts_entities_right = posts_group_right.entities
-  
+
   post_spacing_sections = (length / (15.0 * 12)).ceil  # number of ~15' sections
   spacing_x = length.to_f / post_spacing_sections
   post_size = POST_SIZE # in inches
@@ -597,7 +757,7 @@ if HAS_POSTS
     # Extrude downwards by column height
     face.pushpull(-col_height)
   end
-  
+
   # Right side posts
   (0..post_spacing_sections).each do |i|
     x_pos = [i * spacing_x, length].min
@@ -619,7 +779,7 @@ if HAS_POSTS
     # Extrude downwards by column height
     face.pushpull(-col_height)
   end
-  
+
   posts_group_left.name = "Support Posts (Left)"
   posts_group_right.name = "Support Posts (Right)"
 end
@@ -629,36 +789,44 @@ if NUM_WINGS > 0
   # Left end wing (x = 0) - normal should point in negative x direction
   left_mid_y_neg = -projection / 2.0
   left_mid_z_neg = peak_height - ((peak_height - front_bar_height) * 0.5)
-  group_entities.add_line([0, left_mid_y_neg, left_mid_z_neg], [0, left_mid_y_neg, 0])
+  unless IS_RECOVER
+    group_entities.add_line([0, left_mid_y_neg, left_mid_z_neg], [0, left_mid_y_neg, 0])
+  end
   group_entities.add_line([0, -projection, 0], [0, 0, 0])
-  
+
   left_mid_y_pos = projection / 2.0
   left_mid_z_pos = peak_height - ((peak_height - front_bar_height) * 0.5)
-  group_entities.add_line([0, left_mid_y_pos, left_mid_z_pos], [0, left_mid_y_pos, 0])
+  unless IS_RECOVER
+    group_entities.add_line([0, left_mid_y_pos, left_mid_z_pos], [0, left_mid_y_pos, 0])
+  end
   group_entities.add_line([0, 0, 0], [0, projection, 0])
-  
+
   # Left wing faces
   left_wing_neg = group_entities.add_face([0, 0, peak_height], [0, 0, 0], [0, -projection, 0], [0, -projection, front_bar_height])
   left_wing_neg.reverse! if left_wing_neg.normal.x > 0
-  
+
   left_wing_pos = group_entities.add_face([0, 0, peak_height], [0, projection, front_bar_height], [0, projection, 0], [0, 0, 0])
   left_wing_pos.reverse! if left_wing_pos.normal.x > 0
-  
+
   # Right end wing (x = LENGTH) - normal should point in positive x direction
   right_mid_y_neg = -projection / 2.0
   right_mid_z_neg = peak_height - ((peak_height - front_bar_height) * 0.5)
-  group_entities.add_line([length, right_mid_y_neg, right_mid_z_neg], [length, right_mid_y_neg, 0])
+  unless IS_RECOVER
+    group_entities.add_line([length, right_mid_y_neg, right_mid_z_neg], [length, right_mid_y_neg, 0])
+  end
   group_entities.add_line([length, -projection, 0], [length, 0, 0])
-  
+
   right_mid_y_pos = projection / 2.0
   right_mid_z_pos = peak_height - ((peak_height - front_bar_height) * 0.5)
-  group_entities.add_line([length, right_mid_y_pos, right_mid_z_pos], [length, right_mid_y_pos, 0])
+  unless IS_RECOVER
+    group_entities.add_line([length, right_mid_y_pos, right_mid_z_pos], [length, right_mid_y_pos, 0])
+  end
   group_entities.add_line([length, 0, 0], [length, projection, 0])
-  
+
   # Right wing faces
   right_wing_neg = group_entities.add_face([length, 0, peak_height], [length, -projection, front_bar_height], [length, -projection, 0], [length, 0, 0])
   right_wing_neg.reverse! if right_wing_neg.normal.x < 0
-  
+
   right_wing_pos = group_entities.add_face([length, 0, peak_height], [length, 0, 0], [length, projection, 0], [length, projection, front_bar_height])
   right_wing_pos.reverse! if right_wing_pos.normal.x < 0
 end
@@ -670,29 +838,29 @@ group_entities.grep(Sketchup::Face).each do |face|
   end
 end
 
-# === DIMENSIONS ===
-group_entities.add_dimension_linear(
+# === DIMENSIONS (outside group) ===
+entities.add_dimension_linear(
   Geom::Point3d.new(0, 0, peak_height),
   Geom::Point3d.new(length, 0, peak_height),
   Geom::Vector3d.new(0, 0, 24)
 )
 
-# Projection dimension (left side)
-group_entities.add_dimension_linear(
-  Geom::Point3d.new(length, 0, 0),
+# Full width dimension (edge to edge)
+entities.add_dimension_linear(
   Geom::Point3d.new(length, -projection, 0),
+  Geom::Point3d.new(length, projection, 0),
   Geom::Vector3d.new(24, 0, 0)
 )
 
 # Height dimension
-group_entities.add_dimension_linear(
+entities.add_dimension_linear(
   Geom::Point3d.new(0, 0, 0),
   Geom::Point3d.new(0, 0, peak_height),
   Geom::Vector3d.new(0, -projection - 24, 0)
 )
 
 # Front bar height
-group_entities.add_dimension_linear(
+entities.add_dimension_linear(
   Geom::Point3d.new(0, -projection, 0),
   Geom::Point3d.new(0, -projection, front_bar_height),
   Geom::Vector3d.new(0, -12, 0)
@@ -703,15 +871,9 @@ aframe_group.name = "#{AWNING_TYPE} (#{AWNING_MATERIAL}) #{LENGTH}x#{PROJECTION}
 model.commit_operation`;
 }
 
-/** Write the Ruby to Drive as a .rb file and return the File. */
-function r_writeRubyToDrive_(rubyScript, row, dispName, typeName) {
+/** Write the Ruby to Drive as a .rb file (exact filename) and return the File. */
+function r_writeRubyToDrive_(rubyScript, filename) {
   const folder = r_getRubyExportFolder_();
-  const safeName = (dispName || ('Row ' + row))
-    .replace(/[\\/:*?"<>|#\[\]\r\n]+/g, ' ')
-    .trim()
-    .substring(0, 80);
-
-  const filename = `${typeName} Ruby - ${safeName || ('Row ' + row)}.rb`;
 
   // Remove any old file(s) with same name (keeps folder tidy)
   const existing = folder.getFilesByName(filename);
@@ -757,61 +919,75 @@ function installTriggerLeanToRuby_() {
   return installTriggerAwningRuby_();
 }
 
-function r_getRubyExactTemplate() { 
-  return r_getLeanToRubyTemplate_(); 
+function r_getRubyExactTemplate() {
+  return r_getLeanToRubyTemplate_();
 }
 /**
+ * Macro wrapper — assign a keyboard shortcut via Extensions → Macros
+ * version# [07/17-11:00AM EST] by Claude Opus 4.1
+ */
+function copyRubyMacro() {
+  copyRubyForSelectedRow_();
+}
+
+/**
  * Copy Ruby code for the selected row to clipboard via dialog
- * Version# [12/29-10:45AM EST] by Claude Opus 4.1
+ * version# [07/17-11:00AM EST] by Claude Opus 4.1 — auto-copies on open
  */
 function copyRubyForSelectedRow_() {
   const ui = SpreadsheetApp.getUi();
   const sheet = SpreadsheetApp.getActiveSheet();
-  
+
   if (sheet.getName() !== 'Leads') {
     ui.alert('Please select a row in the Leads sheet');
     return;
   }
-  
+
   const row = sheet.getActiveCell().getRow();
   if (row === 1) {
     ui.alert('Please select a data row, not the header');
     return;
   }
-  
+
   // Get the Ruby link from column S (19)
   const rubyCell = sheet.getRange(row, 19);
   const richText = rubyCell.getRichTextValue();
-  
+
   if (!richText) {
     ui.alert('No Ruby file found in column S for this row.\n\nMake sure columns T-AD have awning data and column AA has "Lean-to" or "A-frame".');
     return;
   }
-  
-  const rubyUrl = richText.getLinkUrl();
-  
+
+  // Column S now holds two links; take the FIRST link (the .rb file)
+  let rubyUrl = null;
+  const runs = richText.getRuns();
+  for (let i = 0; i < runs.length; i++) {
+    if (runs[i].getLinkUrl()) { rubyUrl = runs[i].getLinkUrl(); break; }
+  }
+  if (!rubyUrl) rubyUrl = richText.getLinkUrl();
+
   if (!rubyUrl) {
     ui.alert('No Ruby link found in column S.\n\nThe cell may have text but no hyperlink.');
     return;
   }
-  
+
   // Extract file ID from Drive URL
   const fileIdMatch = rubyUrl.match(/[-\w]{25,}/);
   if (!fileIdMatch) {
     ui.alert('Could not extract file ID from Ruby link:\n' + rubyUrl);
     return;
   }
-  
+
   const fileId = fileIdMatch[0];
-  
+
   try {
     // Get the Ruby file content from Drive
     const file = DriveApp.getFileById(fileId);
     const rubyCode = file.getBlob().getDataAsString();
-    
+
     // Get display name for the dialog title
     const displayName = sheet.getRange(row, 6).getDisplayValue() || 'Row ' + row;
-    
+
     // Create HTML dialog with copy functionality
     const htmlContent = `
       <!DOCTYPE html>
@@ -882,7 +1058,7 @@ function copyRubyForSelectedRow_() {
         <body>
           <h3>Ruby Code: ${displayName}</h3>
           <div class="info">
-            <strong>Instructions:</strong> Click "Copy to Clipboard", then paste into SketchUp's Ruby Console (Window → Ruby Console)
+            <strong>Auto-copied!</strong> Just paste into SketchUp's Ruby Console (Window → Ruby Console). If pasting doesn't work, click "Copy to Clipboard" below.
           </div>
           <textarea id="rubyCode" readonly>${rubyCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
           <div class="button-row">
@@ -891,39 +1067,42 @@ function copyRubyForSelectedRow_() {
             <span class="success" id="successMsg">✓ Copied!</span>
           </div>
           <script>
+            function showCopied() {
+              document.getElementById('successMsg').style.display = 'inline';
+              setTimeout(function() {
+                document.getElementById('successMsg').style.display = 'none';
+              }, 2000);
+            }
             function copyCode() {
               const textarea = document.getElementById('rubyCode');
               textarea.select();
               textarea.setSelectionRange(0, 99999);
-              
-              navigator.clipboard.writeText(textarea.value).then(function() {
-                document.getElementById('successMsg').style.display = 'inline';
-                setTimeout(function() {
-                  document.getElementById('successMsg').style.display = 'none';
-                }, 2000);
-              }).catch(function(err) {
-                // Fallback for older browsers
+              navigator.clipboard.writeText(textarea.value).then(showCopied).catch(function(err) {
                 document.execCommand('copy');
-                document.getElementById('successMsg').style.display = 'inline';
-                setTimeout(function() {
-                  document.getElementById('successMsg').style.display = 'none';
-                }, 2000);
+                showCopied();
               });
             }
-            
-            // Auto-select all text on load for easy copying
-            document.getElementById('rubyCode').select();
+            // Auto-copy on load; Copy button remains as backup if browser blocks it
+            window.addEventListener('load', function() {
+              const textarea = document.getElementById('rubyCode');
+              textarea.select();
+              textarea.setSelectionRange(0, 99999);
+              try {
+                if (document.execCommand('copy')) { showCopied(); return; }
+              } catch (e) {}
+              navigator.clipboard.writeText(textarea.value).then(showCopied).catch(function(e) {});
+            });
           </script>
         </body>
       </html>
     `;
-    
+
     const htmlOutput = HtmlService.createHtmlOutput(htmlContent)
       .setWidth(700)
       .setHeight(500);
-    
+
     ui.showModalDialog(htmlOutput, 'Copy Ruby Code');
-    
+
   } catch (err) {
     ui.alert('Error loading Ruby file:\n\n' + err.message);
   }

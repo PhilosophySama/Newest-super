@@ -1,6 +1,6 @@
 /**
  * Draft Creator.gs
- * Version: 04/03-2:15PM EST by Claude Sonnet 4.6
+ * Version: 07/14-9:48AM FLorida time by Fable 5
  *
  * PURPOSE
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
@@ -12,6 +12,7 @@
  * - Create COI request drafts when Stage (col D) becomes "COI Req" on F/U, Awarded, and Heaven sheets only.
  * - Under PICS, embed a Re-cover!A1:K14 snapshot (HTML only).
  * - Create design review reply drafts when Stage (col D) becomes "Design Review" on allowed sheets.
+ * - Create vendor quote-solicitation drafts (lettering/signage/other subcontracted scope) when Stage (col D) becomes "Req Graphics". "To" field is left blank for manual entry.
  *
  * CHANGES IN THIS VERSION:
  * - Removed 5-second delay - drafts now create BEFORE row moves
@@ -19,6 +20,7 @@
  * - "Email customer" signature moved after QuickBooks button
  * - Added v2_createPlotMapDraft_: satellite map draft for Schedule/2.Sched/Schedule Instal rows (Leads, F/U, Awarded) with per-stop distance + ETA legend
  * - Added v2_createDesignReviewDraft_: replies to existing Proposal Review thread with first-slide screenshot and link to "Shop Drawing - [F]" Slides file
+ * - Added REQ_GRAPHICS_STAGE + d_createReqGraphicsDraft_: vendor quote solicitation draft with PO/Fabric/Dimensions/Location + Google Earth thumbnail linking to Q
  */
  /*
  * NOTES
@@ -36,7 +38,6 @@ const DRAFTS_V2 = {
   // ========================================
   TARGET_STAGE: 'qDraft',              // Main draft creation trigger
   LIZ_STAGE: 'Liz',  // Stage value for email search
-  REVISE_STAGE: 'Revise',  // Stage value for email search + move to Leads
   CUSTOMER_STAGE: 'Email customer',    // Customer follow-up trigger
   HANDOFF_STAGE: 'Cust Handoff',       // Customer handoff trigger
   ROUGH_QUOTE_STAGE: 'Rough quote',    // Rough quote trigger
@@ -47,6 +48,8 @@ const DRAFTS_V2 = {
   LIZ_DESIGN_REVIEW_STAGE: 'Liz Design Review', // Awarded-only email search trigger
   SAMPLES_STAGE: 'Send Samples',
   DEPOSIT_STAGE: 'Waiting on Deposit',  // 50% deposit invoice trigger
+  REQ_GRAPHICS_STAGE: 'Req Graphics',   // Vendor quote solicitation trigger (lettering/signage/other subcontracted scope)
+  PRICE_UPDATE_STAGE: 'Price update',   // Price update reply on Proposal Review thread
 
   COLS: {
     LOG_B: 'B',
@@ -121,7 +124,7 @@ Project Details:
 - Location: \${address}
 - Description: \${jobType}
 
-Free payment options are: Check and Zelle to "walker-awning-fl" If you have any questions or would like to proceed with this project, please reach out via text or call. When you open the link below, please click "View estimate" for specifications.`,
+We ask for a 50% material deposit for us to begin production. Free payment options are: Check and Zelle to "walker-awning-fl". If you have any questions or would like to proceed with this project, please reach out via text or call. When you open the link below, please click "View estimate" for specifications.`,
     HTML_BODY_TEMPLATE: `<div style="font-family: Arial, sans-serif; color: #333;">
 <p>Hello \${firstName},</p>
 
@@ -133,7 +136,7 @@ Free payment options are: Check and Zelle to "walker-awning-fl" If you have any 
   <li><strong>Description:</strong> \${jobType}</li>
 </ul>
 
-<p>Free payment options are: Check and Zelle to "walker-awning-fl" If you have any questions or would like to proceed with this project, please reach out via text or call.</p>
+<p>We ask for a 50% material deposit for us to begin production. Free payment options are: Check and Zelle to "walker-awning-fl". If you have any questions or would like to proceed with this project, please reach out via text or call.</p>
 </div>`
   },
 
@@ -226,13 +229,6 @@ function handleEditDraft_V2(e) {
       SpreadsheetApp.getActive().toast(result.message, 'Email Search', 5);
       return;
     }
-
-    // Handle "Revise" stage - search for email
-    if (newValLower === String(DRAFTS_V2.REVISE_STAGE).toLowerCase()) {
-      const result = v2_searchAndLinkEmail_(sh, row);
-      SpreadsheetApp.getActive().toast(result.message, 'Email Search', 5);
-      return;
-    }
     
     // Handle "Email customer" stage - create customer follow-up draft
     if (newValLower === String(DRAFTS_V2.CUSTOMER_STAGE).toLowerCase()) {
@@ -308,9 +304,24 @@ function handleEditDraft_V2(e) {
       return;
     }
 
+    // Handle "Req Graphics" stage - create vendor quote solicitation draft
+    if (newValLower === String(DRAFTS_V2.REQ_GRAPHICS_STAGE).toLowerCase()) {
+      const result = d_createReqGraphicsDraft_(sh, row);
+      SpreadsheetApp.getActive().toast(result.toast, 'Req Graphics', 5);
+      return;
+    }
+
+    // Handle "Price update" stage - reply to Proposal Review thread with fabric pricing
+    if (newValLower === String(DRAFTS_V2.PRICE_UPDATE_STAGE).toLowerCase()) {
+      const result = d_createPriceUpdateDraft_(sh, row);
+      SpreadsheetApp.getActive().toast(result.toast, 'Price Update', 5);
+      return;
+    }
+
     // Handle "qDraft" stage - create main draft
+    // version# [07/17-10:30AM EST] by Claude Opus 4.1 — always create draft, ignore existing content in B
     if (newValLower === String(DRAFTS_V2.TARGET_STAGE).toLowerCase()) {
-      const result = v2_createDraftForRow_(sh, row, DRAFTS_V2.EMAIL.SKIP_IF_DRAFT_EXISTS);
+      const result = v2_createDraftForRow_(sh, row, false);
       SpreadsheetApp.getActive().toast(result.toast, 'Draft Creator', 5);
     }
   } catch (err) {
@@ -653,6 +664,12 @@ function v2_createCustomerInfoDraft_(sh, row) {
       return { toast: 'All customer info already complete' };
     }
     
+    // Your rule: text ONLY when no email is present. If an email exists,
+    // skip the text and let the email draft (below) handle it.
+    if (!customerEmail || !d_isValidEmail_(customerEmail)) {
+      dp_sendCustomerInfoSms_(firstName, phone, missingItems);
+    }
+    
     // Create subject
     const subjectName = displayName || name;
     const subject = 'Info request for awning - ' + subjectName;
@@ -775,6 +792,9 @@ Walker Awning</p>
         const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
         logCell.setRichTextValue(richText);
         
+        // Auto-advance Stage (col D) to "Pending Email"
+        d_setStage_(sh, row, 'Pending Email');
+        
         return { toast: 'Info request draft created & linked in column B' };
         
       } catch (err) {
@@ -788,6 +808,10 @@ Walker Awning</p>
       // No email - just put the text message in column B
       const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
       logCell.setValue('📱 TEXT MESSAGE (copy below):\n\n' + plainBody);
+      
+      // Auto-advance Stage (col D) to "Pending Txt"
+      d_setStage_(sh, row, 'Pending Txt');
+      
       return { toast: 'Text message script placed in column B for copying' };
     }
     
@@ -1244,6 +1268,34 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
   const photoUrl = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.FOLDER_URL)], rtv[idx(DRAFTS_V2.COLS.FOLDER_URL)], sh, row, DRAFTS_V2.COLS.FOLDER_URL);
   const geUrl    = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.GE_URL)],     rtv[idx(DRAFTS_V2.COLS.GE_URL)],     sh, row, DRAFTS_V2.COLS.GE_URL);
   const qbUrl    = d_extractUrlFromCell_(vals[idx(DRAFTS_V2.COLS.QB_URL)],     rtv[idx(DRAFTS_V2.COLS.QB_URL)],     sh, row, DRAFTS_V2.COLS.QB_URL);
+
+  // version# [07/21-06:15PM EST] by Claude Fable 5
+  // Latest awning render: second link in column S ("Render (.png)")
+  let renderBlob = null;
+  try {
+    const sRtv = sh.getRange(row, 19).getRichTextValue(); // column S
+    if (sRtv) {
+      const sRuns = sRtv.getRuns();
+      const sLinks = [];
+      for (let k = 0; k < sRuns.length; k++) {
+        const u = sRuns[k].getLinkUrl();
+        if (u) sLinks.push(u);
+      }
+      const renderUrl = sLinks.length > 1 ? sLinks[1] : '';
+      const rm = renderUrl.match(/[-\w]{25,}/);
+      if (rm) {
+        const rf = DriveApp.getFileById(rm[0]);
+        if (rf.getSize() > 2048) {   // skip if still a blank placeholder
+          renderBlob = rf.getBlob().setName('awning_render.png');
+        } else {
+          notes.push('Render not generated yet');
+        }
+      }
+    }
+  } catch (renderErr) {
+    console.error('Render fetch error:', renderErr);
+    notes.push('Render fetch failed');
+  }
 // NEW: Generate route map data (includes distance/duration)
   let routeMapData = null;
   const address = d_safeString_(vals[idx(DRAFTS_V2.COLS.ADDRESS)]);
@@ -1340,7 +1392,7 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
   }
 
   // Body
-  const html = v2_buildHtmlBody_({ photoUrl, geUrl, qbUrl, recoverHtml, routeMapData, address, satelliteMapUrl });
+  const html = v2_buildHtmlBody_({ photoUrl, geUrl, qbUrl, recoverHtml, routeMapData, address, satelliteMapUrl, hasRender: !!renderBlob });
   const plain = v2_buildPlainBody_({ photoUrl, geUrl, qbUrl });
 
   // Recipients
@@ -1353,6 +1405,7 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
 
   const options = {};
   if (html) options.htmlBody = html;
+  if (renderBlob) options.inlineImages = { awningrender: renderBlob };
   if (cc.length)  options.cc  = cc.join(',');
   if (bcc.length) options.bcc = bcc.join(',');
 
@@ -1362,7 +1415,7 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
     const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
 
     // Rich text in B: link + optional diagnostics if snapshot failed
-    const base = '✅ Est Draft';
+    const base = '✅ Review';
     const suffix = (!recoverHtml && notes.length) ? '\n' + notes.join(' | ') : '';
     const rich = SpreadsheetApp.newRichTextValue()
       .setText(base + suffix)
@@ -1600,7 +1653,13 @@ function v2_buildHtmlBody_(data) {
   html += data.photoUrl
     ? '<a href="' + esc(data.photoUrl) + '" target="_blank" style="font-size:24pt;">' + esc(L.PHOTOS) + '</a>'
     : '<span style="font-size:24pt;">' + esc(L.PHOTOS) + ' (No URL)</span>';
-  html += '<br><br>';
+  html += '<br>';
+
+  // version# [07/21-06:15PM EST] by Claude Fable 5 — latest awning render below PICS
+  if (data.hasRender) {
+    html += '<img src="cid:awningrender" alt="Awning Render" style="max-width:100%;border:1px solid #ccc;border-radius:8px;"><br>';
+  }
+  html += '<br>';
 
   if (data.recoverHtml) {
     html += data.recoverHtml + '<br>';
@@ -1721,6 +1780,13 @@ function d_extractUrlFromCell_(rawVal, richVal, sh, row, colLetter) {
 }
 
 function d_looksLikeUrl_(s){ return /^https?:\/\/\S+/i.test(String(s||'')); }
+
+/** Extracts a Google Drive folder ID from a folder URL (e.g. .../folders/FOLDER_ID). Returns '' if not found. */
+function d_extractDriveFolderId_(url) {
+  var m = String(url || '').match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : '';
+}
+
 function d_safeString_(v){ if (v==null) return ''; return v instanceof Date ? v.toLocaleString() : String(v).trim(); }
 function d_htmlEscape_(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -1728,6 +1794,15 @@ function d_colLetterToIndex_(letter){
   let col = 0; const up = String(letter||'').toUpperCase();
   for (let i=0;i<up.length;i++) col = col * 26 + (up.charCodeAt(i) - 64);
   return col;
+}
+
+/** Set Stage (col D) to a new value. Programmatic writes don't re-fire onEdit, so this is safe. */
+function d_setStage_(sh, row, stageValue) {
+  try {
+    sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.STAGE)).setValue(stageValue);
+  } catch (err) {
+    console.error('Failed to update Stage (col D) to "' + stageValue + '":', err);
+  }
 }
 
 function v2_getSpreadsheet_() {
@@ -1780,7 +1855,12 @@ function v2_validateConfig_() {
   const bad = all.filter(x => !d_isValidEmail_(x));
   if (bad.length) throw new Error('Drafts V2 config error: Invalid email in recipients: ' + bad[0]);
 }
-function d_isValidEmail_(s){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s||'').trim()); }
+// version# [07/17-10:30AM EST] by Claude Opus 4.1 — accepts comma-separated email lists
+function d_isValidEmail_(s){
+  const parts = String(s||'').split(',').map(p => p.trim()).filter(Boolean);
+  if (!parts.length) return false;
+  return parts.every(p => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p));
+}
 
 function d_firstLinkInRichText_(rtv){
   try{
@@ -2715,7 +2795,7 @@ function d_createSendSamplesDraft_(sh, row) {
       return { toast: 'Missing project address (col J). Draft not created.' };
     }
 
-    var to      = 'rparatore@trivantage.com, customerservice@trivantage.com';
+    var to      = 'rparatore@trivantage.com, customerservice@trivantage.com, lhughes@trivantage.com, tiperry@trivantage.com';
     var subject = 'PO: Samples for ' + displayName;
 
     // Plain-text fallback
@@ -2849,4 +2929,276 @@ function d_draftWaitingOnDeposit_(sh, row) {
   }
 }
 
+// version# [07/07-3:30PM EST] by Claude Opus 4.1
+/** Creates a vendor quote-solicitation draft (lettering, signage, or other subcontracted scope).
+ *  Triggered when Column D = "Req Graphics". "To" field is intentionally left blank —
+ *  fill in the vendor's email manually before sending.
+ *  Embeds a satellite thumbnail (linking to Q) and up to 3 photos pulled from the Drive folder linked in column F. */
+function d_createReqGraphicsDraft_(sh, row) {
+  try {
+    var rawF        = sh.getRange(row, d_colLetterToIndex_('F')).getValue();
+    var displayName = String(rawF || '').trim();
+    var folderUrl   = d_extractUrlFromCell_(rawF, null, sh, row, 'F');
+    var fabric      = String(sh.getRange(row, d_colLetterToIndex_('AB')).getValue() || '').trim();
+    var length      = String(sh.getRange(row, d_colLetterToIndex_('T')).getValue() || '').trim();
+    var width       = String(sh.getRange(row, d_colLetterToIndex_('U')).getValue() || '').trim();
+    var address     = String(sh.getRange(row, d_colLetterToIndex_('J')).getValue() || '').trim();
+    var rawQ        = sh.getRange(row, d_colLetterToIndex_('Q')).getValue();
+    var earthUrl    = d_extractUrlFromCell_(rawQ, null, sh, row, 'Q');
+
+    if (!displayName) {
+      return { toast: 'Missing Quote Display Name (col F). Draft not created.' };
+    }
+
+    var subject = 'Quote solicitation for ' + displayName;
+    var dimensionsText = (length || '?') + "' x " + (width || '?') + "'";
+
+    // Plain-text fallback (no greeting, no bold/center — those are HTML-only)
+    var plainLines = [
+      '      Please send over a price for the following scope:',
+      'PO: ' + displayName,
+      'Fabric: ' + (fabric || 'Not specified'),
+      'Approx. Dimensions: ' + dimensionsText,
+      'Location: ' + (address || 'Not specified')
+    ];
+    if (earthUrl) plainLines.push('Google Earth: ' + earthUrl);
+    plainLines.push('', 'Customer would like the following:', '');
+    var plain = plainLines.join('\n');
+
+    // Satellite thumbnail (same source as qDraft), clickable through to the Google Earth link in Q
+    var satelliteMapUrl = null;
+    if (address) {
+      try {
+        satelliteMapUrl = d_generateSatelliteMapUrl_(address);
+      } catch (mapErr) {
+        console.error('Req Graphics satellite map error:', mapErr);
+      }
+    }
+
+    var thumbnailHtml = '';
+    if (satelliteMapUrl) {
+      thumbnailHtml = earthUrl
+        ? '<a href="' + d_htmlEscape_(earthUrl) + '" target="_blank"><img src="' + d_htmlEscape_(satelliteMapUrl) + '" alt="Aerial View" style="max-width:100%;border:1px solid #ccc;border-radius:8px;"></a><br><br>'
+        : '<img src="' + d_htmlEscape_(satelliteMapUrl) + '" alt="Aerial View" style="max-width:100%;border:1px solid #ccc;border-radius:8px;"><br><br>';
+    }
+
+    // Pull up to 3 photos from the Drive folder linked in column F
+    var inlineImages = {};
+    var photosHtml = '';
+    if (folderUrl) {
+      try {
+        var folderId = d_extractDriveFolderId_(folderUrl);
+        if (folderId) {
+          var folder = DriveApp.getFolderById(folderId);
+          var fileIter = folder.getFiles();
+          var count = 0;
+          while (fileIter.hasNext() && count < 3) {
+            var file = fileIter.next();
+            if (file.getMimeType().indexOf('image/') === 0) {
+              count++;
+              var cid = 'reqgraphicsphoto' + count;
+              inlineImages[cid] = file.getBlob();
+              photosHtml += '<img src="cid:' + cid + '" alt="Project photo ' + count + '" style="max-width:200px;margin:4px;border:1px solid #ccc;border-radius:6px;">';
+            }
+          }
+        }
+      } catch (photoErr) {
+        console.error('Req Graphics photo fetch error:', photoErr);
+      }
+    }
+
+    var html =
+      '<div style="font-family:Arial,sans-serif;color:#333;line-height:1.5;">' +
+        '<p style="text-align:center;font-weight:bold;font-size:16pt;">Please send over a price for the following scope:</p>' +
+        '<p style="padding-left:24px;">' +
+          '<strong>PO:</strong> ' + d_htmlEscape_(displayName) + '<br>' +
+          '<strong>Fabric:</strong> ' + d_htmlEscape_(fabric || 'Not specified') + '<br>' +
+          '<strong>Approx. Dimensions:</strong> ' + d_htmlEscape_(dimensionsText) + '<br>' +
+          '<strong>Location:</strong> ' + d_htmlEscape_(address || 'Not specified') +
+        '</p>' +
+        '<p><strong>Customer would like the following:</strong></p>' +
+        thumbnailHtml +
+        (photosHtml ? '<div>' + photosHtml + '</div>' : '') +
+      '</div>';
+
+    var draftOptions = { htmlBody: html };
+    if (Object.keys(inlineImages).length) draftOptions.inlineImages = inlineImages;
+
+    var draft = d_withRetry_(function() {
+      return GmailApp.createDraft('', subject, plain, draftOptions);
+    });
+    var draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' +
+      encodeURIComponent(draft.getMessage().getId());
+
+    var linkText = '🎨 Req Graphics';
+    var richText = SpreadsheetApp.newRichTextValue()
+      .setText(linkText)
+      .setLinkUrl(0, linkText.length, draftUrl)
+      .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+      .build();
+    sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B)).setRichTextValue(richText);
+
+    return { toast: 'Req Graphics draft created (' + Object.keys(inlineImages).length + ' photo(s) embedded) & linked in column B' };
+
+  } catch (err) {
+    console.error('d_createReqGraphicsDraft_ error:', err);
+    sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B)).setValue('Error creating Req Graphics draft: ' + d_shortErr_(err));
+    return { toast: 'Error: ' + d_shortErr_(err) };
+  }
+}
+// version# [07/29-11:45AM EST] by Claude Opus 4.1
+/** Creates a price-update reply draft on the existing "Proposal Review: [F]" thread when Column D = "Price update".
+ *  Rates pulled from Re-cover!U3:V30 (U = fabric name, V = rate). Trailing " x" is a manual-yardage placeholder.
+ *  AB in (Vinyl, Weblon, Ferrari, Vanguard) -> Vinyl group. AB contains "Sunbrella" -> Sunbrella group.
+ *  If no thread is found, creates a fresh draft to Liz with the qDraft subject + " (Price update)". Links draft in column B. */
+function d_createPriceUpdateDraft_(sh, row) {
+  try {
+    var logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
+
+    var displayName = String(sh.getRange(row, d_colLetterToIndex_('F')).getValue() || '').trim();
+    var jobType     = String(sh.getRange(row, d_colLetterToIndex_('R')).getValue() || '').trim();
+    var fabric      = String(sh.getRange(row, d_colLetterToIndex_('AB')).getValue() || '').trim();
+
+    if (!displayName) {
+      logCell.setValue('No display name in column F');
+      return { toast: 'No display name in column F' };
+    }
+
+    // --- Determine fabric group from AB ---
+    var fabricLower = fabric.toLowerCase();
+    var VINYL_GROUP     = ['Vinyl', 'Weblon', 'Ferrari', 'Vanguard'];
+    var SUNBRELLA_GROUP = ['Sunbrella', 'Sunbrella Mayfield', 'Sunbrella FR', 'Sunbrella FlameCoat', 'Sunbrella Seamark'];
+    var group = null;
+    if (VINYL_GROUP.map(function(n){ return n.toLowerCase(); }).indexOf(fabricLower) !== -1) {
+      group = VINYL_GROUP;
+    } else if (fabricLower.indexOf('sunbrella') !== -1) {
+      group = SUNBRELLA_GROUP;
+    }
+    if (!group) {
+      var gMsg = 'Fabric "' + fabric + '" in AB does not match Vinyl or Sunbrella groups - no draft created';
+      logCell.setValue(gMsg);
+      return { toast: gMsg };
+    }
+
+    // --- Build rate map from Re-cover!U3:V30 (replicates =IFERROR(VLOOKUP(fabric, U3:V30, 2, FALSE), 0)) ---
+    var ss = sh.getParent();
+    var recoverSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
+    if (!recoverSheet) {
+      logCell.setValue('Re-cover sheet not found');
+      return { toast: 'Re-cover sheet not found' };
+    }
+    var rateVals = recoverSheet.getRange('U3:V30').getValues();
+    var rateMap = {};
+    for (var i = 0; i < rateVals.length; i++) {
+      var rName = String(rateVals[i][0] || '').trim().toLowerCase();
+      if (rName) rateMap[rName] = Number(rateVals[i][1]) || 0;
+    }
+    var lookupRate = function(name) {
+      var v = rateMap[String(name).toLowerCase()];
+      return (v == null) ? 0 : v;
+    };
+
+    // --- Build body lines (dotted, monospace-aligned) ---
+    var LABEL_WIDTH = 34;
+    var makeLine = function(name) {
+      var dots = '';
+      var need = LABEL_WIDTH - name.length;
+      for (var d = 0; d < need; d++) dots += '.';
+      return name + dots + '$ ' + lookupRate(name) + ' x';
+    };
+
+    var bodyLines = [];
+    for (var g = 0; g < group.length; g++) bodyLines.push(makeLine(group[g]));
+
+    var plainBody = 'Please confirm the updated pricing below:\n' + bodyLines.join('\n');
+
+    var htmlLines = bodyLines.map(function(l){ return d_htmlEscape_(l); }).join('\n');
+    var htmlBody =
+      '<div style="font-family:Arial,sans-serif;color:#333;">' +
+        '<p>Please confirm the updated pricing below:</p>' +
+        '<pre style="font-family:Courier New,Courier,monospace;font-size:11pt;margin:0;">' + htmlLines + '</pre>' +
+      '</div>';
+
+    // version# [07/29-02:45PM EST] by Claude Opus 4.1
+    // --- Find existing "Proposal Review" thread ---
+    // 1) Exact quoted subject "Proposal Review: [F] - [R]" (no date limit, finds old threads)
+    // 2) Broad "Proposal Review:" search matched locally (most recent 50)
+    var displayNameLower = displayName.toLowerCase();
+    var candidates = [];
+    var thread = null;
+
+    var searchQueries = [
+      'subject:(Proposal Review) subject:("' + displayName + '") subject:("' + jobType + '")',
+      'subject:(Proposal Review) subject:("' + displayName + '")'
+    ];
+
+    for (var sq = 0; sq < searchQueries.length && !thread; sq++) {
+      try {
+        candidates = GmailApp.search(searchQueries[sq], 0, 50);
+      } catch (searchErr) {
+        console.error('Thread search failed (' + searchQueries[sq] + '):', searchErr);
+        candidates = [];
+      }
+      for (var t = 0; t < candidates.length; t++) {
+        if (candidates[t].getFirstMessageSubject().toLowerCase().indexOf(displayNameLower) !== -1) {
+          thread = candidates[t];
+          break;
+        }
+      }
+    }
+
+    var draft;
+    var mode;
+    if (thread) {
+      // version# [07/29-02:30PM EST] by Claude Opus 4.1 — reply-all at end of existing thread
+      draft = d_withRetry_(function() {
+        return thread.createDraftReplyAll(plainBody, { htmlBody: htmlBody });
+      });
+      mode = 'reply';
+    } else {
+      // DIAGNOSTIC: log what the search found so we can see why no match occurred
+      var diag = 'PRICE UPDATE DIAG — searched for: "' + displayNameLower + '" | candidates found: ' + candidates.length;
+      for (var dv = 0; dv < Math.min(candidates.length, 5); dv++) {
+        diag += '\n' + (dv + 1) + ') ' + candidates[dv].getFirstMessageSubject();
+      }
+      console.log(diag);
+      logCell.setValue(diag);
+      // Fallback: fresh draft to Liz with qDraft subject + " (Price update)"
+      var prefix = (DRAFTS_V2.EMAIL.SUBJECT_PREFIX || 'Proposal Review').trim();
+      var subject = d_templateSafe_(DRAFTS_V2.EMAIL.SUBJECT_TEMPLATE, { prefix: prefix, displayName: displayName, jobType: jobType }) + ' (Price update)';
+      var to = (DRAFTS_V2.EMAIL.TO || []).filter(Boolean).join(',');
+      draft = d_withRetry_(function() {
+        return GmailApp.createDraft(to, subject, plainBody, { htmlBody: htmlBody });
+      });
+      mode = 'new';
+    }
+
+    var draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' +
+      encodeURIComponent(draft.getMessage().getId());
+
+    var linkText = '💲 Price Update';
+    var diagSuffix = '';
+    if (mode !== 'reply') {
+      diagSuffix = '\nDIAG: searched "' + displayNameLower + '" | ' + candidates.length + ' candidates';
+      for (var dx = 0; dx < Math.min(candidates.length, 3); dx++) {
+        diagSuffix += '\n' + (dx + 1) + ') ' + candidates[dx].getFirstMessageSubject();
+      }
+    }
+    var richText = SpreadsheetApp.newRichTextValue()
+      .setText(linkText + diagSuffix)
+      .setLinkUrl(0, linkText.length, draftUrl)
+      .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
+      .build();
+    logCell.setRichTextValue(richText);
+
+    return { toast: mode === 'reply'
+      ? 'Price update reply draft added to thread & linked in column B'
+      : 'No thread found - new price update draft created & linked in column B' };
+
+  } catch (err) {
+    console.error('d_createPriceUpdateDraft_ error:', err);
+    sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B)).setValue('Error creating price update draft: ' + d_shortErr_(err));
+    return { toast: 'Error: ' + d_shortErr_(err) };
+  }
+}
 /** end-of-file */
