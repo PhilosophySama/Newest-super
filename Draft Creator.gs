@@ -6,7 +6,6 @@
  * - Create Gmail drafts when Stage (col D) becomes TARGET_STAGE ("qDraft") on allowed sheets.
  * - Search and link existing emails when Stage (col D) becomes "Liz" on allowed sheets.
  * - Create customer follow-up drafts when Stage (col D) becomes "Email customer" on allowed sheets.
- * - Create customer handoff drafts when Stage (col D) becomes "Cust Handoff" on allowed sheets.
  * - Create rough quote drafts/messages when Stage (col D) becomes "Rough quote" on allowed sheets.
  * - Create customer info request drafts when Stage (col D) becomes "Customer Info" on Leads, F/U, and Awarded sheets.
  * - Create COI request drafts when Stage (col D) becomes "COI Req" on F/U, Awarded, and Heaven sheets only.
@@ -18,7 +17,6 @@
  * - Removed 5-second delay - drafts now create BEFORE row moves
  * - "Email customer" now uses Job Type (R) instead of Job Description (K)
  * - "Email customer" signature moved after QuickBooks button
- * - Added v2_createPlotMapDraft_: satellite map draft for Schedule/2.Sched/Schedule Instal rows (Leads, F/U, Awarded) with per-stop distance + ETA legend
  * - Added v2_createDesignReviewDraft_: replies to existing Proposal Review thread with first-slide screenshot and link to "Shop Drawing - [F]" Slides file
  * - Added REQ_GRAPHICS_STAGE + d_createReqGraphicsDraft_: vendor quote solicitation draft with PO/Fabric/Dimensions/Location + Google Earth thumbnail linking to Q
  */
@@ -39,17 +37,14 @@ const DRAFTS_V2 = {
   TARGET_STAGE: 'qDraft',              // Main draft creation trigger
   LIZ_STAGE: 'Liz',  // Stage value for email search
   CUSTOMER_STAGE: 'Email customer',    // Customer follow-up trigger
-  HANDOFF_STAGE: 'Cust Handoff',       // Customer handoff trigger
   ROUGH_QUOTE_STAGE: 'Rough quote',    // Rough quote trigger
   CUSTOMER_INFO_STAGE: 'Customer Info', // Info request trigger
   COI_STAGE: 'COI Req',                // COI request trigger
-  FOLLOWUP_STAGE: 'F/U',               // Follow-up reply trigger
   DESIGN_REVIEW_STAGE: 'Design Review',       // Design review reply trigger
   LIZ_DESIGN_REVIEW_STAGE: 'Liz Design Review', // Awarded-only email search trigger
   SAMPLES_STAGE: 'Send Samples',
   DEPOSIT_STAGE: 'Waiting on Deposit',  // 50% deposit invoice trigger
   REQ_GRAPHICS_STAGE: 'Req Graphics',   // Vendor quote solicitation trigger (lettering/signage/other subcontracted scope)
-  PRICE_UPDATE_STAGE: 'Price update',   // Price update reply on Proposal Review thread
 
   COLS: {
     LOG_B: 'B',
@@ -104,7 +99,7 @@ const DRAFTS_V2 = {
     BCC: [],
     SUBJECT_PREFIX: 'Proposal Review',
     LINK_LABELS: { PHOTOS:'PICS', EARTH:'Google Earth', QUICKBOOKS:'Quickbooks', ROUTE_MAP:'Route Map' },
-    SUBJECT_TEMPLATE: '${prefix}: ${displayName} - ${jobType}',
+    SUBJECT_TEMPLATE: '${prefix} - ${displayName} - ${jobType}',
     SUBJECT_MAX_LENGTH: 120,
     SKIP_IF_DRAFT_EXISTS: true
   },
@@ -137,26 +132,6 @@ We ask for a 50% material deposit for us to begin production. Free payment optio
 </ul>
 
 <p>We ask for a 50% material deposit for us to begin production. Free payment options are: Check and Zelle to "walker-awning-fl". If you have any questions or would like to proceed with this project, please reach out via text or call.</p>
-</div>`
-  },
-
-  HANDOFF_EMAIL: {
-    SUBJECT_TEMPLATE: 'Re: Your Walker Awning Project - ${displayName}',
-    BODY_TEMPLATE: `Hello \${firstName},
-
-Michael is no longer with our team, and I'll be taking over your project. To help me get up to speed, could you please send me any photos, rough dimensions, and other key details about your situation?
-
-I wasn't able to find Mike's notes on this (haha), so your input will be a huge help.
-
-Thanks,`,
-    HTML_BODY_TEMPLATE: `<div style="font-family: Arial, sans-serif; color: #333;">
-<p>Hello \${firstName},</p>
-
-<p>Michael is no longer with our team, and I'll be taking over your project. To help me get up to speed, could you please send me any photos, rough dimensions, and other key details about your situation?</p>
-
-<p>I wasn't able to find Mike's notes on this (haha), so your input will be a huge help.</p>
-
-<p>Thanks,</p>
 </div>`
   },
 
@@ -237,13 +212,6 @@ function handleEditDraft_V2(e) {
       return;
     }
     
-    // Handle "Cust Handoff" stage - create customer handoff draft
-    if (newValLower === String(DRAFTS_V2.HANDOFF_STAGE).toLowerCase()) {
-      const result = v2_createHandoffDraft_(sh, row);
-      SpreadsheetApp.getActive().toast(result.toast, 'Handoff Draft', 5);
-      return;
-    }
-    
     // Handle "Rough quote" stage - create rough quote draft/message
     if (newValLower === String(DRAFTS_V2.ROUGH_QUOTE_STAGE).toLowerCase()) {
       const result = v2_createRoughQuote_(sh, row);
@@ -262,13 +230,6 @@ function handleEditDraft_V2(e) {
     if (newValLower === String(DRAFTS_V2.COI_STAGE).toLowerCase()) {
       const result = v2_createCOIDraft_(sh, row);
       SpreadsheetApp.getActive().toast(result.toast, 'COI Request', 5);
-      return;
-    }
-    
-    // Handle "F/U" stage - create follow-up reply draft
-    if (newValLower === String(DRAFTS_V2.FOLLOWUP_STAGE).toLowerCase()) {
-      const result = v2_createFollowUpDraft_(sh, row);
-      SpreadsheetApp.getActive().toast(result.toast, 'Follow-Up Draft', 5);
       return;
     }
 
@@ -308,13 +269,6 @@ function handleEditDraft_V2(e) {
     if (newValLower === String(DRAFTS_V2.REQ_GRAPHICS_STAGE).toLowerCase()) {
       const result = d_createReqGraphicsDraft_(sh, row);
       SpreadsheetApp.getActive().toast(result.toast, 'Req Graphics', 5);
-      return;
-    }
-
-    // Handle "Price update" stage - reply to Proposal Review thread with fabric pricing
-    if (newValLower === String(DRAFTS_V2.PRICE_UPDATE_STAGE).toLowerCase()) {
-      const result = d_createPriceUpdateDraft_(sh, row);
-      SpreadsheetApp.getActive().toast(result.toast, 'Price Update', 5);
       return;
     }
 
@@ -509,6 +463,7 @@ Walker Awning Team</p>
       const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
       logCell.setRichTextValue(richText);
       
+      try { al_logActivity_(sh.getName(), 'Automation', customerName, displayName, 'Draft', 'Awning quote', ''); } catch (_) {}
       return { toast: 'Customer follow-up draft created & linked in column B' };
       
     } catch (err) {
@@ -522,82 +477,6 @@ Walker Awning Team</p>
     const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
     logCell.setValue('Error creating customer draft: ' + d_shortErr_(err));
     return { toast: 'Error creating customer draft: ' + d_shortErr_(err) };
-  }
-}
-
-/**
- * Create customer handoff draft when "Cust Handoff" is selected
- */
-function v2_createHandoffDraft_(sh, row) {
-  try {
-    const lastCol = sh.getLastColumn();
-    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
-    const idx = (L) => d_colLetterToIndex_(L) - 1;
-    
-    // Get customer data
-    const customerEmail = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]);
-    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]) || 'Unnamed Lead';
-    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
-    
-    // Extract first name from customer name
-    const firstName = customerName ? customerName.split(' ')[0] : 'there';
-    
-    // Validate customer email
-    if (!customerEmail || !d_isValidEmail_(customerEmail)) {
-      const msg = 'No valid customer email found in column I';
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue(msg);
-      return { toast: msg };
-    }
-    
-    // Create subject
-    let subject = d_templateSafe_(DRAFTS_V2.HANDOFF_EMAIL.SUBJECT_TEMPLATE, { 
-      displayName
-    });
-    
-    // Create plain text body
-    let plainBody = DRAFTS_V2.HANDOFF_EMAIL.BODY_TEMPLATE;
-    plainBody = plainBody.replace(/\$\{firstName\}/g, firstName);
-    
-    // Create HTML body
-    let htmlBody = DRAFTS_V2.HANDOFF_EMAIL.HTML_BODY_TEMPLATE;
-    htmlBody = htmlBody.replace(/\$\{firstName\}/g, d_htmlEscape_(firstName));
-    
-    // Create draft
-    const options = {
-      htmlBody: htmlBody
-    };
-    
-    try {
-      const draft = d_withRetry_(() => GmailApp.createDraft(customerEmail, subject, plainBody, options));
-      const draftMessageId = draft.getMessage().getId();
-      const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' + encodeURIComponent(draftMessageId);
-      
-      // Create rich text link for column B
-      const linkText = '🤝 Handoff Draft: ' + displayName;
-      const richText = SpreadsheetApp.newRichTextValue()
-        .setText(linkText)
-        .setLinkUrl(0, linkText.length, draftUrl)
-        .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
-        .build();
-      
-      // Update column B
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setRichTextValue(richText);
-      
-      return { toast: 'Customer handoff draft created & linked in column B' };
-      
-    } catch (err) {
-      const msg = d_specificErrorMessage_(err);
-      const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-      logCell.setValue(msg);
-      return { toast: msg };
-    }
-    
-  } catch (err) {
-    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-    logCell.setValue('Error creating handoff draft: ' + d_shortErr_(err));
-    return { toast: 'Error creating handoff draft: ' + d_shortErr_(err) };
   }
 }
 
@@ -795,6 +674,7 @@ Walker Awning</p>
         // Auto-advance Stage (col D) to "Pending Email"
         d_setStage_(sh, row, 'Pending Email');
         
+        try { al_logActivity_(sh.getName(), 'Automation', customerName, displayName, 'Draft', 'Info request', ''); } catch (_) {}
         return { toast: 'Info request draft created & linked in column B' };
         
       } catch (err) {
@@ -875,7 +755,7 @@ function v2_createCOIDraft_(sh, row) {
     }
     
     // Create subject
-    const subject = `COI Request: ${displayName}`;
+        const subject = `COI Request - ${displayName}`;
     
     // Create plain text body
     const plainBody = `Hello wonderful Keyes team,
@@ -957,6 +837,7 @@ Gino Carneiro</p>
       const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
       logCell.setRichTextValue(richText);
       
+      try { al_logActivity_(sh.getName(), 'Automation', customerName, displayName, 'Draft', 'COI request', ''); } catch (_) {}
       return { toast: 'COI request draft created & linked in column B' };
       
     } catch (err) {
@@ -970,107 +851,6 @@ Gino Carneiro</p>
     const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
     logCell.setValue('Error creating COI draft: ' + d_shortErr_(err));
     return { toast: 'Error creating COI draft: ' + d_shortErr_(err) };
-  }
-}
-
-/**
- * Create follow-up draft when "F/U" is selected.
- * Finds original sent quote email, copies its body, and creates a new draft
- * with a follow-up message prepended and the original quoted below.
- * Version: 03/03-12:30PM EST by Claude Sonnet 4.6
- */
-function v2_createFollowUpDraft_(sh, row) {
-  try {
-    const lastCol = sh.getLastColumn();
-    const vals = sh.getRange(row, 1, 1, lastCol).getValues()[0];
-    const idx = (L) => d_colLetterToIndex_(L) - 1;
-
-    const customerName = d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]);
-    const firstName = customerName ? customerName.split(' ')[0] : 'there';
-    const customerEmail = d_safeString_(vals[idx(DRAFTS_V2.COLS.EMAIL)]);
-    const displayName = d_safeString_(vals[idx(DRAFTS_V2.COLS.DISPLAY_NAME)]) || 'Unnamed Lead';
-
-    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-
-    if (!customerEmail || !d_isValidEmail_(customerEmail)) {
-      logCell.setValue('No valid customer email in col I — cannot create follow-up.');
-      return { toast: 'No valid customer email found.' };
-    }
-
-    // --- Search for original sent quote email ---
-    let originalBody = null;
-    let originalSubject = null;
-    let originalDate = null;
-
-    const queries = [
-      'subject:"Your awning quote from Walker Awning - ' + displayName + '" in:sent newer_than:' + DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS + 'd',
-      'to:' + customerEmail + ' in:sent newer_than:' + DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS + 'd',
-      '"' + displayName + '" in:sent newer_than:' + DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS + 'd'
-    ];
-
-    for (var q = 0; q < queries.length; q++) {
-      const results = GmailApp.search(queries[q], 0, DRAFTS_V2.EMAIL_SEARCH.MAX_RESULTS);
-      if (results.length > 0) {
-        const msgs = results[0].getMessages();
-        const last = msgs[msgs.length - 1];
-        originalBody = last.getBody();
-        originalSubject = last.getSubject();
-        originalDate = Utilities.formatDate(last.getDate(), Session.getScriptTimeZone(), 'MMMM dd, yyyy');
-        break;
-      }
-    }
-
-    // --- Build follow-up message ---
-    const subject = 'Following up: ' + (originalSubject || 'Your Walker Awning quote - ' + displayName);
-
-    const followUpHtml =
-      '<div style="font-family: Arial, sans-serif; color: #333;">' +
-      '<p>Hello ' + d_htmlEscape_(firstName) + ',</p>' +
-      '<p>Just a friendly follow-up on the proposal I sent over. I\'ve included it below for your convenience — ' +
-      'please don\'t hesitate to reach out with any questions or if you\'d like to make any changes.</p>' +
-      '<p>Best regards,<br>Gino Carneiro<br>Walker Awning</p>' +
-      '</div>';
-
-    const followUpPlain =
-      'Hello ' + firstName + ',\n\n' +
-      'Just a friendly follow-up on the proposal I sent over. I\'ve included it below for your convenience — ' +
-      'please don\'t hesitate to reach out with any questions or if you\'d like to make any changes.\n\n' +
-      'Best regards,\nGino Carneiro\nWalker Awning';
-
-    // Build full HTML: follow-up message + divider + original email quoted below
-    let fullHtml = followUpHtml;
-    if (originalBody) {
-      fullHtml +=
-        '<hr style="border:none;border-top:1px solid #ccc;margin:24px 0;">' +
-        '<p style="color:#888;font-size:12px;">--- Original message sent ' + originalDate + ' ---</p>' +
-        '<div style="opacity:0.85;">' + originalBody + '</div>';
-    }
-
-    const draft = d_withRetry_(function() {
-      return GmailApp.createDraft(customerEmail, subject, followUpPlain, { htmlBody: fullHtml });
-    });
-
-    const draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' +
-      encodeURIComponent(draft.getMessage().getId());
-
-    const linkText = originalBody ? '🔁 F/U w/ Quote' : '🔁 F/U Draft';
-    const richText = SpreadsheetApp.newRichTextValue()
-      .setText(linkText)
-      .setLinkUrl(0, linkText.length, draftUrl)
-      .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
-      .build();
-    logCell.setRichTextValue(richText);
-
-    return { 
-      toast: originalBody 
-        ? 'Follow-up draft created with original quote attached.' 
-        : 'Follow-up draft created (original quote not found).' 
-    };
-
-  } catch (err) {
-    const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-    logCell.setValue('Error creating follow-up: ' + d_shortErr_(err));
-    return { toast: 'Error creating follow-up: ' + d_shortErr_(err) };
   }
 }
 
@@ -1166,6 +946,7 @@ function v2_createRoughQuote_(sh, row) {
         const logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
         logCell.setRichTextValue(richText);
         
+        try { al_logActivity_(sh.getName(), 'Automation', customerName, displayName, 'Draft', 'Rough quote', ''); } catch (_) {}
         return { toast: 'Rough quote draft created & linked in column B' };
         
       } catch (err) {
@@ -1425,6 +1206,7 @@ function v2_createDraftForRow_(sh, row, respectExisting, rowValsOpt, rowRtvOpt, 
 
     if (batchReceiverOpt) batchReceiverOpt(rich); else logCell.setRichTextValue(rich);
 
+    try { al_logActivity_(sh.getName(), 'Automation', d_safeString_(vals[idx(DRAFTS_V2.COLS.CUSTOMER_NAME)]), displayName, 'Draft', 'Proposal Review', ''); } catch (_) {}
     return { ok:true, toast:'Draft created & linked in column B.' };
   } catch (err) {
     const msg = d_specificErrorMessage_(err);
@@ -2047,619 +1829,6 @@ function d_generateSatelliteMapUrl_(address) {
   }
 }
 /**
- * Scans Leads, F/U, and Awarded for rows with Stage (col D) matching
- * schedule trigger words, builds a satellite Static Maps image auto-fitted
- * to all locations, fetches distance/ETA per stop, and creates a Gmail draft.
- * Version: 03/16-12:00PM by Claude Sonnet 4.6
- */
-function v2_createPlotMapDraft_() {
-  const apiKey = PropertiesService.getScriptProperties().getProperty('MAPS_API_KEY');
-  if (!apiKey) {
-    SpreadsheetApp.getUi().alert('MAPS_API_KEY not found in Script Properties.');
-    return;
-  }
-
-  const ss             = SpreadsheetApp.getActiveSpreadsheet();
-  const sh             = ss.getActiveSheet();
-  const activeSheetName = sh.getName();
-  const allowedSheets  = ['Leads', 'F/U', 'Awarded'];
-  const STAGE_COL      = 4;   // D
-  const NAME_COL       = 5;   // E
-  const FOLDER_COL     = 6;   // F
-  const QB_COL         = 16;  // P
-  const EARTH_COL      = 17;  // Q
-  const ADDRESS_COL    = 10;  // J
-  const JOB_TYPE_COL   = 18;  // R
-  const READ_COL       = 35;
-  const JOB_VAL_COL    = 33;  // AG
-  const DEPOSIT_DATE_COL = 32;  // AF
-  const LEAD_START_COL   = 34;  // AH
-  const LEAD_END_COL     = 35;  // AI
-  const PHONE_COL      = 8;   // H
-  const EMAIL_COL      = 9;   // I
-  const TRIGGERS     = ['schedule', '2.sched', 'schedule instal'];
-  const ENG_TRIGGERS       = ['planning & engineering', 'permitting'];
-  const SCHEDULED_TRIGGERS = ['scheduled'];
-  const SHOP_ADDRESS   = DRAFTS_V2.MAPS_CONFIG.SHOP_ADDRESS;
-
-  if (!allowedSheets.includes(activeSheetName)) {
-    SpreadsheetApp.getUi().alert(`Please switch to one of these sheets first: ${allowedSheets.join(', ')}`);
-    return;
-  }
-
-  const plotRows      = [];
-  const engRows       = [];
-  let scheduledRows = [];
-
-  const lastRow = sh.getLastRow();
-  if (lastRow >= 2) {
-    const data            = sh.getRange(2, 1,          lastRow - 1, READ_COL).getValues();
-    const folderRichTexts = sh.getRange(2, FOLDER_COL, lastRow - 1, 1).getRichTextValues();
-    const qbRichTexts     = sh.getRange(2, QB_COL,     lastRow - 1, 1).getRichTextValues();
-    const earthRichTexts  = sh.getRange(2, EARTH_COL,  lastRow - 1, 1).getRichTextValues();
-    for (let i = 0; i < data.length; i++) {
-      const stage   = String(data[i][STAGE_COL   - 1] || '').trim().toLowerCase();
-      const name    = String(data[i][NAME_COL    - 1] || '').trim();
-      const address = String(data[i][ADDRESS_COL - 1] || '').trim();
-      const isSchedule  = TRIGGERS.includes(stage);
-      const isEng       = ENG_TRIGGERS.includes(stage);
-      const isScheduled = SCHEDULED_TRIGGERS.includes(stage);
-      const isFix       = stage === 'fix';
-      if ((isSchedule || isEng || isScheduled || isFix) && address) {
-        const cleanAddress = address.replace(/[\r\n]+/g, ', ').replace(/,\s*,/g, ',').trim();
-        const folderUrl = (() => {
-          try {
-            const rtv = folderRichTexts[i][0];
-            if (rtv) {
-              const runs = rtv.getRuns();
-              for (let k = 0; k < runs.length; k++) {
-                const u = runs[k].getLinkUrl();
-                if (u) return u;
-              }
-              const whole = rtv.getLinkUrl();
-              if (whole) return whole;
-            }
-          } catch (_) {}
-          return '';
-        })();
-        const jobType     = String(data[i][JOB_TYPE_COL - 1] || '').trim();
-        const displayName = String(data[i][FOLDER_COL - 1] || '').trim() || name || cleanAddress;
-        const qbUrl       = (() => {
-          try {
-            const rtv = qbRichTexts[i][0];
-            if (rtv) {
-              const runs = rtv.getRuns();
-              for (let k = 0; k < runs.length; k++) {
-                const u = runs[k].getLinkUrl();
-                if (u) return u;
-              }
-              const whole = rtv.getLinkUrl();
-              if (whole) return whole;
-            }
-            const val = String(data[i][QB_COL - 1] || '').trim();
-            if (/^https?:\/\/\S+/i.test(val)) return val;
-          } catch (_) {}
-          return '';
-        })();
-        const addressLines = address.split(/[\r\n]+/).map(l => l.trim()).filter(l => l);
-        const lastLine     = addressLines.length > 0 ? addressLines[addressLines.length - 1] : cleanAddress;
-        const city         = (lastLine.split(',')[0] || '').trim();
-        const earthUrl = (() => {
-          try {
-            const rtv = earthRichTexts[i][0];
-            if (rtv) {
-              const runs = rtv.getRuns();
-              for (let k = 0; k < runs.length; k++) {
-                const u = runs[k].getLinkUrl();
-                if (u) return u;
-              }
-              const whole = rtv.getLinkUrl();
-              if (whole) return whole;
-            }
-          } catch (_) {}
-          return '';
-        })();
-        const jobValRaw = Number(data[i][JOB_VAL_COL - 1]) || 0;
-        const jobVal = jobValRaw ? (jobValRaw >= 1000 ? '$' + Math.round(jobValRaw / 1000) + 'k' : '$' + jobValRaw) : '';
-        if (isSchedule || isFix) {
-          const phone = String(data[i][PHONE_COL - 1] || '').trim();
-          const email = String(data[i][EMAIL_COL - 1] || '').trim();
-          const fmtLeadDate = (v) => {
-            if (!v) return '';
-            const d = v instanceof Date ? v : new Date(v);
-            if (isNaN(d)) return String(v);
-            return (d.getMonth() + 1) + '/' + d.getDate();
-          };
-          const leadStart    = fmtLeadDate(data[i][LEAD_START_COL - 1]);
-          const leadEnd      = fmtLeadDate(data[i][LEAD_END_COL   - 1]);
-          const leadTime     = leadStart && leadEnd ? leadStart + ' - ' + leadEnd : (leadStart || leadEnd || '');
-          const leadStartRaw = data[i][LEAD_START_COL - 1] ? new Date(data[i][LEAD_START_COL - 1]) : null;
-          const leadEndRaw   = data[i][LEAD_END_COL   - 1] ? new Date(data[i][LEAD_END_COL   - 1]) : null;
-          const driveLabel = String(data[i][29] || '').trim(); // AD = col 30, index 29
-          plotRows.push({ name: displayName, rawName: name, address: cleanAddress, city, folderUrl, qbUrl, earthUrl, jobType, phone, email, jobVal, leadTime, leadStartRaw, leadEndRaw, driveLabel, distance: null, duration: null, lat: 0, isFix: isFix, stage: stage });
-        } else if (isEng) {
-          const depositRaw  = data[i][DEPOSIT_DATE_COL - 1] ? new Date(data[i][DEPOSIT_DATE_COL - 1]) : null;
-          const depositDate = depositRaw ? String(depositRaw.getMonth() + 1).padStart(2,'0') + '/' + String(depositRaw.getDate()).padStart(2,'0') : '';
-          const driveLabel = String(data[i][29] || '').trim(); // AD = col 30, index 29
-          engRows.push({ name: displayName, rawName: name, address: cleanAddress, city, folderUrl, qbUrl, jobType, jobVal, depositDate, depositRaw, driveLabel, distance: null, duration: null, lat: 0 });
-        } else if (isScheduled) {
-          scheduledRows.push({ name: displayName, rawName: name, address: cleanAddress, city, folderUrl, qbUrl, jobType, jobVal, distance: null, duration: null, lat: 0, scheduledDate: null });
-        }
-      }
-    }
-  }
-
-  // --- Batch Gmail search: 2 searches total, matched locally ---
-  let _proposalThreads = [];
-  let _lizGinoThreads  = [];
-  try { _proposalThreads = GmailApp.search('subject:"Proposal Review:"', 0, 50); } catch (_) {}
-  try { _lizGinoThreads  = GmailApp.search('(from:liz@walkerawning.com OR to:liz@walkerawning.com) (from:gino@walkerawning.com OR to:gino@walkerawning.com)', 0, 50); } catch (_) {}
-
-  const v2_getEmailUrl_ = (displayName, rawName) => {
-    const dnL = displayName.toLowerCase();
-    const rnL = (rawName || '').toLowerCase();
-    for (let t = 0; t < _proposalThreads.length; t++) {
-      const subj = _proposalThreads[t].getFirstMessageSubject().toLowerCase();
-      if (subj.includes(dnL) || (rnL && subj.includes(rnL))) return 'https://mail.google.com/mail/u/0/#all/' + _proposalThreads[t].getId();
-    }
-    for (let t = 0; t < _lizGinoThreads.length; t++) {
-      const subj = _lizGinoThreads[t].getFirstMessageSubject().toLowerCase();
-      if (subj.includes(dnL) || (rnL && subj.includes(rnL))) return 'https://mail.google.com/mail/u/0/#all/' + _lizGinoThreads[t].getId();
-    }
-    return 'https://mail.google.com/mail/u/0/#search/' + encodeURIComponent(displayName);
-  };
-  for (let r = 0; r < plotRows.length; r++)     plotRows[r].emailThreadUrl     = v2_getEmailUrl_(plotRows[r].name,     plotRows[r].rawName);
-  for (let r = 0; r < engRows.length; r++)       engRows[r].emailThreadUrl       = v2_getEmailUrl_(engRows[r].name,       engRows[r].rawName);
-  for (let r = 0; r < scheduledRows.length; r++) scheduledRows[r].emailThreadUrl = v2_getEmailUrl_(scheduledRows[r].name, scheduledRows[r].rawName);
-
-  // Scheduled rows lat/lng handled in batch fetch below
-
-  // --- Single unified calendar scan — 5-month window, pre-built lookup map ---
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const futureDate = new Date(today);
-    futureDate.setMonth(futureDate.getMonth() + 5); // 5 months is plenty for scheduling
-
-    const calClean_ = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-
-    // Pre-build lookup maps: cleaned title -> { event, isFrame }
-    // One pass through all calendars, one getEvents() call per calendar
-    const allEventMap   = [];  // { cleanTitle, event }
-    const frameEventMap = [];  // { cleanTitle, event }
-
-    const allCals = CalendarApp.getAllCalendars();
-    for (let c = 0; c < allCals.length; c++) {
-      try {
-        const isFrame = allCals[c].getName().toLowerCase().includes('frame building');
-        const evs = allCals[c].getEvents(today, futureDate);
-        for (let e = 0; e < evs.length; e++) {
-          if (!evs[e].isAllDayEvent()) continue;
-          const cleanTitle = calClean_(evs[e].getTitle());
-          const entry = { cleanTitle: cleanTitle, event: evs[e] };
-          allEventMap.push(entry);
-          if (isFrame) frameEventMap.push(entry);
-        }
-      } catch (_) {}
-    }
-
-    // Match scheduled rows
-    for (let i = 0; i < scheduledRows.length; i++) {
-      const clean = calClean_(scheduledRows[i].name);
-      const match = allEventMap.find(en => en.cleanTitle.includes(clean));
-      if (match) {
-        scheduledRows[i].scheduledDate    = Utilities.formatDate(match.event.getStartTime(), Session.getScriptTimeZone(), 'MM/dd');
-        scheduledRows[i].scheduledDateRaw = match.event.getStartTime();
-      }
-    }
-    // Match schedule instal plot rows
-    for (let i = 0; i < plotRows.length; i++) {
-      if (plotRows[i].stage !== 'schedule instal') continue;
-      const clean = calClean_(plotRows[i].name);
-      const match = allEventMap.find(en => en.cleanTitle.includes(clean));
-      if (match) {
-        plotRows[i].scheduledDate    = Utilities.formatDate(match.event.getStartTime(), Session.getScriptTimeZone(), 'MM/dd');
-        plotRows[i].scheduledDateRaw = match.event.getStartTime();
-      }
-    }
-    // Match eng rows against frame building calendar only
-    for (let i = 0; i < engRows.length; i++) {
-      const clean = calClean_(engRows[i].name);
-      const match = frameEventMap.find(en => en.cleanTitle.includes(clean));
-      if (match) {
-        engRows[i].frameDate    = Utilities.formatDate(match.event.getStartTime(), Session.getScriptTimeZone(), 'MM/dd');
-        engRows[i].frameDateRaw = match.event.getStartTime();
-      }
-    }
-  } catch (calErr) {
-    console.error('Calendar lookup failed: ' + calErr.message);
-  }
-
-  // --- Keep only scheduled rows with a confirmed calendar match ---
-  scheduledRows = scheduledRows.filter(r => r.scheduledDateRaw);
-
-  // --- Batch fetch all Directions at once: plotRows + engRows + scheduledRows ---
-  const allDirRows = [
-    ...plotRows.map(r => ({ row: r, wantDistDur: true })),
-    ...engRows.map(r => ({ row: r, wantDistDur: true })),
-    ...scheduledRows.map(r => ({ row: r, wantDistDur: false }))
-  ];
-  if (allDirRows.length > 0) {
-    const dirRequests = allDirRows.map(item => ({
-      url: 'https://maps.googleapis.com/maps/api/directions/json?' +
-        'origin=' + encodeURIComponent(SHOP_ADDRESS) +
-        '&destination=' + encodeURIComponent(item.row.address) +
-        '&key=' + apiKey,
-      muteHttpExceptions: true
-    }));
-    const dirResponses = fetchAllThrottled_(dirRequests, 5, 1200);
-    for (let i = 0; i < dirResponses.length; i++) {
-      try {
-        const parsed = JSON.parse(dirResponses[i].getContentText());
-        const item   = allDirRows[i];
-        if (parsed.status === 'OK' && parsed.routes && parsed.routes[0]) {
-          const leg    = parsed.routes[0].legs[0];
-          item.row.lat = leg.end_location ? leg.end_location.lat : 0;
-          item.row.lng = leg.end_location ? leg.end_location.lng : 0;
-          if (item.wantDistDur) {
-            item.row.distance = leg.distance ? leg.distance.text : null;
-            item.row.duration = leg.duration ? leg.duration.text : null;
-          }
-        } else {
-          item.row.lat = 0;
-          item.row.lng = 0;
-        }
-      } catch (e) {
-        console.error('Directions parse failed: ' + e.message);
-        allDirRows[i].row.lat = 0;
-        allDirRows[i].row.lng = 0;
-      }
-    }
-  }
-
-  // --- Final sorts (after lat/lng populated) ---
-  plotRows.sort((a, b) => {
-    if (!a.leadStartRaw && !b.leadStartRaw) return 0;
-    if (!a.leadStartRaw) return 1;
-    if (!b.leadStartRaw) return -1;
-    return a.leadStartRaw - b.leadStartRaw;
-  });
-  engRows.sort((a, b) => {
-    if (!a.depositRaw && !b.depositRaw) return 0;
-    if (!a.depositRaw) return 1;
-    if (!b.depositRaw) return -1;
-    return a.depositRaw - b.depositRaw;
-  });
-  scheduledRows.sort((a, b) => {
-    if (!a.scheduledDateRaw && !b.scheduledDateRaw) return 0;
-    if (!a.scheduledDateRaw) return 1;
-    if (!b.scheduledDateRaw) return -1;
-    return a.scheduledDateRaw - b.scheduledDateRaw;
-  });
-
-  // --- Build tentativeRows: schedule instal plot rows with a calendar match ---
-  const tentativeRows = plotRows.filter(r => r.stage === 'schedule instal' && r.scheduledDateRaw);
-
-  // --- Build frameRows from eng rows with a Frame Building calendar match ---
-  const frameRows = engRows
-    .filter(r => r.frameDateRaw)
-    .sort((a, b) => a.frameDateRaw - b.frameDateRaw);
-
-  // --- Build satellite map markers (no center/zoom = API auto-fits) ---
-  const LABELS     = 'ABCDEFGHIJKLMNOPQRST';
-  let markersParam = '';
-
-  for (let i = 0; i < plotRows.length; i++) {
-    const label = LABELS[i];
-    const loc   = plotRows[i].lat ? `${plotRows[i].lat},${plotRows[i].lng}` : encodeURIComponent(plotRows[i].address);
-    markersParam += `&markers=size:mid%7Ccolor:blue%7Clabel:${label}%7C${loc}`;
-  }
-  for (let i = 0; i < engRows.length; i++) {
-    const label = LABELS[plotRows.length + i];
-    const loc   = engRows[i].lat ? `${engRows[i].lat},${engRows[i].lng}` : encodeURIComponent(engRows[i].address);
-    markersParam += `&markers=size:mid%7Ccolor:red%7Clabel:${label}%7C${loc}`;
-  }
-  for (let i = 0; i < scheduledRows.length; i++) {
-    const label = LABELS[plotRows.length + engRows.length + i];
-    const loc   = scheduledRows[i].lat ? `${scheduledRows[i].lat},${scheduledRows[i].lng}` : encodeURIComponent(scheduledRows[i].address);
-    markersParam += `&markers=size:mid%7Ccolor:green%7Clabel:${label}%7C${loc}`;
-  }
-
-  const mapUrl =
-    'https://maps.googleapis.com/maps/api/staticmap?' +
-    'size=640x640' +
-    '&scale=2' +
-    '&maptype=satellite' +
-    markersParam +
-    '&key=' + apiKey;
-
-  // --- Parallel fetch: satellite map + route directions together ---
-  let mapBlob;
-  let routeMapBlob = null;
-
-  // Build route markers string
-  let routeMarkersParam = '';
-  for (let i = 0; i < plotRows.length; i++) {
-    const label = LABELS[i];
-    const loc   = plotRows[i].lat ? `${plotRows[i].lat},${plotRows[i].lng}` : encodeURIComponent(plotRows[i].address);
-    routeMarkersParam += `&markers=size:mid%7Ccolor:blue%7Clabel:${label}%7C${loc}`;
-  }
-
-  // Build route directions URL (needed for polyline)
-  let routeDirUrl = null;
-  if (plotRows.length >= 2) {
-    const origin      = plotRows[0].lat ? `${plotRows[0].lat},${plotRows[0].lng}` : encodeURIComponent(plotRows[0].address);
-    const destination = plotRows[plotRows.length - 1].lat ? `${plotRows[plotRows.length - 1].lat},${plotRows[plotRows.length - 1].lng}` : encodeURIComponent(plotRows[plotRows.length - 1].address);
-    const waypointList = plotRows.slice(1, -1).map(r => r.lat ? `${r.lat},${r.lng}` : encodeURIComponent(r.address)).join('|');
-    routeDirUrl = 'https://maps.googleapis.com/maps/api/directions/json?' +
-      'origin=' + origin +
-      '&destination=' + destination +
-      (waypointList ? '&waypoints=' + encodeURIComponent(waypointList) : '') +
-      '&key=' + apiKey;
-  }
-
-  // Fire satellite map + route directions in parallel
-  try {
-    const parallelRequests = [{ url: mapUrl, muteHttpExceptions: true }];
-    if (routeDirUrl) parallelRequests.push({ url: routeDirUrl, muteHttpExceptions: true });
-
-    const parallelResponses = fetchAllThrottled_(parallelRequests, 2, 1200);
-
-    // Satellite map
-    const mapResp = parallelResponses[0];
-    if (mapResp.getResponseCode() !== 200) {
-      SpreadsheetApp.getUi().alert('Maps API error (' + mapResp.getResponseCode() + '): ' + mapResp.getContentText().substring(0, 300));
-      return;
-    }
-    mapBlob = mapResp.getBlob().setName('schedule_map.png');
-
-    // Route polyline -> build route map URL -> fetch in a second parallel batch
-    if (routeDirUrl && parallelResponses[1]) {
-      try {
-        const routeData = JSON.parse(parallelResponses[1].getContentText());
-        let routeMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?size=640x400&scale=2&maptype=roadmap' + routeMarkersParam;
-        if (routeData.status === 'OK' && routeData.routes && routeData.routes[0]) {
-          routeMapUrl += '&path=color:0x1a73e8|weight:5|enc:' + routeData.routes[0].overview_polyline.points;
-        }
-        routeMapUrl += '&key=' + apiKey;
-        // fetchAll with single item — keeps pattern consistent and non-blocking relative to any future additions
-        Utilities.sleep(1200);
-        const routeImgResps = UrlFetchApp.fetchAll([{ url: routeMapUrl, muteHttpExceptions: true }]);
-        if (routeImgResps[0].getResponseCode() === 200) {
-          routeMapBlob = routeImgResps[0].getBlob().setName('route_map.png');
-        }
-      } catch (e) {
-        console.error('Route map fetch failed: ' + e.message);
-      }
-    } else if (plotRows.length === 1) {
-      try {
-        const routeMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?size=640x400&scale=2&maptype=roadmap' + routeMarkersParam + '&key=' + apiKey;
-        Utilities.sleep(1200);
-        const routeImgResps = UrlFetchApp.fetchAll([{ url: routeMapUrl, muteHttpExceptions: true }]);
-        if (routeImgResps[0].getResponseCode() === 200) {
-          routeMapBlob = routeImgResps[0].getBlob().setName('route_map.png');
-        }
-      } catch (e) {
-        console.error('Single-stop route map failed: ' + e.message);
-      }
-    }
-  } catch (e) {
-    SpreadsheetApp.getUi().alert('Failed to fetch map image: ' + e.message);
-    return;
-  }
-
-  // --- Calculate tomorrow's date for Schedule button label ---
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tPad = n => String(n).padStart(2, '0');
-  const tomorrowLabel = tPad(tomorrow.getMonth() + 1) + '/' + tPad(tomorrow.getDate());
-  const tomorrowCalDate = tomorrow.getFullYear() +
-    tPad(tomorrow.getMonth() + 1) +
-    tPad(tomorrow.getDate());
-
-  // --- Build schedule legend rows ---
-  const typeShort_ = (s) => (s && s.match(/^\S+/) ? s.match(/^\S+/)[0] : '—');
-  const schedLegendRows = plotRows.map((item, i) => {
-    if (item.stage === 'schedule instal' && item.scheduledDateRaw) return '';
-    const label      = LABELS[i];
-    const labelColor = item.isFix ? '#0b2158' : '#2471a3';
-    const linkColor  = item.isFix ? '#0b2158' : '#1a73e8';
-    const nameDisplay = item.name +
-      (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
-      (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '') +
-      (item.jobType ? ` <span style="color:#888;font-size:7pt;">${typeShort_(item.jobType)}</span>` : '');
-    const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:${linkColor};text-decoration:none;">${nameDisplay}</a>`;
-    const calDescription = encodeURIComponent(
-      item.name + (item.phone ? ' - ' + item.phone : '') + '\n' +
-      (item.email ? item.email : '') + '\n\n' +
-      (item.jobType || '—') + '\n' +
-      (item.distance || '—') + ' - ' + (item.duration || '—') +
-      (item.folderUrl ? '\n\n' + item.folderUrl : '')
-    );
-    const calEventTitle = item.name + (item.jobVal ? ' ' + item.jobVal : '');
-    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE` +
-      `&text=${encodeURIComponent(calEventTitle)}` +
-      `&dates=${tomorrowCalDate}/${tomorrowCalDate}` +
-      `&details=${calDescription}` +
-      `&location=${encodeURIComponent(item.address)}` +
-      `&ctz=America%2FNew_York`;
-    const fmtLeadEndOnly = (v) => {
-      if (!v) return '+ Schedule';
-      const d = v instanceof Date ? v : new Date(v);
-      if (isNaN(d)) return '+ Schedule';
-      return String(d.getMonth() + 1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0');
-    };
-    const deadlineLabel = fmtLeadEndOnly(item.leadEndRaw);
-    const addToSchedCell = `<a href="${calUrl}" target="_blank" style="display:inline-block;padding:3px 8px;background:${labelColor};color:#fff;border-radius:4px;text-decoration:none;font-size:8pt;white-space:nowrap;">${deadlineLabel}</a>`;
-    return `<tr>
-       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:${labelColor};text-align:right;">${label}</td>
-       <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
-       <td style="padding:5px 8px;text-align:left;">${addToSchedCell}</td>
-     </tr>`;
-  }).join('');
-
-  // --- Build planning & engineering legend rows ---
-  const engLegendRows = engRows.map((item, i) => {
-    const label    = LABELS[plotRows.length + i];
-    const nameDisplay = item.name +
-      (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
-      (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '') +
-      (item.jobType ? ` <span style="color:#888;font-size:7pt;">${typeShort_(item.jobType)}</span>` : '');
-    const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:#c0392b;text-decoration:none;">${nameDisplay}</a>`;
-    const depositCell = `<span style="color:#c0392b;font-size:8pt;">${item.depositDate || '—'}</span>`;
-    return `<tr>
-       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#c0392b;text-align:left;">${label}</td>
-       <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
-       <td style="padding:5px 8px;text-align:left;">${depositCell}</td>
-     </tr>`;
-  }).join('');
-
-  // --- Build scheduled legend rows (green) ---
-  const scheduledLegendRows = scheduledRows.map((item, i) => {
-    const label    = LABELS[plotRows.length + engRows.length + i];
-    const nameDisplay = item.name +
-      (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
-      (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '');
-    const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:#1e8449;text-decoration:none;">${nameDisplay}</a>`;
-    const calSearchUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(item.name)}`;
-    const dateCell = item.scheduledDate
-      ? `<a href="${calSearchUrl}" target="_blank" style="color:#1e8449;font-size:8pt;text-decoration:none;">${item.scheduledDate}</a>`
-      : `<span style="color:#1e8449;font-size:8pt;">—</span>`;
-    return `<tr>
-       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#1e8449;text-align:left;">${label}</td>
-       <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
-       <td style="padding:5px 8px;text-align:left;">${dateCell}</td>
-     </tr>`;
-  }).join('');
-
-  // --- Build frame building legend rows (purple) ---
-  const frameLegendRows = frameRows.map((item) => {
-    const label       = LABELS[plotRows.length + engRows.indexOf(item)];
-    const nameDisplay = item.name +
-      (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
-      (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '');
-    const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:#7d3c98;text-decoration:none;">${nameDisplay}</a>`;
-    const calSearchUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(item.name)}`;
-    const dateCell  = `<a href="${calSearchUrl}" target="_blank" style="color:#7d3c98;font-size:8pt;text-decoration:none;">${item.frameDate}</a>`;
-    return `<tr>
-       <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#7d3c98;text-align:left;">${label}</td>
-       <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
-       <td style="padding:5px 8px;text-align:left;">${dateCell}</td>
-     </tr>`;
-  }).join('');
-
-  const allAddresses = plotRows
-    .map(item => item.lat ? `${item.lat},${item.lng}` : encodeURIComponent(item.address))
-    .join('/');
-
-  const htmlBody =
-    `<div style="font-family:Arial,sans-serif;">` +
-    `<p style="font-size:16pt;font-weight:bold;">Scheduling items — ${plotRows.length + engRows.length + scheduledRows.length} Location(s)</p>` +
-    `<img src="cid:schedulemap" alt="Satellite Scheduling items" style="max-width:640px;border:2px solid #333;border-radius:6px;" /><br><br>` +
-    `<table style="border-collapse:collapse;"><tr valign="top">` +
-    // Left table - Schedule (red)
-    `<td style="padding-right:20px;">` +
-    `<p style="font-size:13pt;font-weight:bold;color:#2471a3;margin:0 0 6px 0;text-align:center;">Need to Schedule</p>` +
-    `<table style="border-collapse:collapse;">` +
-    `<tr style="font-size:11pt;color:#888;border-bottom:1px solid #ddd;">` +
-    `<th style="padding:4px 12px 4px 4px;text-align:left;"></th>` +
-    `<th style="padding:4px 12px 4px 4px;text-align:right;">Email Chain</th>` +
-    `<th style="padding:4px 8px;text-align:left;">Deadline</th>` +
-    `</tr>` +
-    schedLegendRows +
-    `</table>` +
-    `<div style="margin-top:12px;text-align:center;"><a href="https://www.google.com/maps/dir/${encodeURIComponent(SHOP_ADDRESS)}/${allAddresses}" target="_blank" style="display:inline-block;padding:6px 14px;background:#1a73e8;color:#fff;border-radius:4px;text-decoration:none;font-size:11pt;font-weight:bold;">Full Route in Google Maps Link</a></div>` +
-    `</td>` +
-    // Divider
-    `<td style="border-left:2px solid #ddd;padding:0;"></td>` +
-    // Right table - Planning & Engineering (blue)
-    `<td style="padding-left:20px;padding-top:0px;vertical-align:top;">` +
-    `<p style="font-size:13pt;font-weight:bold;color:#c0392b;margin:0 0 6px 0;text-align:center;">In Planning & Engineering</p>` +
-    `<table style="border-collapse:collapse;">` +
-    `<tr style="font-size:11pt;color:#888;border-bottom:1px solid #ddd;">` +
-    `<th style="padding:4px 12px 4px 4px;text-align:right;"></th>` +
-    `<th style="padding:4px 12px 4px 4px;text-align:right;">Email Chain</th>` +
-    `<th style="padding:4px 8px;text-align:left;">Deposited</th>` +
-    `</tr>` +
-    engLegendRows +
-    `</table></td>` +
-    `</tr></table>` +
-    (scheduledRows.length > 0 || tentativeRows.length > 0 || frameRows.length > 0 ?
-      `<br><div style="display:inline-block;">` +
-      `<p style="font-size:13pt;font-weight:bold;color:#1e8449;margin:16px 0 6px 0;text-align:center;">Already on the Schedule</p>` +
-      `<table style="border-collapse:collapse;">` +
-      `<tr style="font-size:11pt;color:#888;border-bottom:1px solid #ddd;">` +
-      `<th style="padding:4px 12px 4px 4px;text-align:right;"></th>` +
-      `<th style="padding:4px 12px 4px 4px;text-align:right;">Email Chain</th>` +
-      `<th style="padding:4px 8px;text-align:left;">Scheduled</th>` +
-      `</tr>` +
-      scheduledLegendRows +
-      tentativeRows.map((item) => {
-        const label = LABELS[plotRows.indexOf(item)];
-        const nameDisplay = item.name +
-          (item.jobVal ? ` <span style="color:#888;">${item.jobVal}</span>` : '') +
-          (item.city ? ` <span style="color:#888;font-size:7pt;">(${item.city})</span>` : '');
-        const emailChainCell = `<a href="${item.emailThreadUrl}" target="_blank" style="color:#2471a3;text-decoration:none;">${nameDisplay}</a>`;
-        const calSearchUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(item.name)}`;
-        const dateCell = `<a href="${calSearchUrl}" target="_blank" style="color:#2471a3;font-size:8pt;text-decoration:none;">${item.scheduledDate}</a> <span style="color:#2471a3;font-style:italic;font-size:8pt;">Tentative</span>`;
-        return `<tr>
-           <td style="padding:5px 12px 5px 4px;font-weight:bold;font-size:15pt;color:#2471a3;text-align:left;">${label}</td>
-           <td style="padding:5px 12px 5px 4px;font-size:11pt;text-align:right;">${emailChainCell}</td>
-           <td style="padding:5px 8px;text-align:left;">${dateCell}</td>
-         </tr>`;
-      }).join('') +
-      frameLegendRows +
-      `</table>` +
-      (scheduledRows.length > 0 ?
-        `<div style="margin-top:12px;"><a href="https://www.google.com/maps/dir/${encodeURIComponent(SHOP_ADDRESS)}/${scheduledRows.map(r => r.lat ? `${r.lat},${r.lng}` : encodeURIComponent(r.address)).join('/')}" target="_blank" style="display:inline-block;padding:6px 14px;background:#1a73e8;color:#fff;border-radius:4px;text-decoration:none;font-size:11pt;font-weight:bold;">Full Route in Google Maps Link</a></div>`
-      : '') +
-      `</div><br>`
-    : '') +
-    (routeMapBlob ? `<br><a href="https://www.google.com/maps/dir/${encodeURIComponent(SHOP_ADDRESS)}/${allAddresses}" target="_blank"><img src="cid:routemap" alt="Full Route" style="max-width:640px;border:1px solid #ccc;border-radius:6px;" /></a>` : '') +
-    `</div>`;
-
-  const schedPlain = plotRows.map((item, i) =>
-    `${LABELS[i]} — ${item.name}  |  ${item.jobType || '—'}  |  ${item.city || item.address}  |  ${item.distance || '—'}`
-  ).join('\n');
-  const engPlain = engRows.map((item, i) =>
-    `${LABELS[plotRows.length + i]} — ${item.name}  |  ${item.jobType || '—'}`
-  ).join('\n');
-  const scheduledPlain = scheduledRows.map((item, i) =>
-    `${LABELS[plotRows.length + engRows.length + i]} — ${item.name}  |  ${item.scheduledDate || '—'}`
-  ).join('\n');
-  const plainBody =
-    `Scheduling items — ${plotRows.length + engRows.length + scheduledRows.length} Location(s)\n\n` +
-    (plotRows.length      ? `Schedule:\n${schedPlain}\n\n` : '') +
-    (engRows.length       ? `Planning & Engineering:\n${engPlain}\n\n` : '') +
-    (scheduledRows.length ? `Scheduled:\n${scheduledPlain}` : '');
-
-  GmailApp.createDraft(
-    'Liz@WalkerAwning.com',
-    `Scheduling items — ${plotRows.length + engRows.length + scheduledRows.length} Location(s)`,
-    plainBody,
-    { htmlBody, inlineImages: Object.assign({ schedulemap: mapBlob }, routeMapBlob ? { routemap: routeMapBlob } : {}) }
-  );
-
-  SpreadsheetApp.getActive().toast(`Draft created — ${plotRows.length} schedule + ${engRows.length} planning + ${scheduledRows.length} scheduled location(s).`, 'Plot Map', 5);
-}
-function fetchAllThrottled_(requests, batchSize, sleepMs) {
-  const out = [];
-
-  for (let i = 0; i < requests.length; i++) {
-    const res = UrlFetchApp.fetch(requests[i].url, {
-      muteHttpExceptions: requests[i].muteHttpExceptions === true
-    });
-
-    out.push(res);
-
-    if (i < requests.length - 1) {
-      Utilities.sleep(sleepMs || 1500);
-    }
-  }
-
-  return out;
-}
-/**
  * Create a design review reply draft on the existing Proposal Review thread.
  * Finds the Gmail thread by subject "Proposal Review: [F]", exports the first
  * slide of "Shop Drawing - [F]" as a PNG, and creates a reply draft with the
@@ -2684,7 +1853,8 @@ function v2_createDesignReviewDraft_(sh, row) {
     // Search using first word of display name to avoid Gmail misreading hyphens,
     // then match locally against full display name (case-insensitive, contains check)
     const firstWord = displayName.split(/\s+/)[0];
-    const searchQuery = 'subject:"Proposal Review: ' + firstWord + '" newer_than:' + DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS + 'd';
+        // Broad match: finds both old "Proposal Review: X" and new "Proposal Review - X"
+    const searchQuery = 'subject:(Proposal Review) subject:(' + firstWord + ') newer_than:' + DRAFTS_V2.EMAIL_SEARCH.SEARCH_DAYS + 'd';
     const candidates = GmailApp.search(searchQuery, 0, 20);
     const displayNameLower = displayName.toLowerCase();
     const thread = candidates.find(t =>
@@ -2763,6 +1933,7 @@ function v2_createDesignReviewDraft_(sh, row) {
       .build();
     logCell.setRichTextValue(richText);
 
+    try { al_logActivity_(sh.getName(), 'Automation', sh.getRange(row, 5).getDisplayValue(), displayName, 'Draft', 'Design Review', ''); } catch (_) {}
     return { toast: slideBlob ? 'Design Review draft created & linked in B' : 'Design Review draft created (slide image unavailable) & linked in B' };
 
   } catch (err) {
@@ -2796,7 +1967,7 @@ function d_createSendSamplesDraft_(sh, row) {
     }
 
     var to      = 'rparatore@trivantage.com, customerservice@trivantage.com, lhughes@trivantage.com, tiperry@trivantage.com';
-    var subject = 'PO: Samples for ' + displayName;
+    var subject = 'PO: Samples - ' + displayName;
 
     // Plain-text fallback
     var plain = [
@@ -2843,6 +2014,7 @@ function d_createSendSamplesDraft_(sh, row) {
 
     GmailApp.createDraft(to, subject, plain, { htmlBody: html });
 
+    try { al_logActivity_(sh.getName(), 'Automation', customerName, displayName, 'Draft', 'Samples PO', ''); } catch (_) {}
     return { toast: 'Samples PO draft created for ' + displayName };
   } catch (err) {
     console.error('d_createSendSamplesDraft_ error:', err);
@@ -2870,7 +2042,7 @@ function d_draftWaitingOnDeposit_(sh, row) {
       return { toast: msg };
     }
 
-    var subject = 'Invoice — Walker Awning (50% Deposit)';
+    var subject = 'Invoice - Walker Awning - 50% Deposit - ' + displayName;
 
     // Plain-text fallback
     var plain = [
@@ -2920,6 +2092,7 @@ function d_draftWaitingOnDeposit_(sh, row) {
       .build();
     sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B)).setRichTextValue(richText);
 
+    try { al_logActivity_(sh.getName(), 'Automation', customerName, displayName, 'Draft', 'Deposit invoice', ''); } catch (_) {}
     return { toast: invoiceUrl ? 'Deposit invoice draft created & linked in column B' : 'Deposit draft created (no P link) & linked in column B' };
 
   } catch (err) {
@@ -2950,7 +2123,7 @@ function d_createReqGraphicsDraft_(sh, row) {
       return { toast: 'Missing Quote Display Name (col F). Draft not created.' };
     }
 
-    var subject = 'Quote solicitation for ' + displayName;
+    var subject = 'Quote solicitation - ' + displayName;
     var dimensionsText = (length || '?') + "' x " + (width || '?') + "'";
 
     // Plain-text fallback (no greeting, no bold/center — those are HTML-only)
@@ -3038,6 +2211,7 @@ function d_createReqGraphicsDraft_(sh, row) {
       .build();
     sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B)).setRichTextValue(richText);
 
+        try { al_logActivity_(sh.getName(), 'Automation', sh.getRange(row, 5).getDisplayValue(), displayName, 'Draft', 'Quote solicitation', ''); } catch (_) {}
     return { toast: 'Req Graphics draft created (' + Object.keys(inlineImages).length + ' photo(s) embedded) & linked in column B' };
 
   } catch (err) {
@@ -3046,159 +2220,3 @@ function d_createReqGraphicsDraft_(sh, row) {
     return { toast: 'Error: ' + d_shortErr_(err) };
   }
 }
-// version# [07/29-11:45AM EST] by Claude Opus 4.1
-/** Creates a price-update reply draft on the existing "Proposal Review: [F]" thread when Column D = "Price update".
- *  Rates pulled from Re-cover!U3:V30 (U = fabric name, V = rate). Trailing " x" is a manual-yardage placeholder.
- *  AB in (Vinyl, Weblon, Ferrari, Vanguard) -> Vinyl group. AB contains "Sunbrella" -> Sunbrella group.
- *  If no thread is found, creates a fresh draft to Liz with the qDraft subject + " (Price update)". Links draft in column B. */
-function d_createPriceUpdateDraft_(sh, row) {
-  try {
-    var logCell = sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B));
-
-    var displayName = String(sh.getRange(row, d_colLetterToIndex_('F')).getValue() || '').trim();
-    var jobType     = String(sh.getRange(row, d_colLetterToIndex_('R')).getValue() || '').trim();
-    var fabric      = String(sh.getRange(row, d_colLetterToIndex_('AB')).getValue() || '').trim();
-
-    if (!displayName) {
-      logCell.setValue('No display name in column F');
-      return { toast: 'No display name in column F' };
-    }
-
-    // --- Determine fabric group from AB ---
-    var fabricLower = fabric.toLowerCase();
-    var VINYL_GROUP     = ['Vinyl', 'Weblon', 'Ferrari', 'Vanguard'];
-    var SUNBRELLA_GROUP = ['Sunbrella', 'Sunbrella Mayfield', 'Sunbrella FR', 'Sunbrella FlameCoat', 'Sunbrella Seamark'];
-    var group = null;
-    if (VINYL_GROUP.map(function(n){ return n.toLowerCase(); }).indexOf(fabricLower) !== -1) {
-      group = VINYL_GROUP;
-    } else if (fabricLower.indexOf('sunbrella') !== -1) {
-      group = SUNBRELLA_GROUP;
-    }
-    if (!group) {
-      var gMsg = 'Fabric "' + fabric + '" in AB does not match Vinyl or Sunbrella groups - no draft created';
-      logCell.setValue(gMsg);
-      return { toast: gMsg };
-    }
-
-    // --- Build rate map from Re-cover!U3:V30 (replicates =IFERROR(VLOOKUP(fabric, U3:V30, 2, FALSE), 0)) ---
-    var ss = sh.getParent();
-    var recoverSheet = ss.getSheetByName(DRAFTS_V2.SHEETS.RECOVER);
-    if (!recoverSheet) {
-      logCell.setValue('Re-cover sheet not found');
-      return { toast: 'Re-cover sheet not found' };
-    }
-    var rateVals = recoverSheet.getRange('U3:V30').getValues();
-    var rateMap = {};
-    for (var i = 0; i < rateVals.length; i++) {
-      var rName = String(rateVals[i][0] || '').trim().toLowerCase();
-      if (rName) rateMap[rName] = Number(rateVals[i][1]) || 0;
-    }
-    var lookupRate = function(name) {
-      var v = rateMap[String(name).toLowerCase()];
-      return (v == null) ? 0 : v;
-    };
-
-    // --- Build body lines (dotted, monospace-aligned) ---
-    var LABEL_WIDTH = 34;
-    var makeLine = function(name) {
-      var dots = '';
-      var need = LABEL_WIDTH - name.length;
-      for (var d = 0; d < need; d++) dots += '.';
-      return name + dots + '$ ' + lookupRate(name) + ' x';
-    };
-
-    var bodyLines = [];
-    for (var g = 0; g < group.length; g++) bodyLines.push(makeLine(group[g]));
-
-    var plainBody = 'Please confirm the updated pricing below:\n' + bodyLines.join('\n');
-
-    var htmlLines = bodyLines.map(function(l){ return d_htmlEscape_(l); }).join('\n');
-    var htmlBody =
-      '<div style="font-family:Arial,sans-serif;color:#333;">' +
-        '<p>Please confirm the updated pricing below:</p>' +
-        '<pre style="font-family:Courier New,Courier,monospace;font-size:11pt;margin:0;">' + htmlLines + '</pre>' +
-      '</div>';
-
-    // version# [07/29-02:45PM EST] by Claude Opus 4.1
-    // --- Find existing "Proposal Review" thread ---
-    // 1) Exact quoted subject "Proposal Review: [F] - [R]" (no date limit, finds old threads)
-    // 2) Broad "Proposal Review:" search matched locally (most recent 50)
-    var displayNameLower = displayName.toLowerCase();
-    var candidates = [];
-    var thread = null;
-
-    var searchQueries = [
-      'subject:(Proposal Review) subject:("' + displayName + '") subject:("' + jobType + '")',
-      'subject:(Proposal Review) subject:("' + displayName + '")'
-    ];
-
-    for (var sq = 0; sq < searchQueries.length && !thread; sq++) {
-      try {
-        candidates = GmailApp.search(searchQueries[sq], 0, 50);
-      } catch (searchErr) {
-        console.error('Thread search failed (' + searchQueries[sq] + '):', searchErr);
-        candidates = [];
-      }
-      for (var t = 0; t < candidates.length; t++) {
-        if (candidates[t].getFirstMessageSubject().toLowerCase().indexOf(displayNameLower) !== -1) {
-          thread = candidates[t];
-          break;
-        }
-      }
-    }
-
-    var draft;
-    var mode;
-    if (thread) {
-      // version# [07/29-02:30PM EST] by Claude Opus 4.1 — reply-all at end of existing thread
-      draft = d_withRetry_(function() {
-        return thread.createDraftReplyAll(plainBody, { htmlBody: htmlBody });
-      });
-      mode = 'reply';
-    } else {
-      // DIAGNOSTIC: log what the search found so we can see why no match occurred
-      var diag = 'PRICE UPDATE DIAG — searched for: "' + displayNameLower + '" | candidates found: ' + candidates.length;
-      for (var dv = 0; dv < Math.min(candidates.length, 5); dv++) {
-        diag += '\n' + (dv + 1) + ') ' + candidates[dv].getFirstMessageSubject();
-      }
-      console.log(diag);
-      logCell.setValue(diag);
-      // Fallback: fresh draft to Liz with qDraft subject + " (Price update)"
-      var prefix = (DRAFTS_V2.EMAIL.SUBJECT_PREFIX || 'Proposal Review').trim();
-      var subject = d_templateSafe_(DRAFTS_V2.EMAIL.SUBJECT_TEMPLATE, { prefix: prefix, displayName: displayName, jobType: jobType }) + ' (Price update)';
-      var to = (DRAFTS_V2.EMAIL.TO || []).filter(Boolean).join(',');
-      draft = d_withRetry_(function() {
-        return GmailApp.createDraft(to, subject, plainBody, { htmlBody: htmlBody });
-      });
-      mode = 'new';
-    }
-
-    var draftUrl = 'https://mail.google.com/mail/u/0/#drafts?compose=' +
-      encodeURIComponent(draft.getMessage().getId());
-
-    var linkText = '💲 Price Update';
-    var diagSuffix = '';
-    if (mode !== 'reply') {
-      diagSuffix = '\nDIAG: searched "' + displayNameLower + '" | ' + candidates.length + ' candidates';
-      for (var dx = 0; dx < Math.min(candidates.length, 3); dx++) {
-        diagSuffix += '\n' + (dx + 1) + ') ' + candidates[dx].getFirstMessageSubject();
-      }
-    }
-    var richText = SpreadsheetApp.newRichTextValue()
-      .setText(linkText + diagSuffix)
-      .setLinkUrl(0, linkText.length, draftUrl)
-      .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
-      .build();
-    logCell.setRichTextValue(richText);
-
-    return { toast: mode === 'reply'
-      ? 'Price update reply draft added to thread & linked in column B'
-      : 'No thread found - new price update draft created & linked in column B' };
-
-  } catch (err) {
-    console.error('d_createPriceUpdateDraft_ error:', err);
-    sh.getRange(row, d_colLetterToIndex_(DRAFTS_V2.COLS.LOG_B)).setValue('Error creating price update draft: ' + d_shortErr_(err));
-    return { toast: 'Error: ' + d_shortErr_(err) };
-  }
-}
-/** end-of-file */

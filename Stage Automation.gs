@@ -165,7 +165,7 @@ function handleEditMove_(e) {
   if ((isLeads || isFU || isAwarded) && col === S.COLS.STAGE) {
     // List of stages handled by Draft Creator - DO NOT auto-sort these
     const DRAFT_CREATOR_STAGES = [
-      'qdraft', 'liz', 'email customer', 'cust handoff', 
+      'qdraft', 'liz', 'email customer',
       'rough quote', 'customer info', 'coi req'
     ];
     const stageValueLower = String(r.getValue() || '').trim().toLowerCase();
@@ -704,8 +704,8 @@ function m_searchAndLinkSentEmail_(sheet, displayName) {
     // Construct the expected email subject
     const searchSubject = `Your awning quote from Walker Awning - ${displayName}`;
     
-    // Search in sent mail for this subject
-    const searchQuery = `in:sent subject:"${searchSubject}"`;
+    // Split terms so punctuation changes don't break the match
+    const searchQuery = `in:sent subject:(Your awning quote from Walker Awning) subject:("${displayName}")`;
     
     // Search Gmail for the most recent matching email
     const threads = GmailApp.search(searchQuery, 0, 1);
@@ -790,7 +790,7 @@ function m_linkProposalReviewEmail_(sheet, displayName) {
   const logCell = sheet.getRange(lastRow, 2); // Column B of the newly moved row
   
   try {
-    const searchQuery = `subject:"Proposal Review: ${displayName}"`;
+    const searchQuery = `subject:(Proposal Review) subject:("${displayName}")`;
     const threads = GmailApp.search(searchQuery, 0, 1);
     
     if (threads.length === 0) {
@@ -805,7 +805,7 @@ function m_linkProposalReviewEmail_(sheet, displayName) {
     
     const message = messages[messages.length - 1];
     const gmailUrl = 'https://mail.google.com/mail/u/0/#search/' + 
-      encodeURIComponent('subject:"Proposal Review: ' + displayName + '"');
+      encodeURIComponent('subject:(Proposal Review) subject:("' + displayName + '")');
     const emailDate = Utilities.formatDate(message.getDate(), Session.getScriptTimeZone(), 'yy/MM/dd');
     
     const linkText = emailDate + ' ✅';
@@ -838,7 +838,7 @@ function m_linkQuoteSentEmail_(sheet, row, displayName) {
     
     // PRIMARY SEARCH: "Your awning quote from Walker Awning - [displayName]"
     const primarySubject = `Your awning quote from Walker Awning - ${displayName}`;
-    const primaryQuery = `in:sent subject:"${primarySubject}"`;
+    const primaryQuery = `in:sent subject:(Your awning quote from Walker Awning) subject:("${displayName}")`;
     let threads = GmailApp.search(primaryQuery, 0, 1);
     let searchMethod = 'primary';
     
@@ -969,7 +969,7 @@ function m_createPrintPacket_(sheet, row) {
     logCell.setValue(`🔍 Searching for email: "${subject}"...`);
     SpreadsheetApp.flush();
     
-    const searchQuery = `subject:"${subject}"`;
+    const searchQuery = `subject:(Proposal Review) subject:("${displayName}")`;
     const threads = GmailApp.search(searchQuery, 0, 1);
     
     if (threads.length === 0) {
@@ -1248,13 +1248,13 @@ function m_createPrintPacket_(sheet, row) {
 
       // Also link the Proposal Review email thread
       try {
-        const proposalQuery = `subject:"Proposal Review: ${displayName}"`;
+        const proposalQuery = `subject:(Proposal Review) subject:("${displayName}")`;
         const proposalThreads = GmailApp.search(proposalQuery, 0, 1);
         if (proposalThreads.length > 0) {
           const proposalMessages = proposalThreads[0].getMessages();
           if (proposalMessages.length > 0) {
             const proposalMsgId = proposalMessages[proposalMessages.length - 1].getId();
-            const proposalUrl = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent('subject:"Proposal Review: ' + displayName + '"')}`;
+            const proposalUrl = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent('subject:(Proposal Review) subject:("' + displayName + '")')}`;
             const emailLinkText = `📧 Proposal Review Email: ${displayName}`;
             const emailLinkPara = body.appendParagraph(emailLinkText);
             emailLinkPara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
@@ -2085,7 +2085,7 @@ function installTriggerMove_() {
 function checkEmptyFoldersDaily_() {
   const S = MOVE_CONFIG;
   const ss = SpreadsheetApp.getActive();
-  const sheetsToCheck = [S.SHEETS.LEADS, S.SHEETS.FU, S.SHEETS.AWARDED];
+  const sheetsToCheck = [S.SHEETS.LEADS];
   
   let totalChecked = 0;
   let totalEmpty = 0;
@@ -2120,7 +2120,7 @@ function checkEmptyFoldersDaily_() {
 function checkEmptyFoldersNow_() {
   const S = MOVE_CONFIG;
   const ss = SpreadsheetApp.getActive();
-  const sheetsToCheck = [S.SHEETS.LEADS, S.SHEETS.FU, S.SHEETS.AWARDED];
+  const sheetsToCheck = [S.SHEETS.LEADS];
   
   let totalChecked = 0;
   let totalEmpty = 0;

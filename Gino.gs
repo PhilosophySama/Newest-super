@@ -15,13 +15,14 @@ const AL_CONFIG = {
   REPORT_URL: 'https://lookerstudio.google.com/reporting/c3fa4070-6ef5-410a-a670-2b35bad39253',
   LOG_FILE_NAME: "Gino's Diary",
   LOG_SHEET_NAME: 'Log',
-  HEADERS: ['Stamp', 'Day', 'Date', 'Time', 'Sheet', 'User', 'Name', 'Display Name', 'Activity', 'Purpose', 'Notes'],
+  HEADERS: ['Stamp', 'Day', 'Date', 'Time', 'Sheet', 'User', 'Name', 'Display Name', 'Activity', 'Purpose', 'Detail', 'Source ID', 'Notes'],
+  DETAIL_COL: 11,  // K
+  SOURCE_COL: 12,  // L (hidden) - dedupe key for Email/Appointment rows only
+  NOTES_COL: 13,   // M
   // Standard subjects: matched (lowercase, partial) against the real subject.
   // First match wins; no match falls back to the actual subject line.
   SUBJECTS: [
     // Wrappers first — these contain other subjects inside them.
-    { match: '(price update)',                       label: 'Price update' },
-    { match: 'following up:',                        label: 'Follow-up' },
     // Base subjects
     { match: 'your awning quote from walker awning', label: 'Awning quote' },
     { match: 'proposal review',                      label: 'Proposal Review' },
@@ -30,9 +31,9 @@ const AL_CONFIG = {
     { match: 'quick quote for your awning',          label: 'Rough quote' },
     { match: 'info request for awning',              label: 'Info request' },
     { match: 'coi request',                          label: 'COI request' },
-    { match: 'po: samples for',                      label: 'Samples PO' },
-    { match: 'walker awning (50% deposit)',          label: 'Deposit invoice' },
-    { match: 'quote solicitation for',               label: 'Quote solicitation' },
+    { match: 'po: samples -',                        label: 'Samples PO' },
+    { match: 'walker awning - 50% deposit',          label: 'Deposit invoice' },
+    { match: 'quote solicitation -',                 label: 'Quote solicitation' },
     { match: 'scheduling items',                     label: 'Scheduling' },
     { match: 'awning follow-up',                     label: 'Follow-up' },
     { match: 'employee weekly schedule',             label: 'Weekly schedule' }
@@ -40,9 +41,9 @@ const AL_CONFIG = {
   // Vendor/internal emails: matched by SUBJECT PREFIX, not recipient.
   // 'strip' is removed from the front of the subject to recover the display name.
   VENDOR_SUBJECTS: [
-    { match: 'po: samples for ',        label: 'Samples PO',        strip: 'po: samples for ' },
-    { match: 'quote solicitation for ', label: 'Quote solicitation', strip: 'quote solicitation for ' },
-    { match: 'coi request: ',           label: 'COI request',       strip: 'coi request: ' },
+    { match: 'po: samples - ',        label: 'Samples PO',         strip: 'po: samples - ' },
+    { match: 'quote solicitation - ', label: 'Quote solicitation',  strip: 'quote solicitation - ' },
+    { match: 'coi request - ',          label: 'COI request',       strip: 'coi request - ' },
     { match: 'proposal review: ',       label: 'Proposal Review',   strip: 'proposal review: ' }
   ],
   SHEETS: ['Leads', 'F/U', 'Awarded', 'Heaven', 'Purgatory', 'Re-cover'],
@@ -75,6 +76,8 @@ function al_setupLog() {
     sh.getRange(1, 1, 1, AL_CONFIG.HEADERS.length).setValues([AL_CONFIG.HEADERS]);
     sh.setFrozenRows(1);
   }
+  // Source ID column is machinery, not reading material.
+  try { sh.hideColumns(AL_CONFIG.SOURCE_COL); } catch (_) {}
   SpreadsheetApp.getUi().alert('Activity Log ready:\n' + ss.getUrl());
 }
 
@@ -84,8 +87,8 @@ function al_installLogTriggers() {
     const fn = t.getHandlerFunction();
     if (fn === 'al_sweepSentMail_' || fn === 'al_sortLog_') ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger('al_sweepSentMail_').timeBased().everyDays(1).atHour(17).create();
-  ScriptApp.newTrigger('al_sortLog_').timeBased().everyDays(1).atHour(7).create();
+  ScriptApp.newTrigger('al_sweepSentMail_').timeBased().everyDays(1).atHour(17).inTimezone(AL_CONFIG.TZ).create();
+  ScriptApp.newTrigger('al_sortLog_').timeBased().everyDays(1).atHour(7).inTimezone(AL_CONFIG.TZ).create();
   SpreadsheetApp.getUi().alert('Log triggers installed: mail sweep 5PM, sort 7AM (weekdays only; weekend runs self-skip).');
 }
 
@@ -105,18 +108,64 @@ function al_openLog() {
 }
 
 /* ---------- CORE WRITER ---------- */
-function al_logActivity_(sheetName, user, name, display, activity, purpose, notes, when) {
+function al_logActivity_(sheetName, user, name, display, activity, purpose, notes, when, sourceId, detail) {
   const id = PropertiesService.getScriptProperties().getProperty(AL_CONFIG.LOG_ID_PROP);
   if (!id) return; // log not set up yet; never block main handlers
   const sh = SpreadsheetApp.openById(id).getSheetByName(AL_CONFIG.LOG_SHEET_NAME);
   const now = (when instanceof Date) ? when : new Date();
+
+  // Rows carrying a Source ID (Email/Appointment) are deduped under a lock so
+  // two runs can't both decide the same ID is absent. Edits/Stage/Calc pass
+  // no ID: they fire once from onEdit and are never rediscovered.
+  if (sourceId) {
+    const lock = LockService.getScriptLock();
+    try {
+      if (!lock.tryLock(10000)) return; // busy; next sweep will re-cover it
+      if (al_sourceIdExists_(sh, sourceId)) return;
+      al_appendRow_(sh, now, sheetName, user, name, display, activity, purpose, notes, sourceId, detail);
+    } finally {
+      try { lock.releaseLock(); } catch (_) {}
+    }
+    return;
+  }
+
+  al_appendRow_(sh, now, sheetName, user, name, display, activity, purpose, notes, '', detail);
+}
+
+function al_appendRow_(sh, now, sheetName, user, name, display, activity, purpose, notes, sourceId, detail) {
   sh.appendRow([
     now,
     Utilities.formatDate(now, AL_CONFIG.TZ, 'EEE'),
     Utilities.formatDate(now, AL_CONFIG.TZ, 'MM/dd'),
     Utilities.formatDate(now, AL_CONFIG.TZ, 'h:mm a'),
-    sheetName, user, name, display, activity, purpose || '', notes || ''
+    sheetName, user, name, display, activity, purpose || '', detail || '', sourceId || '', notes || ''
   ]);
+}
+// Reads column L once per call. Cached for 60s so a sweep logging many rows
+// doesn't re-read the whole column each time.
+var AL_SOURCE_CACHE = { at: 0, set: null };
+function al_sourceIdExists_(sh, sourceId) {
+  const nowMs = Date.now();
+  if (!AL_SOURCE_CACHE.set || (nowMs - AL_SOURCE_CACHE.at) > 60000) {
+    const lastRow = sh.getLastRow();
+    const set = {};
+    if (lastRow > 1) {
+      sh.getRange(2, AL_CONFIG.SOURCE_COL, lastRow - 1, 1).getValues().forEach(function (r) {
+        const v = String(r[0] || '').trim();
+        if (v) set[v] = true;
+      });
+    }
+    AL_SOURCE_CACHE = { at: nowMs, set: set };
+  }
+  if (AL_SOURCE_CACHE.set[sourceId]) return true;
+  AL_SOURCE_CACHE.set[sourceId] = true; // claim it for this run
+  return false;
+}
+
+// Composite key: message/event ID alone is too coarse, since one email can
+// legitimately produce rows for several jobs.
+function al_sourceId_(kind, externalId, sheetName, display) {
+  return kind + ':' + externalId + '|' + (sheetName || '') + '|' + (display || '');
 }
 
 // Maps a real subject line to its standard label; falls back to the actual subject.
@@ -154,18 +203,22 @@ function al_handleEditLog_(e) {
     const display = sh.getRange(row, AL_CONFIG.DISPLAY_COL).getDisplayValue();
     const newVal = e.range.getDisplayValue();
 
-    let activity, purpose;
+    let activity, purpose, detail;
     if (col === AL_CONFIG.STAGE_COL) {
       activity = 'Stage';
       purpose = newVal; // just the status it was changed to
+      detail = '';
     } else {
-      const header = sh.getRange(1, col).getDisplayValue() || al_colLetter_(col);
+      // Activity = what happened, Purpose = which field, Detail = the value.
       activity = 'Edit';
-      purpose = header + ' to ' + newVal;
+      purpose = sh.getRange(1, col).getDisplayValue() || al_colLetter_(col);
+      detail = newVal;
     }
-    al_logActivity_(sheetName, user, name, display, activity, purpose, '');
+    al_logActivity_(sheetName, user, name, display, activity, purpose, '', null, '', detail);
   } catch (err) {
-    // Logging must never break stage automation or draft creation.
+    // Logging must never break stage automation or draft creation — but a
+    // silent failure is invisible, so surface it in Executions.
+    console.error('Activity logger failed:', err);
   }
 }
 
@@ -194,42 +247,64 @@ function al_sweepSentMail_() {
   const dow = Number(Utilities.formatDate(now, AL_CONFIG.TZ, 'u')); // 1=Mon..7=Sun
   if (dow > 5) return; // weekends self-skip
 
+  // Record the START time. Saving this (rather than the finish time) means the
+  // next sweep re-covers anything sent while this one was running: a small
+  // deliberate overlap instead of a gap. Overlap becomes harmless once Source
+  // IDs land; until then it may occasionally duplicate a row.
+  const sweepStartedAt = Date.now();
+
   const props = PropertiesService.getScriptProperties();
   const last = Number(props.getProperty(AL_CONFIG.LAST_SWEEP_PROP)) || (Date.now() - 24 * 60 * 60 * 1000);
   const me = Session.getEffectiveUser().getEmail();
+  const myAddresses = al_myAddresses_();
 
   const emailMap = al_buildEmailMap_();
-  const threads = GmailApp.search('in:sent after:' + Math.floor(last / 1000), 0, 50);
+  const query = 'in:sent after:' + Math.floor(last / 1000);
 
-  threads.forEach(function (th) {
-    th.getMessages().forEach(function (msg) {
-      if (msg.getDate().getTime() <= last) return;
-      const subjRaw = msg.getSubject() || '(no subject)';
-      const subj = subjRaw.replace(/"/g, '""');
-      const link = '=HYPERLINK("https://mail.google.com/mail/u/0/#all/' + msg.getId() + '","' + subj + '")';
+  // Page through ALL matching threads, not just the first 50.
+  const BATCH = 100;
+  let start = 0;
+  while (true) {
+    const threads = GmailApp.search(query, start, BATCH);
+    if (!threads.length) break;
 
-      // Vendor/internal email? Match by subject; log once and move on.
-      const vend = al_matchVendorSubject_(subjRaw);
-      if (vend) {
-        al_logActivity_(vend.sheet, me, vend.name, vend.display, 'Email', vend.label, link);
-        return;
-      }
+    threads.forEach(function (th) {
+      th.getMessages().forEach(function (msg) {
+        if (msg.getDate().getTime() <= last) return;
+        // in:sent returns whole THREADS, so skip inbound replies mixed in.
+        if (!al_messageIsFromMe_(msg, myAddresses)) return;
 
-      const recipients = (msg.getTo() + ',' + msg.getCc()).toLowerCase();
-      Object.keys(emailMap).forEach(function (addr) {
-        if (addr && recipients.indexOf(addr) !== -1) {
-          const rec = emailMap[addr];
-          al_logActivity_(rec.sheet, me, rec.name, rec.display, 'Email', al_standardSubject_(subjRaw), link);
+        const subjRaw = msg.getSubject() || '(no subject)';
+        const subj = subjRaw.replace(/"/g, '""');
+        const link = '=HYPERLINK("https://mail.google.com/mail/u/0/#all/' + msg.getId() + '","' + subj + '")';
+
+        // Vendor/internal email? Match by subject; log once and move on.
+        const vend = al_matchVendorSubject_(subjRaw);
+        if (vend) {
+          al_logActivity_(vend.sheet, me, vend.name, vend.display, 'Email', vend.label, link, msg.getDate(),
+            al_sourceId_('gmail', msg.getId(), vend.sheet, vend.display));
+          return;
         }
+
+        // Exact address matching (no substring false positives)
+        al_extractEmails_(msg.getTo() + ',' + msg.getCc()).forEach(function (addr) {
+          const rec = emailMap[addr];
+          if (!rec) return;
+          al_logActivity_(rec.sheet, me, rec.name, rec.display, 'Email', al_standardSubject_(subjRaw), link, msg.getDate(),
+            al_sourceId_('gmail', msg.getId(), rec.sheet, rec.display));
+        });
       });
     });
-  });
 
-  props.setProperty(AL_CONFIG.LAST_SWEEP_PROP, String(Date.now()));
+    if (threads.length < BATCH) break;
+    start += BATCH;
+  }
+
+  props.setProperty(AL_CONFIG.LAST_SWEEP_PROP, String(sweepStartedAt));
 }
 
-// Builds { emailAddress: {sheet, name, display} } across the 5 table sheets.
-// Supports comma-separated addresses in column I.
+// Builds a normalized email lookup { address: {sheet, name, display} } across
+// the 5 table sheets. Column I may hold one or more addresses in any format.
 function al_buildEmailMap_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const map = {};
@@ -244,9 +319,8 @@ function al_buildEmailMap_() {
       const display = r[AL_CONFIG.DISPLAY_COL - AL_CONFIG.NAME_COL]; // F
       const emails = r[AL_CONFIG.EMAIL_COL - AL_CONFIG.NAME_COL];    // I
       if (!emails) return;
-      emails.split(',').forEach(function (addr) {
-        addr = addr.trim().toLowerCase();
-        if (addr) map[addr] = { sheet: sheetName, name: name, display: display };
+      al_extractEmails_(emails).forEach(function (addr) {
+        map[addr] = { sheet: sheetName, name: name, display: display };
       });
     });
   });
@@ -267,7 +341,7 @@ function al_sortLog_() {
 
   const range = sh.getRange(2, 1, lastRow - 1, AL_CONFIG.HEADERS.length);
   const rows = range.getValues();
-  const formulas = sh.getRange(2, 11, lastRow - 1, 1).getFormulas(); // preserve Notes hyperlinks (col K)
+  const formulas = sh.getRange(2, AL_CONFIG.NOTES_COL, lastRow - 1, 1).getFormulas(); // preserve Notes hyperlinks (col M)
 
   const parsed = rows.map(function (r, i) {
     const stamp = (r[0] instanceof Date) ? r[0] : new Date(r[0]); // Stamp column
@@ -277,7 +351,7 @@ function al_sortLog_() {
 
   range.setValues(parsed.map(function (p) { return p.r; }));
   parsed.forEach(function (p, i) {
-    if (p.f) sh.getRange(i + 2, 11).setFormula(p.f);
+    if (p.f) sh.getRange(i + 2, AL_CONFIG.NOTES_COL).setFormula(p.f);
   });
 }
 /* ---------- ONE-TIME BACKFILLS (menu items; safe to run repeatedly) ---------- */
@@ -295,30 +369,32 @@ function al_backfillSentMail() {
   const beforeStr = Utilities.formatDate(new Date(), AL_CONFIG.TZ, 'yyyy/MM/dd'); // excludes today (5PM sweep owns today)
 
   const me = Session.getEffectiveUser().getEmail();
+  const myAddresses = al_myAddresses_();
   const emailMap = al_buildEmailMap_();
   const threads = GmailApp.search('in:sent after:' + afterStr + ' before:' + beforeStr, start, BATCH);
 
   let logged = 0;
   threads.forEach(function (th) {
     th.getMessages().forEach(function (msg) {
+      if (!al_messageIsFromMe_(msg, myAddresses)) return;
       const subjRaw = msg.getSubject() || '(no subject)';
       const subj = subjRaw.replace(/"/g, '""');
       const link = '=HYPERLINK("https://mail.google.com/mail/u/0/#all/' + msg.getId() + '","' + subj + '")';
 
       const vend = al_matchVendorSubject_(subjRaw);
       if (vend) {
-        al_logActivity_(vend.sheet, me, vend.name, vend.display, 'Email', vend.label, link, msg.getDate());
+        al_logActivity_(vend.sheet, me, vend.name, vend.display, 'Email', vend.label, link, msg.getDate(),
+          al_sourceId_('gmail', msg.getId(), vend.sheet, vend.display));
         logged++;
         return;
       }
 
-      const recipients = (msg.getTo() + ',' + msg.getCc()).toLowerCase();
-      Object.keys(emailMap).forEach(function (addr) {
-        if (addr && recipients.indexOf(addr) !== -1) {
-          const rec = emailMap[addr];
-          al_logActivity_(rec.sheet, me, rec.name, rec.display, 'Email', al_standardSubject_(subjRaw), link, msg.getDate());
-          logged++;
-        }
+      al_extractEmails_(msg.getTo() + ',' + msg.getCc()).forEach(function (addr) {
+        const rec = emailMap[addr];
+        if (!rec) return;
+        al_logActivity_(rec.sheet, me, rec.name, rec.display, 'Email', al_standardSubject_(subjRaw), link, msg.getDate(),
+          al_sourceId_('gmail', msg.getId(), rec.sheet, rec.display));
+        logged++;
       });
     });
   });
@@ -352,7 +428,8 @@ function al_backfillCalendar() {
     if (title.indexOf('Gino - ') !== 0) return;
     const custName = title.substring(7).trim();
     const found = al_findCustomerSheet_(custName);
-    al_logActivity_(found.sheet, 'gino@walkerawning.com', custName, found.display, 'Appointment', 'Site visit', ev.getLocation() || '', ev.getStartTime());
+    al_logActivity_(found.sheet, 'gino@walkerawning.com', custName, found.display, 'Appointment', 'Site visit', ev.getLocation() || '', ev.getStartTime(),
+      al_sourceId_('calendar', ev.getId(), found.sheet, found.display));
     logged++;
   });
 
@@ -430,4 +507,61 @@ function al_findByDisplayName_(display) {
     }
   }
   return { sheet: '', name: '' };
+}
+// Returns lowercase list of every address that counts as "me" (primary + aliases).
+function al_myAddresses_() {
+  const out = [];
+  try { const e = Session.getEffectiveUser().getEmail(); if (e) out.push(e.toLowerCase()); } catch (_) {}
+  try { GmailApp.getAliases().forEach(function (a) { if (a) out.push(String(a).toLowerCase()); }); } catch (_) {}
+  return out;
+}
+
+// True if the message was sent by me. Handles "Name <addr@x.com>" and bare addresses.
+function al_messageIsFromMe_(msg, myAddresses) {
+  let from = '';
+  try { from = msg.getFrom() || ''; } catch (_) { return false; }
+  return al_extractEmails_(from).some(function (addr) {
+    return myAddresses.indexOf(addr) !== -1;
+  });
+}
+// One consistent email parser: pulls bare addresses out of any header text.
+function al_extractEmails_(text) {
+  const matches = String(text || '')
+    .toLowerCase()
+    .match(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9.-]+\.[a-z]{2,}/g);
+  return matches || [];
+}
+/* ---------- ONE-TIME MIGRATION (menu: "Migrate Source IDs") ---------- */
+// Existing Email rows already carry the Gmail message ID inside the Notes
+// hyperlink. This derives Source IDs for them so legacy history participates
+// in dedupe instead of being re-created by the next backfill.
+function al_migrateSourceIds() {
+  const id = PropertiesService.getScriptProperties().getProperty(AL_CONFIG.LOG_ID_PROP);
+  if (!id) { SpreadsheetApp.getUi().alert('Run "Setup Activity Log" first.'); return; }
+  const sh = SpreadsheetApp.openById(id).getSheetByName(AL_CONFIG.LOG_SHEET_NAME);
+  const lastRow = sh.getLastRow();
+  if (lastRow < 2) { SpreadsheetApp.getUi().alert('Nothing to migrate.'); return; }
+
+  const n = lastRow - 1;
+  const sheets   = sh.getRange(2, 5,  n, 1).getValues();  // E: Sheet
+  const displays = sh.getRange(2, 8,  n, 1).getValues();  // H: Display Name
+  const acts     = sh.getRange(2, 9,  n, 1).getValues();  // I: Activity
+  const notesF   = sh.getRange(2, AL_CONFIG.NOTES_COL, n, 1).getFormulas();
+  const srcRange = sh.getRange(2, AL_CONFIG.SOURCE_COL, n, 1);
+  const src      = srcRange.getValues();
+
+  let filled = 0;
+  for (let i = 0; i < n; i++) {
+    if (String(src[i][0] || '').trim()) continue;              // already has one
+    if (String(acts[i][0] || '').trim() !== 'Email') continue;  // Email rows only
+    const f = String(notesF[i][0] || '');
+    const m = f.match(/#all\/([A-Za-z0-9]+)/);                  // ID from the link
+    if (!m) continue;
+    src[i][0] = al_sourceId_('gmail', m[1], sheets[i][0], displays[i][0]);
+    filled++;
+  }
+
+  srcRange.setValues(src);
+  AL_SOURCE_CACHE = { at: 0, set: null }; // force a fresh read next time
+  SpreadsheetApp.getUi().alert('Source ID migration complete.\n' + filled + ' legacy Email rows updated.');
 }

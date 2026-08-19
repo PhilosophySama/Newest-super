@@ -88,17 +88,6 @@ function masterOnEditHandler_(e) {
     logTriggerError_('handleEditFormula_', err, e);
   }
 
-  // 5. Follow-up Draft Creator (if still needed - may be redundant with V2)
-  try {
-    if (typeof handleEditDraft_FU === 'function') {
-      handleEditDraft_FU(e);
-      handlerResults.push({ handler: 'Follow-up Draft', status: 'OK' });
-    }
-  } catch (err) {
-    handlerResults.push({ handler: 'Follow-up Draft', status: 'ERROR', error: err.message });
-    logTriggerError_('handleEditDraft_FU', err, e);
-  }
-
   // 6. Dialpad stage-triggered texts (opens review dialog; never moves/sorts)
   try {
     if (typeof dp_handleEditText_ === 'function') {
@@ -254,7 +243,7 @@ function checkTriggerHealthMenu_() {
   }
   
   // Check for expected time-based triggers
-  const expectedTimeBased = ['er_processNewEmails', 'runMileageSync_', 'checkEmptyFoldersDaily_', 'emailWeeklySchedulePDF_'];
+  const expectedTimeBased = ['er_processNewEmails', 'runMileageSync_', 'checkEmptyFoldersDaily_'];
   const missingTimeBased = expectedTimeBased.filter(
     expected => !timeBasedTriggers.some(t => t.handler === expected)
   );
@@ -411,7 +400,6 @@ function onOpen() {
       .addItem('Install Draft Trigger', 'installTriggerDrafts_V2')
       .addItem('Create Drafts For All Rows', 'createDraftsForAllRows_V2')
       .addItem('📊 Go to Re-cover Calculations', 'goToRecoverCalculations_')
-      .addItem('🗺️ Create Schedule Map Draft', 'v2_createPlotMapDraft_')
       .addSeparator()
       // Email Reader
       .addItem('📧 Process "Add Lead" Emails', 'er_processAddLeadEmails')
@@ -428,10 +416,6 @@ function onOpen() {
       .addItem('Install Formula Protection', 'installFormulaProtection')
       .addItem('Disable Formula Protection', 'uninstallFormulaProtection')
       .addItem('Restore All Formulas Now', 'restoreAllFormulasNow')
-      .addSeparator()
-      // Schedule
-      .addItem('📅 Email Weekly Schedule PDF', 'emailWeeklySchedulePDF_')
-      .addItem('📅 Install Monday Auto-Email', 'installWeeklyScheduleTrigger_')
       .addSeparator()
       // Time-Off
       .addItem('🏖️ New Time-Off Request', 'showTimeOffDialog')
@@ -477,6 +461,7 @@ function onOpen() {
       .addItem('📔 Setup Activity Log', 'al_setupLog')
       .addItem('📔 Install Log Triggers', 'al_installLogTriggers')
       .addItem('📔 Backfill: Sent Emails', 'al_backfillSentMail')
+      .addItem('📔 Migrate Source IDs (one-time)', 'al_migrateSourceIds')
       .addToUi();
 
     console.log('Menus created successfully');
@@ -604,8 +589,6 @@ function removeAllTriggers_() {
     ui.alert('Success', `Removed ${triggers.length} triggers.\n\nRemember to reinstall triggers when ready:\n🔧 Triggers → Install Master Trigger`, ui.ButtonSet.OK);
   }
 }
-// ─── Weekly Schedule PDF Emailer ────────────────────────────────────────────
-// version1 [03/09-4:10PM] by Claude Sonnet 4.6
 
 function emailWeeklySchedulePDF_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();

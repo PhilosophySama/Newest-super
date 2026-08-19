@@ -1,5 +1,9 @@
 /**
  * LEAN-TO & A-FRAME RUBY (Exact) — Drive File Export
+ * version# [08/18-12:05PM EST] by Claude Opus 4.1
+ *   - Batch column AE: IS_RECOVER now passed through to batch structures
+ *   - Offset now moves dimensions (added outside the group) along with geometry
+ *   - Module constants released after each block so re-pastes don't warn
  * version# [07/21-04:05PM EST] by Claude Fable 5
  *
  * CHANGES THIS VERSION:
@@ -11,7 +15,7 @@
  *  - r_writeRubyToDrive_ signature changed: (rubyScript, filename).
  *  - Removed r_getRenderPlaceholder_ (replaced by r_ensurePlaceholder_).
  *
- * Triggers on edits to Leads!T:AD (cols 20–30) when AA contains:
+ * Triggers on edits to Leads!T:AE (cols 20–31) when AA contains:
  *   - "Lean-to" or "Sloped L" → generates Lean-to Ruby
  *   - "A-frame" or "A frame" → generates A-frame Ruby
  *
@@ -37,8 +41,8 @@ function handleEditAwningRuby_(e) {
   const col = r.getColumn();
   if (row === 1 || r.getNumRows() !== 1 || r.getNumColumns() !== 1) return;
 
-  // Only react to T–AD (20–30)
-  if (col < 20 || col > 30) return;
+  // Only react to T–AE (20–31)
+  if (col < 20 || col > 31) return;
 
   // version# [07/21-05:30PM EST] by Claude Fable 5
   // Skip deletions/clears — only regenerate when a value (including 0) is entered
@@ -54,7 +58,8 @@ function handleEditAwningRuby_(e) {
     TYPE: 27,          // AA
     FABRIC: 28,        // AB
     POSTS: 30,         // AD  ("Yes" or checkbox TRUE → true; else false)
-    DISPLAY: 6         // F - display name + customer folder hyperlink
+    BATCH: 31,         // AE  (extra structures, e.g. "15x10x8x1x2; 30x12x9x1.5x0")
+    DISPLAY: 6         // F - optional for nicer filenames
   };
 
   const type = String(sheet.getRange(row, COLS.TYPE).getDisplayValue() || '').trim().toLowerCase();
@@ -103,31 +108,34 @@ function handleEditAwningRuby_(e) {
   let rubyExact;
   let typeName;
 
-  if (awningType === 'LEAN_TO') {
-    rubyExact = r_buildRubyFromLeanToTemplate_({
-      fabric:     fabricType,
-      length:     length,
-      projection: width,
-      height:     height,
-      frontBar:   frontBar,
-      hasWings:   hasWings,
-      hasPosts:   hasPosts,
-      isRecover:  isRecover
-    });
-    typeName = 'Lean-to';
-  } else if (awningType === 'A_FRAME') {
-    rubyExact = r_buildRubyFromAFrameTemplate_({
-      fabric:     fabricType,
-      length:     length,
-      projection: width,
-      height:     height,
-      frontBar:   frontBar,
-      hasWings:   hasWings,
-      hasPosts:   hasPosts,
-      isRecover:  isRecover
-    });
-    typeName = 'A-Frame';
-  }
+  // Structure #1 always comes from T–Y. Extras come from the Batch cell (AE).
+  const batchRaw = sheet.getRange(row, COLS.BATCH).getDisplayValue();
+  const extras = r_parseBatchSpec_(batchRaw, {
+    fabric:   fabricType,
+    type:     awningType,
+    frontBar: frontBar
+  });
+
+  const structures = [{
+    length:    length,
+    width:     width,
+    height:    height,
+    frontBar:  frontBar,
+    wings:     wingsNum,
+    fabric:    fabricType,
+    type:      awningType,
+    hasPosts:  hasPosts,
+    isRecover: isRecover
+  }].concat(extras.map(function (s) {
+    s.hasPosts  = hasPosts;
+    s.isRecover = isRecover;
+    return s;
+  }));
+
+  rubyExact = r_buildBatchRuby_(structures);
+  typeName  = (structures.length > 1)
+    ? 'Batch x' + structures.length
+    : (awningType === 'A_FRAME' ? 'A-Frame' : 'Lean-to');
 
   try {
     const lock = LockService.getDocumentLock();
@@ -954,7 +962,7 @@ function copyRubyForSelectedRow_() {
   const richText = rubyCell.getRichTextValue();
 
   if (!richText) {
-    ui.alert('No Ruby file found in column S for this row.\n\nMake sure columns T-AD have awning data and column AA has "Lean-to" or "A-frame".');
+    ui.alert('No Ruby file found in column S for this row.\n\nMake sure columns T-AE have awning data and column AA has "Lean-to" or "A-frame".');
     return;
   }
 
@@ -1106,4 +1114,107 @@ function copyRubyForSelectedRow_() {
   } catch (err) {
     ui.alert('Error loading Ruby file:\n\n' + err.message);
   }
+}
+/**
+ * Parse the Batch cell (AE) into extra structure specs.
+ * Format: L x W x H x FrontBar x Wings   [@vinyl|@sunbrella] [@leanto|@aframe]
+ * Separate structures with ";" or a line break. Blank/garbage entries are skipped.
+ */
+function r_parseBatchSpec_(raw, defaults) {
+  const out = [];
+  const text = String(raw == null ? '' : raw).trim();
+  if (!text) return out;
+
+  text.split(/[;\n]+/).forEach(function (chunk) {
+    const part = String(chunk).trim();
+    if (!part) return;
+
+    let fabric = defaults.fabric;
+    let type   = defaults.type;
+
+    // Strip @tags first, applying any overrides
+    const body = part.replace(/@([a-z\-]+)/gi, function (m, tag) {
+      const t = String(tag).toLowerCase().replace(/[\s\-]/g, '');
+      if (t === 'vinyl')          fabric = 'Vinyl';
+      else if (t === 'sunbrella') fabric = 'Sunbrella';
+      else if (t === 'aframe')    type   = 'A_FRAME';
+      else if (t === 'leanto')    type   = 'LEAN_TO';
+      return '';
+    }).trim();
+
+    const nums = body.split(/\s*[x×*]\s*/i).map(function (n) { return Number(String(n).trim()); });
+    if (nums.length < 3) return;
+    if (nums.slice(0, 3).some(function (n) { return isNaN(n) || n <= 0; })) return;
+
+    out.push({
+      length:   nums[0],
+      width:    nums[1],
+      height:   nums[2],
+      frontBar: (nums.length > 3 && !isNaN(nums[3])) ? nums[3] : defaults.frontBar,
+      wings:    (nums.length > 4 && !isNaN(nums[4])) ? nums[4] : 0,
+      fabric:   fabric,
+      type:     type
+    });
+  });
+
+  return out;
+}
+
+/**
+ * Build ONE Ruby file containing every structure, each offset along +X
+ * so they don't overlap in SketchUp. Each structure is wrapped in its own
+ * module so the template constants don't collide between blocks.
+ */
+function r_buildBatchRuby_(structures) {
+  const GAP_FT = 10;   // clear space between structures in the model
+  const parts  = [];
+  let offsetFt = 0;
+
+  structures.forEach(function (s, i) {
+    const p = {
+      fabric:     s.fabric,
+      length:     s.length,
+      projection: s.width,
+      height:     s.height,
+      frontBar:   s.frontBar,
+      hasWings:   Number(s.wings) > 0,
+      hasPosts:   s.hasPosts,
+      isRecover:  s.isRecover
+    };
+
+    let txt = (s.type === 'A_FRAME')
+      ? r_buildRubyFromAFrameTemplate_(p)
+      : r_buildRubyFromLeanToTemplate_(p);
+
+    if (offsetFt > 0) {
+      const offsetIn = offsetFt * 12;
+
+      // Snapshot active_entities before the block runs, then move everything it
+      // created. Transforming the group alone would leave the dimensions behind,
+      // since both templates add those OUTSIDE the group.
+      txt = txt.replace(
+        /^model = Sketchup\.active_model\s*$/m,
+        'model = Sketchup.active_model\n__wa_before = model.active_entities.to_a'
+      );
+
+      txt = txt.replace(
+        /^model\.commit_operation\s*$/m,
+        '__wa_new = model.active_entities.to_a - __wa_before\n' +
+        'model.active_entities.transform_entities(' +
+        'Geom::Transformation.translation([' + offsetIn + ', 0, 0]), __wa_new)\n' +
+        'model.commit_operation'
+      );
+    }
+
+    const modName = 'WA_Struct' + (i + 1);
+    parts.push(
+      '# --- Structure ' + (i + 1) + ' of ' + structures.length + ' ---\n' +
+      'module ' + modName + '\n' + txt + '\nend\n' +
+      'Object.send(:remove_const, :' + modName + ') if Object.const_defined?(:' + modName + ')'
+    );
+
+    offsetFt += (Number(s.length) || 0) + GAP_FT;
+  });
+
+  return parts.join('\n\n');
 }
