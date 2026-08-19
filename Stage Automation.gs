@@ -604,7 +604,7 @@ function handleStageChange_(e, sheet, row, newStage) {
           customer: customerName, stage, from: sheet.getName(), to: dest.getName(), originalRow: row
         });
       }
-      try { al_logActivity_(dest.getName(), 'Automation', customerName, displayName, 'Move', sheet.getName() + ' → ' + dest.getName(), '', null, '', stage); } catch (_) {}try { al_logActivity_(dest.getName(), 'Automation', customerName, displayName, 'Move', sheet.getName() + ' → ' + dest.getName(), ''); } catch (_) {}
+      try { al_logActivity_(dest.getName(), 'Automation', customerName, displayName, 'Move', sheet.getName() + ' → ' + dest.getName(), '', null, '', stage); } catch (_) {}
       
       // If moved to F/U, search for and link the sent email (unless this came from a Rough Quote draft)
       if (dest.getName() === S.SHEETS.FU && displayName) {

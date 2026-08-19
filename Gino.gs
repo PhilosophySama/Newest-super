@@ -46,6 +46,50 @@ const AL_CONFIG = {
     { match: 'coi request - ',          label: 'COI request',       strip: 'coi request - ' },
     { match: 'proposal review: ',       label: 'Proposal Review',   strip: 'proposal review: ' }
   ],
+  // Stage → Detail wording for the diary. To change or add wording later,
+  // edit THIS map only — no code changes needed. Keys are lowercase.
+  STAGE_DETAILS: {
+    // Drafts & proposals
+    'quote sent': 'Sent proposal',
+    'qdraft': 'Building proposal review',
+    'liz': 'Submitted proposal review',
+    'liz design review': 'Submitted design review',
+    'design review': 'Sent design for approval',
+    'email customer': 'Preparing proposal to send',
+    'rough quote': 'Sent ballpark price',
+    'customer info': 'Requested missing info',
+    'pending email': 'Waiting on customer reply',
+    'pending txt': 'Waiting on customer reply',
+    'coi req': 'Requested COI',
+    'req graphics': 'Requested vendor pricing',
+    'send samples': 'Ordered samples',
+    // Estimating
+    'qb prompt': 'Working on estimate',
+    // Pipeline moves
+    'awarded': 'Won the job',
+    'won': 'Won the job',
+    'waiting on deposit': 'Sent deposit invoice',
+    'negotiating': 'Negotiating price',
+    'revise': 'Reworking proposal',
+    'lost': 'Lost the job',
+    'declined': 'Lost the job',
+    'archive': 'Shelved',
+    'closed': 'Shelved',
+    'installed': 'Job installed',
+    'complete': 'Job complete',
+    'pending review': 'Awaiting final review',
+    // Scheduling & production
+    '2. sched': 'Scheduled site visit',
+    'schedule install': 'Scheduling installation',
+    'scheduled': 'Told customer awning is ready',
+    'shop drawing': 'Created shop drawing',
+    'print folder': 'Printed job packet',
+    // Follow-ups & reviews
+    'fu1': 'Follow-up #1',
+    'fu2': 'Follow-up #2',
+    'fu3': 'Final follow-up',
+    'request review': 'Asked for Google review'
+  },
   SHEETS: ['Leads', 'F/U', 'Awarded', 'Heaven', 'Purgatory', 'Re-cover'],
   TABLE_SHEETS: ['Leads', 'F/U', 'Awarded', 'Heaven', 'Purgatory'],
   STAGE_COL: 4,   // D
@@ -107,6 +151,16 @@ function al_openLog() {
   SpreadsheetApp.getUi().showModalDialog(html, 'Activity Log');
 }
 
+/* ---------- LOG SCRIPT CHANGE (menu: "Log Script Change") ---------- */
+function al_logScriptChange() {
+  const ui = SpreadsheetApp.getUi();
+  const resp = ui.prompt('Log script change', 'Which file + what changed?\n(e.g. "Gino.gs — added catch-all email rows")', ui.ButtonSet.OK_CANCEL);
+  if (resp.getSelectedButton() !== ui.Button.OK) return;
+  const note = String(resp.getResponseText() || '').trim();
+  if (!note) return;
+  al_logActivity_('', al_getUser_(null), '', '', 'Script', 'Update', '', null, '', note);
+  SpreadsheetApp.getActiveSpreadsheet().toast('Script change logged', 'Diary', 3);
+}
 /* ---------- CORE WRITER ---------- */
 function al_logActivity_(sheetName, user, name, display, activity, purpose, notes, when, sourceId, detail) {
   const id = PropertiesService.getScriptProperties().getProperty(AL_CONFIG.LOG_ID_PROP);
@@ -207,12 +261,13 @@ function al_handleEditLog_(e) {
     if (col === AL_CONFIG.STAGE_COL) {
       activity = 'Stage';
       purpose = newVal; // just the status it was changed to
-      detail = '';
+      detail = AL_CONFIG.STAGE_DETAILS[newVal.trim().toLowerCase()] || '';
     } else {
       // Activity = what happened, Purpose = which field, Detail = the value.
       activity = 'Edit';
       purpose = sh.getRange(1, col).getDisplayValue() || al_colLetter_(col);
       detail = newVal || '(cleared)';
+      if (col === 16 && /^https/i.test(newVal)) detail = 'Created estimate'; // QB link pasted in P
     }
     al_logActivity_(sheetName, user, name, display, activity, purpose, '', null, '', detail);
   } catch (err) {
@@ -278,21 +333,35 @@ function al_sweepSentMail_() {
         const subj = subjRaw.replace(/"/g, '""');
         const link = '=HYPERLINK("https://mail.google.com/mail/u/0/#all/' + msg.getId() + '","' + subj + '")';
 
+        const allAddrs = al_extractEmails_(msg.getTo() + ',' + msg.getCc());
+
         // Vendor/internal email? Match by subject; log once and move on.
         const vend = al_matchVendorSubject_(subjRaw);
         if (vend) {
           al_logActivity_(vend.sheet, me, vend.name, vend.display, 'Email', vend.label, link, msg.getDate(),
-            al_sourceId_('gmail', msg.getId(), vend.sheet, vend.display));
+            al_sourceId_('gmail', msg.getId(), vend.sheet, vend.display), allAddrs[0] || '');
           return;
         }
 
         // Exact address matching (no substring false positives)
-        al_extractEmails_(msg.getTo() + ',' + msg.getCc()).forEach(function (addr) {
+        let matched = false;
+        allAddrs.forEach(function (addr) {
           const rec = emailMap[addr];
           if (!rec) return;
+          matched = true;
           al_logActivity_(rec.sheet, me, rec.name, rec.display, 'Email', al_standardSubject_(subjRaw), link, msg.getDate(),
-            al_sourceId_('gmail', msg.getId(), rec.sheet, rec.display));
+            al_sourceId_('gmail', msg.getId(), rec.sheet, rec.display), addr);
         });
+
+        // Catch-all: emails to anyone NOT in the sheets still get a row.
+        // Skips pure self-sends (notes to yourself / aliases).
+        if (!matched) {
+          const outside = allAddrs.filter(function (a) { return myAddresses.indexOf(a) === -1; });
+          if (outside.length) {
+            al_logActivity_('', me, '', outside[0], 'Email', 'Sent', link, msg.getDate(),
+              al_sourceId_('gmail', msg.getId(), '', outside[0]), subjRaw);
+          }
+        }
       });
     });
 

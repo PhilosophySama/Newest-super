@@ -423,6 +423,7 @@ function onOpen() {
       // Gino's Diary (Activity Log)
       .addItem('📔 Open Log', 'al_openLog')
       .addItem('📈 See Visuals', 'al_openVisuals')
+      .addItem('Log Script Change', 'al_logScriptChange')
       .addToUi();
     // ====== SETUP / TROUBLESHOOTING ======
     ui.createMenu('⚙️ Setup')

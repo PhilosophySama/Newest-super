@@ -150,7 +150,7 @@ function dp_testSend() {
 // existing "Customer Info" stage. Swatches go out as a Drive folder link
 // because the brochure PDFs exceed the 500 KiB MMS cap. Personalized with
 // the first name. Never throws - a text failure must not break the email flow.
-function dp_sendCustomerInfoSms_(firstName, phone, missingItems) {
+function dp_sendCustomerInfoSms_(firstName, phone, missingItems, opt_sheet, opt_row) {
   var e164 = dp_normalisePhone_(phone);
   if (!e164) {
     Logger.log('dp_sendCustomerInfoSms_: no valid phone, SMS skipped.');
@@ -177,7 +177,7 @@ function dp_sendCustomerInfoSms_(firstName, phone, missingItems) {
          '\n\nThank you!';
 
   // Open the shared editable review dialog (single path for all texts).
-  dp_openReviewDialog_(msg, e164, who);
+  dp_openReviewDialog_(msg, e164, who, opt_sheet, opt_row);
 }
 // ----- EDITABLE REVIEW DIALOG (shows the text body, lets you edit, then send) -----
 // Built as an array of lines (joined) to keep quotes clean and avoid template

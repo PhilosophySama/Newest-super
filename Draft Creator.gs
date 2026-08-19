@@ -546,7 +546,7 @@ function v2_createCustomerInfoDraft_(sh, row) {
     // Your rule: text ONLY when no email is present. If an email exists,
     // skip the text and let the email draft (below) handle it.
     if (!customerEmail || !d_isValidEmail_(customerEmail)) {
-      dp_sendCustomerInfoSms_(firstName, phone, missingItems);
+      dp_sendCustomerInfoSms_(firstName, phone, missingItems, sh, row);
     }
     
     // Create subject
