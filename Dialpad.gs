@@ -248,6 +248,17 @@ function dp_sendSmsFromDialog(phone, text, markSheet, markRow) {
 
   // Success → mark D (only when a target was passed; Customer Info passes none yet).
   if (markSheet && markRow) dp_markStageCellByName_(markSheet, Number(markRow), true);
+  try {
+    if (markSheet && markRow) {
+      var logSh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(markSheet);
+      if (logSh) {
+        var logStage = String(logSh.getRange(Number(markRow), 4).getDisplayValue() || '').replace(/[\u2705\u274C]/g, '').trim();
+        al_logActivity_(markSheet, 'Automation', String(logSh.getRange(Number(markRow), DP_TX.NAME).getDisplayValue() || ''), String(logSh.getRange(Number(markRow), 6).getDisplayValue() || ''), 'Text', logStage, '', null, '', phone);
+      }
+    } else {
+      al_logActivity_('', 'Automation', '', '', 'Text', 'Info request', '', null, '', phone);
+    }
+  } catch (_) {}
   SpreadsheetApp.getActiveSpreadsheet().toast('Text sent', 'SMS Sent', 4);
   return 'sent';
 }
@@ -366,6 +377,7 @@ function dp_dispatchStageText_(sheet, row, stageRaw) {
     try {
       dp_sendSms(e164, body);
       dp_markStageCell_(sheet, row, true);
+      try { al_logActivity_(sheetName, 'Automation', String(sheet.getRange(row, DP_TX.NAME).getDisplayValue() || ''), String(sheet.getRange(row, 6).getDisplayValue() || ''), 'Text', stage.toUpperCase(), '', null, '', e164); } catch (_) {}
       SpreadsheetApp.getActiveSpreadsheet().toast('Text sent to ' + first, 'SMS Sent', 4);
     } catch (err) {
       dp_markStageCell_(sheet, row, false, err.message);

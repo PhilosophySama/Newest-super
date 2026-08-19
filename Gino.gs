@@ -212,7 +212,7 @@ function al_handleEditLog_(e) {
       // Activity = what happened, Purpose = which field, Detail = the value.
       activity = 'Edit';
       purpose = sh.getRange(1, col).getDisplayValue() || al_colLetter_(col);
-      detail = newVal;
+      detail = newVal || '(cleared)';
     }
     al_logActivity_(sheetName, user, name, display, activity, purpose, '', null, '', detail);
   } catch (err) {

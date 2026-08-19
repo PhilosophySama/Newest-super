@@ -294,6 +294,7 @@ function updateJobDescription_(sheet, row) {
     const target = sheet.getRange(row, S.COLS.JOB_DESC_FORMULA);
     if (description) {
       target.setValue(description.trim());
+      try { al_logActivity_(sheet.getName(), 'Automation', String(sheet.getRange(row, S.COLS.NAME).getDisplayValue() || ''), String(sheet.getRange(row, S.COLS.DISPLAY).getDisplayValue() || ''), 'Edit', 'Job Desc (M) auto-filled', '', null, '', jobType); } catch (_) {}
       if (S.ENABLE_LOGGING) {
         m_logOperation_('Job description updated', {row, jobType, description: description.substring(0, 100) + '...'});
       }
@@ -339,7 +340,7 @@ function handleDisplayNameChange_(sheet, row, displayName) {
     target.setRichTextValue(rich);
 
     if (S.ENABLE_LOGGING) m_logOperation_('Display name linked to folder', {name, url, row, sheet: sheet.getName()});
-    try { al_logActivity_(sheet.getName(), 'Automation', sheet.getRange(row, S.COLS.NAME).getDisplayValue(), name, 'Folder', 'Created/linked', ''); } catch (_) {}
+    try { al_logActivity_(sheet.getName(), 'Automation', sheet.getRange(row, S.COLS.NAME).getDisplayValue(), name, 'Folder', 'Created/linked', '', null, '', url); } catch (_) {}
 
   } catch (err) {
     sheet.getRange(row, S.COLS.DISPLAY).setValue(`Error: ${err.message || err}`);
@@ -410,6 +411,7 @@ function handleAddressChange_(sheet, row, address) {
 
   // PART 2: Earth link in Q
   createEarthLink_(sheet, row, addr);
+  try { al_logActivity_(sheet.getName(), 'Automation', String(sheet.getRange(row, S.COLS.NAME).getDisplayValue() || ''), String(sheet.getRange(row, S.COLS.DISPLAY).getDisplayValue() || ''), 'Link', 'Maps + Earth links', '', null, '', addr); } catch (_) {}
 }
 
 /*** FEATURE: Create Google Earth link with geocoded coordinates - Now works on Leads, F/U, Awarded ***/
@@ -602,7 +604,7 @@ function handleStageChange_(e, sheet, row, newStage) {
           customer: customerName, stage, from: sheet.getName(), to: dest.getName(), originalRow: row
         });
       }
-      try { al_logActivity_(dest.getName(), 'Automation', customerName, displayName, 'Move', sheet.getName() + ' → ' + dest.getName(), ''); } catch (_) {}
+      try { al_logActivity_(dest.getName(), 'Automation', customerName, displayName, 'Move', sheet.getName() + ' → ' + dest.getName(), '', null, '', stage); } catch (_) {}try { al_logActivity_(dest.getName(), 'Automation', customerName, displayName, 'Move', sheet.getName() + ' → ' + dest.getName(), ''); } catch (_) {}
       
       // If moved to F/U, search for and link the sent email (unless this came from a Rough Quote draft)
       if (dest.getName() === S.SHEETS.FU && displayName) {
@@ -899,6 +901,7 @@ function m_linkQuoteSentEmail_(sheet, row, displayName) {
     
     // Update column B (overwrites existing content)
     logCell.setRichTextValue(richText);
+    try { al_logActivity_(sheet.getName(), 'Automation', String(sheet.getRange(row, S.COLS.NAME).getDisplayValue() || ''), displayName, 'Link', 'Quote email linked', '', null, '', emailDate); } catch (_) {}
     
     if (S.ENABLE_LOGGING) {
       const messageDate = message.getDate();
@@ -1457,6 +1460,7 @@ function m_createPrintPacket_(sheet, row) {
       .build();
     
     logCell.setRichTextValue(richTextLink);
+    try { al_logActivity_(sheet.getName(), 'Automation', customerName, displayName, 'Print', 'Print packet', '', null, '', (imageAttachments.length + driveImages.length) + ' photos'); } catch (_) {}
     
     if (S.ENABLE_LOGGING) {
       m_logOperation_('Print packet created', {
@@ -1593,6 +1597,7 @@ function createNextDayGinoEvent_(sheet, row) {
       });
     }
 
+    try { al_logActivity_(sheet.getName(), 'Automation', name, String(sheet.getRange(row, S.COLS.DISPLAY).getDisplayValue() || ''), 'Calendar', 'Site visit created', '', null, '', Utilities.formatDate(tomorrow, AL_CONFIG.TZ, 'M/d') + ' 8:00 AM'); } catch (_) {}
     return true;
     
   } catch (err) {
@@ -1692,6 +1697,7 @@ function m_writeScheduleInstalCalLink_(sheet, row) {
       .setTextStyle(0, linkText.length, SpreadsheetApp.newTextStyle().setUnderline(true).build())
       .build();
     sheet.getRange(row, 2).setRichTextValue(rich); // Column B
+    try { al_logActivity_(sheet.getName(), 'Automation', name, displayName, 'Calendar', 'Install link', '', null, '', calEventTitle); } catch (_) {}
 
     if (S.ENABLE_LOGGING) {
       m_logOperation_('Schedule Install calendar link written', { row: row, eventName: eventName, url: calUrl });
@@ -1768,6 +1774,7 @@ function m_handleQbPrompt_(ss, sheet, row) {
       m_logOperation_('QB Prompt pasted', {row, customerName, jobType, lines: lines.length});
     }
 
+    try { al_logActivity_(sheet.getName(), 'Automation', customerName, String(sheet.getRange(row, S.COLS.DISPLAY).getDisplayValue() || ''), 'QB', 'Pricing prompt pasted', '', null, '', jobType); } catch (_) {}
     SpreadsheetApp.getActive().toast('QB prompt pasted into column P', 'QB Prompt', 3);
 
   } catch (err) {
